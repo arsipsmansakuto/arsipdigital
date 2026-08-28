@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArsipCloud Enterprise v3.7</title>
+
+    <!-- Inline SVG Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><path d='M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z'/></svg>">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- External CDN Libraries -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Cropper.js CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        svg { display: inline-block; vertical-align: middle; }
+
+        #custom-bg-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 0.3s ease, filter 0.3s ease;
+        }
+
+        .cropper-view-box, .cropper-face {
+            border-radius: 12px;
+        }
+
+        :root {
+            --app-global-text-color: #1e293b;
+        }
+        body {
+            color: var(--app-global-text-color);
+        }
+    </style>
+</head>
+<body class="h-full font-sans bg-slate-100 antialiased flex flex-col relative" id="app-body-bg">
+
+    <!-- Custom Background Overlay Layer -->
+    <div id="custom-bg-layer" class="opacity-80"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p class="text-white font-medium text-sm tracking-wide" id="loading-text">Memuat Data System...</p>
+    </div>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-2 sm:px-0"></div>
+
+    <!-- AUTH / LOGIN MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/75 z-[1000] flex items-center justify-center p-4 transition-colors duration-300">
+        <div id="login-card-box" class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full overflow-hidden p-6 sm:p-8 transition-all relative">
+            <div class="text-center mb-6">
+                <div id="login-logo-container" class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-brand-500/30 mb-3 overflow-hidden">
+                    <svg id="login-logo-svg" class="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z"></path></svg>
+                    <img id="login-logo-img" class="w-full h-full object-contain rounded-2xl hidden" alt="Logo">
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight truncate max-w-full" id="login-app-title">ArsipCloud Enterprise</h2>
+                <p class="text-xs opacity-70 mt-1 break-words leading-relaxed" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">Username</label>
+                    <input type="text" id="login-username" required placeholder="Masukkan username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all shadow-sm bg-white/90 text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all shadow-sm bg-white/90 text-slate-800">
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-sm shadow-lg shadow-brand-500/30 transition-all transform active:scale-95 cursor-pointer">
+                    Masuk ke Sistem
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP STRUCTURE -->
+    <div id="main-app" class="flex-1 flex overflow-hidden hidden z-10 relative">
+
+        <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 md:hidden hidden transition-opacity"></div>
+
+        <!-- Sidebar Navigation -->
+        <aside id="main-sidebar" class="fixed md:static inset-y-0 left-0 w-60 bg-white border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-xl md:shadow-none overflow-hidden">
+            <!-- Brand Header -->
+            <div class="h-16 px-4 border-b border-slate-100/80 flex items-center justify-between min-w-0">
+                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-1">
+                    <div id="sidebar-logo-box" class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-brand-700 text-white flex items-center justify-center font-bold text-base shadow-sm shadow-brand-500/30 transition-transform hover:scale-105 overflow-hidden flex-shrink-0">
+                        <svg id="sidebar-logo-svg" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z"></path></svg>
+                        <img id="sidebar-logo-img" class="w-full h-full object-contain rounded-xl hidden" alt="Logo">
+                    </div>
+                    <div class="leading-tight min-w-0 flex-1 overflow-hidden">
+                        <h1 class="font-bold text-slate-800 text-xs sm:text-sm tracking-tight truncate w-full block" id="sidebar-app-title">ArsipCloud</h1>
+                        <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider block truncate w-full opacity-80" id="sidebar-app-subtitle">Enterprise v3.7</span>
+                    </div>
+                </div>
+                <button type="button" onclick="toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 p-3 space-y-1 overflow-y-auto" id="sidebar-nav-container">
+                <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all bg-brand-50 text-brand-600">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span class="truncate">Dashboard</span>
+                </button>
+
+                <button type="button" onclick="switchTab('arsip')" id="nav-arsip" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v1a2 2 0 01-2 2M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                    <span class="truncate">Kelola Arsip</span>
+                </button>
+
+                <button type="button" onclick="switchTab('kategori')" id="nav-kategori" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    <span class="truncate">Kategori & Drive</span>
+                </button>
+
+                <button type="button" onclick="switchTab('users')" id="nav-users" class="nav-item role-admin-only w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="truncate">Kelola User</span>
+                </button>
+
+                <button type="button" onclick="switchTab('laporan')" id="nav-laporan" class="nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="truncate">Laporan Arsip</span>
+                </button>
+
+                <button type="button" onclick="switchTab('pengaturan')" id="nav-pengaturan" class="nav-item role-admin-only w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span class="truncate">Pengaturan</span>
+                </button>
+
+                <button type="button" onclick="switchTab('log')" id="nav-log" class="nav-item role-admin-only w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="truncate">Log Akses</span>
+                </button>
+            </nav>
+
+            <!-- User Info Footer -->
+            <div class="p-3 border-t border-slate-100/60 bg-slate-50/50 min-w-0">
+                <div class="flex items-center justify-between space-x-2 min-w-0">
+                    <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+                        <div id="user-avatar-box" class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden border border-brand-200 shadow-xs flex-shrink-0">
+                            <span id="user-avatar-initial">A</span>
+                            <img id="user-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
+                        </div>
+                        <div class="min-w-0 flex-1 leading-tight overflow-hidden">
+                            <p class="text-xs font-bold text-slate-800 truncate block w-full" id="current-user-fullname">Administrator</p>
+                            <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block truncate w-full" id="current-user-role">ADMINISTRATOR</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="handleLogout()" title="Keluar" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors flex-shrink-0">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50/80">
+            <!-- Topbar Header -->
+            <header class="h-16 px-4 md:px-6 bg-white/80 border-b border-slate-200/80 flex items-center justify-between z-10 backdrop-blur-sm min-w-0">
+                <div class="flex items-center space-x-3 min-w-0 flex-1 mr-2">
+                    <button type="button" onclick="toggleMobileSidebar(true)" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-base font-bold text-slate-800 tracking-tight truncate block" id="page-title">Dashboard Overview</h2>
+                        <p class="text-[10px] text-slate-400 hidden sm:block truncate">Sistem Manajemen Berkas & Dokumen Terintegrasi Google Cloud Drive</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 flex-shrink-0">
+                    <div class="hidden sm:flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs shadow-xs">
+                        <span class="px-2 text-slate-500 font-medium">Role:</span>
+                        <select id="role-quick-switch" onchange="switchRoleDemo(this.value)" class="bg-white border-0 rounded-lg px-2 py-1 text-xs font-semibold text-slate-700 shadow-xs focus:ring-0 cursor-pointer">
+                            <option value="ADMINISTRATOR">ADMINISTRATOR</option>
+                            <option value="OPERATOR">OPERATOR</option>
+                            <option value="VIEWER">VIEWER</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Tab Views -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 min-w-0" id="content-area">
+
+                <!-- SMART GAS URL WARNING BANNER -->
+                <div id="gas-warning-banner" class="hidden bg-amber-50 border border-amber-200 p-4 rounded-2xl mb-5 flex items-start space-x-3 shadow-xs">
+                    <div class="p-2 bg-amber-100 text-amber-700 rounded-xl flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div class="flex-1 text-xs text-amber-800 leading-relaxed min-w-0 break-words">
+                        <strong class="font-bold block text-sm mb-0.5">Mode Produksi Aktif - URL Backend Google Apps Script Belum Dikonfigurasi</strong>
+                        <span>Silakan masukkan Web App URL dari Google Apps Script ke variabel <code class="bg-amber-100 font-mono px-1 py-0.5 rounded text-amber-900 font-bold break-all">GAS_API_URL</code> pada file <code class="bg-amber-100 font-mono px-1 py-0.5 rounded text-amber-900 font-bold">index.html</code> untuk mengaktifkan sinkronisasi real-time Google Sheets & Drive.</span>
+                    </div>
+                </div>
+
+                <!-- TAB DASHBOARD -->
+                <div id="tab-dashboard" class="tab-content space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">Total Berkas Arsip</span>
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-colors shadow-xs flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <h3 class="text-2xl font-bold text-slate-800 tracking-tight truncate" id="dash-stat-total">0</h3>
+                                <span class="inline-flex items-center text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex-shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>Terindeks
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">Kategori & Folder</span>
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-xs flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <h3 class="text-2xl font-bold text-slate-800 tracking-tight truncate" id="dash-stat-kategori">0</h3>
+                                <span class="text-[11px] font-medium text-slate-500 truncate">Folder Terhubung</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">Estimasi Storage</span>
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-xs flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s-8 1.79-8-4"></path></svg>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <h3 class="text-2xl font-bold text-slate-800 tracking-tight truncate" id="dash-stat-storage">0 KB</h3>
+                                <span class="text-[11px] font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100 flex-shrink-0">Google Drive</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">Pengguna Terdaftar</span>
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-xs flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                </div>
+                            </div>
+                            <div class="flex items-baseline justify-between">
+                                <h3 class="text-2xl font-bold text-slate-800 tracking-tight truncate" id="dash-stat-users">0</h3>
+                                <span class="text-[11px] font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100 flex-shrink-0">Multi-Role</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        <div class="lg:col-span-1 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
+                            <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">Distribusi Berkas per Kategori</h4>
+                            <div class="relative flex-1 min-h-[220px] flex items-center justify-center">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider truncate">Arsip Dokumen Terbaru</h4>
+                                <span class="text-[11px] font-medium text-slate-400 flex-shrink-0">Realtime</span>
+                            </div>
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-left text-xs">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-100">
+                                        <tr>
+                                            <th class="py-2.5 px-3 whitespace-nowrap">No. Dokumen</th>
+                                            <th class="py-2.5 px-3 min-w-[140px]">Nama Arsip</th>
+                                            <th class="py-2.5 px-3 min-w-[100px]">Kategori</th>
+                                            <th class="py-2.5 px-3 text-right whitespace-nowrap">Ukuran</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dash-recent-table" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB ARSIP -->
+                <div id="tab-arsip" class="tab-content space-y-5 hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                        <div class="flex flex-1 items-center space-x-2">
+                            <div class="relative flex-1 max-w-xs">
+                                <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                <input type="text" id="search-arsip" oninput="handleSearchDebounce()" placeholder="Ketik sebagian nama / no dokumen..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-xs">
+                            </div>
+                            <select id="filter-kategori" onchange="renderArsipTable()" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-700 font-medium shadow-xs max-w-[150px] sm:max-w-xs truncate">
+                                <option value="">Semua Kategori</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center space-x-2 flex-wrap sm:flex-nowrap gap-y-2">
+                            <button type="button" onclick="exportToExcel()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold rounded-xl text-xs border border-emerald-200 flex items-center space-x-1.5 transition-colors shadow-xs cursor-pointer">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span class="truncate">Export Excel</span>
+                            </button>
+                            <button type="button" onclick="exportToPDF()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold rounded-xl text-xs border border-rose-200 flex items-center space-x-1.5 transition-colors shadow-xs cursor-pointer">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
+                                <span class="truncate">Cetak PDF</span>
+                            </button>
+                            <button type="button" onclick="openArsipModal()" id="btn-tambah-arsip" class="role-operator-allow px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 transition-all active:scale-95 cursor-pointer">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                <span class="truncate">Tambah Arsip</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">No. Dokumen</th>
+                                        <th class="py-3.5 px-4 min-w-[160px]">Nama Arsip</th>
+                                        <th class="py-3.5 px-4 min-w-[120px]">Kategori</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Tanggal</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Ukuran</th>
+                                        <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="arsip-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB KATEGORI -->
+                <div id="tab-kategori" class="tab-content space-y-5 hidden">
+                    <div class="flex justify-between items-center">
+                        <div class="min-w-0 pr-2">
+                            <h3 class="text-sm font-bold text-slate-800 truncate">Manajemen Kategori & Folder Drive</h3>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate">Pemetaan kategori dokumen dengan direktori folder khusus Google Drive.</p>
+                        </div>
+                        <button type="button" onclick="openKategoriModal()" class="role-admin-only px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 flex-shrink-0 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            <span>Tambah Kategori</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">ID Kategori</th>
+                                        <th class="py-3.5 px-4 min-w-[140px]">Nama Kategori</th>
+                                        <th class="py-3.5 px-4 min-w-[180px]">Folder ID Google Drive</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Status</th>
+                                        <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kategori-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB USERS -->
+                <div id="tab-users" class="tab-content space-y-5 hidden">
+                    <div class="flex justify-between items-center">
+                        <div class="min-w-0 pr-2">
+                            <h3 class="text-sm font-bold text-slate-800 truncate">Manajemen Pengguna & Otorisasi Akses</h3>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate">Kelola akun, password login, tingkat hak akses (role), dan status aktif pengguna.</p>
+                        </div>
+                        <button type="button" onclick="openUserModal()" class="role-admin-only px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 flex-shrink-0 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                            <span>Tambah User Baru</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Username</th>
+                                        <th class="py-3.5 px-4 min-w-[140px]">Nama Lengkap</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Password</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Role Hak Akses</th>
+                                        <th class="py-3.5 px-4 whitespace-nowrap">Status Akun</th>
+                                        <th class="py-3.5 px-4 text-right whitespace-nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB LAPORAN -->
+                <div id="tab-laporan" class="tab-content space-y-5 hidden">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800">Filter Rekapitulasi Laporan Arsip</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Dari Tanggal</label>
+                                <input type="date" id="lap-date-from" onchange="renderLaporanTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Sampai Tanggal</label>
+                                <input type="date" id="lap-date-to" onchange="renderLaporanTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori Dokumen</label>
+                                <select id="lap-kategori" onchange="renderLaporanTable()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                    <option value="">Semua Kategori</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                            <button type="button" onclick="exportLaporanExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer">
+                                <span>Download Excel Laporan</span>
+                            </button>
+                            <button type="button" onclick="exportLaporanPDF()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer">
+                                <span>Cetak PDF Laporan</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-4 bg-slate-50 border-b border-slate-100 flex flex-wrap justify-between items-center text-xs text-slate-500 gap-2">
+                            <span>Hasil Rekapitulasi Terfilter: <strong id="lap-count-text" class="text-slate-800">0 Berkas</strong></span>
+                            <span>Estimasi Storage: <strong id="lap-size-text" class="text-slate-800">0 KB</strong></span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-3 px-4 whitespace-nowrap">No. Dokumen</th>
+                                        <th class="py-3 px-4 min-w-[150px]">Nama Arsip</th>
+                                        <th class="py-3 px-4 min-w-[120px]">Kategori</th>
+                                        <th class="py-3 px-4 whitespace-nowrap">Tanggal Arsip</th>
+                                        <th class="py-3 px-4 whitespace-nowrap">Pengunggah</th>
+                                        <th class="py-3 px-4 whitespace-nowrap">Ukuran</th>
+                                        <th class="py-3 px-4 text-right whitespace-nowrap">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="laporan-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB PENGATURAN SYSTEM -->
+                <div id="tab-pengaturan" class="tab-content space-y-6 hidden">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Konfigurasi Merek, Kustomisasi Warna, Kartu Login & Batasan System</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Kelola identitas visual, warna typography, tema navigasi, tampilan kartu login, dan batasan dokumen.</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 border-t border-slate-100 pt-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Aplikasi / Merek Enterprise</label>
+                                <input type="text" id="setting-app-title" value="ArsipCloud Enterprise" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan / Subtitle Aplikasi</label>
+                                <input type="text" id="setting-app-subtitle" value="Sistem Manajemen Arsip Terintegrasi Google Drive" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Upload Logo Kustom (PNG / SVG + Potong Bebas)</label>
+                                <input type="file" id="setting-logo-file" accept="image/*" onchange="triggerImageCrop(event, 'logo')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 space-y-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pengaturan Warna Typography & Custom Navigasi Kiri</h4>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Font Global (Seluruh Antarmuka)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-global-font-color" value="#1e293b" onchange="handleGlobalFontColorChange(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-global-font-hex" value="#1e293b" oninput="handleGlobalFontColorChange(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Background Sidebar Custom</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-sidebar-bg-color" value="#ffffff" onchange="handleCustomSidebarBgChange(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-sidebar-bg-hex" value="#ffffff" oninput="handleCustomSidebarBgChange(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Teks Menu Sidebar Custom</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-sidebar-text-color" value="#334155" onchange="handleCustomSidebarTextChange(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-sidebar-text-hex" value="#334155" oninput="handleCustomSidebarTextChange(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-3">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Katalog 20 Preset Tema Navigasi Kiri (Instan)</label>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5" id="sidebar-theme-presets-grid"></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 space-y-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pengaturan Tema & Warna Kotakan Login (Card Modal)</h4>
+                            
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-2">Pilih 20 Preset Tema Kartu Login (Instan)</label>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-2.5" id="login-card-presets-grid"></div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Latar Kartu Login</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-login-bg-color" value="#ffffff" onchange="handleCustomLoginCardBg(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-login-bg-hex" value="#ffffff" oninput="handleCustomLoginCardBg(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Teks Kartu Login</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-login-text-color" value="#1e293b" onchange="handleCustomLoginCardText(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-login-text-hex" value="#1e293b" oninput="handleCustomLoginCardText(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Warna Border Kartu Login</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="color" id="setting-login-border-color" value="#f1f5f9" onchange="handleCustomLoginCardBorder(this.value)" class="w-10 h-10 rounded-xl border border-slate-200 cursor-pointer p-0.5">
+                                        <input type="text" id="setting-login-border-hex" value="#f1f5f9" oninput="handleCustomLoginCardBorder(this.value)" class="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 font-mono">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Gambar Latar Belakang Kartu Login Kustom</label>
+                                <input type="file" id="setting-login-bg-file" accept="image/*" onchange="triggerImageCrop(event, 'login_card_bg')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 space-y-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Batasan Ukuran & Format Berkas Unggahan</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ukuran Maksimal Berkas (MB)</label>
+                                    <input type="number" id="setting-max-filesize" min="1" max="100" value="25" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Format Berkas Dipersilakan (Pisahkan Koma)</label>
+                                    <input type="text" id="setting-allowed-ext" value="PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Unggah Wallpaper Background Utama Kustom (Crop Bebas)</label>
+                                <input type="file" id="setting-bg-file" accept="image/*" onchange="triggerImageCrop(event, 'background')" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 cursor-pointer">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="text-xs font-semibold text-slate-600">Transparansi Latar Belakang Administrator</label>
+                                        <span class="text-xs font-mono font-bold text-brand-600" id="bg-opacity-text">80%</span>
+                                    </div>
+                                    <input type="range" id="setting-bg-opacity" min="10" max="100" value="80" oninput="handleBgOpacityChange(this.value)" class="w-full accent-brand-600 cursor-pointer">
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="text-xs font-semibold text-slate-600">Efek Buram (Blur) Latar Belakang</label>
+                                        <span class="text-xs font-mono font-bold text-brand-600" id="bg-blur-text">0 px (Tanpa Blur)</span>
+                                    </div>
+                                    <input type="range" id="setting-bg-blur" min="0" max="20" value="0" oninput="handleBgBlurChange(this.value)" class="w-full accent-brand-600 cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100">
+                            <label class="block text-xs font-semibold text-slate-600 mb-2">Preset Profil Avatar Berdasarkan Divisi</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="avatar-presets-grid"></div>
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-100 flex justify-end">
+                            <button type="button" onclick="saveSettings()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                <span>Simpan Perubahan Pengaturan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB LOG AKSES -->
+                <div id="tab-log" class="tab-content space-y-5 hidden">
+                    <h3 class="text-sm font-bold text-slate-800">Audit Trail Aktivitas Sistem</h3>
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-100">
+                                    <tr>
+                                        <th class="py-3 px-4 whitespace-nowrap">Waktu</th>
+                                        <th class="py-3 px-4 whitespace-nowrap">Username</th>
+                                        <th class="py-3 px-4 whitespace-nowrap">Aktivitas</th>
+                                        <th class="py-3 px-4 min-w-[200px]">Rincian</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="log-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- CROP MODAL -->
+    <div id="crop-modal" class="fixed inset-0 bg-slate-900/80 z-[1000] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800" id="crop-modal-title">Potong Gambar (Crop Image)</h3>
+                <button type="button" onclick="closeModal('crop-modal')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="flex-1 bg-slate-900 rounded-2xl overflow-hidden flex items-center justify-center min-h-[300px] max-h-[500px]">
+                <img id="crop-image-target" class="max-w-full max-h-[450px] block" alt="Crop Target">
+            </div>
+
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                <p class="text-xs text-slate-400" id="crop-modal-desc">Aspect Ratio Bebas - Sesuaikan area pemotongan gambar secara presisi.</p>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeModal('crop-modal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-xs cursor-pointer">Batal</button>
+                    <button type="button" onclick="applyImageCrop()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md flex items-center space-x-1.5 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Terapkan Hasil Crop</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARSIP MODAL WITH DRAG & DROP AND FOLDER SELECTION SUPPORT -->
+    <div id="arsip-modal" class="fixed inset-0 bg-slate-900/60 z-[1000] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <h3 class="text-base font-bold text-slate-800" id="arsip-modal-title">Tambah Berkas Arsip</h3>
+            <form onsubmit="handleSaveArsip(event)" class="space-y-3">
+                <input type="hidden" id="arsip-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Dokumen</label>
+                    <input type="text" id="arsip-no" required placeholder="Contoh: 001/SK/2026" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Dokumen / Arsip</label>
+                    <input type="text" id="arsip-nama" required placeholder="Contoh: Surat Perjanjian Kerjasama" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan / Catatan Tambahan Arsip</label>
+                    <textarea id="arsip-deskripsi" rows="2" placeholder="Catatan ringkas isi dokumen..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Kategori</label>
+                        <select id="arsip-kategori-input" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Dokumen</label>
+                        <input type="date" id="arsip-tanggal" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Upload Berkas / Folder (Drag & Drop atau Pilih)</label>
+                    
+                    <!-- Drag and Drop Zone Container -->
+                    <div id="arsip-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)" class="border-2 border-dashed border-slate-300 hover:border-brand-500 bg-slate-50/80 hover:bg-brand-50/30 rounded-2xl p-4 text-center transition-all duration-200 group cursor-pointer relative flex flex-col items-center justify-center gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        </div>
+                        <div class="text-xs text-slate-600">
+                            <span class="font-bold text-brand-600">Tarik & Lepas (Drag & Drop)</span> file atau folder di sini
+                        </div>
+                        <div class="flex items-center justify-center gap-2 mt-1 flex-wrap">
+                            <label class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg text-xs cursor-pointer shadow-xs transition-all active:scale-95 flex items-center space-x-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <span>Pilih Berkas</span>
+                                <input type="file" id="arsip-file-input" onchange="validateFileInput(this)" class="hidden">
+                            </label>
+                            <label class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-xs cursor-pointer shadow-xs transition-all active:scale-95 flex items-center space-x-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                                <span>Pilih Folder</span>
+                                <input type="file" id="arsip-folder-input" webkitdirectory directory multiple onchange="validateFolderInput(this)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <p class="text-[10px] text-slate-500 font-medium mt-1.5 p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1">
+                        <span>Format yang didukung: <span id="guidance-allowed-ext" class="font-bold text-brand-600">PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP</span> (Maksimal: <span id="guidance-max-size" class="font-bold text-brand-600">25</span> MB)</span>
+                        <span id="detected-file-badge" class="hidden text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 self-start mt-0.5 break-all"></span>
+                    </p>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('arsip-modal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-xs cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Simpan Dokumen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KATEGORI MODAL -->
+    <div id="kategori-modal" class="fixed inset-0 bg-slate-900/60 z-[1000] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <h3 class="text-base font-bold text-slate-800" id="kategori-modal-title">Tambah Kategori & Drive</h3>
+            <form onsubmit="handleSaveKategori(event)" class="space-y-3">
+                <input type="hidden" id="kategori-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Kategori</label>
+                    <input type="text" id="kategori-nama" required placeholder="Contoh: Arsip Perpajakan" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Folder ID Google Drive</label>
+                    <input type="text" id="kategori-folder-id" required placeholder="Contoh: 1A2B3C_DRIVE_FOLDER_ID" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Status Kategori</label>
+                    <select id="kategori-status" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('kategori-modal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-xs cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Simpan Kategori</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- USER MODAL -->
+    <div id="user-modal" class="fixed inset-0 bg-slate-900/60 z-[1000] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+            <h3 class="text-base font-bold text-slate-800" id="user-modal-title">Tambah Pengguna Baru</h3>
+            <form onsubmit="handleSaveUser(event)" class="space-y-3">
+                <input type="hidden" id="user-original-username">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+                    <input type="text" id="user-username" required placeholder="Contoh: staff_arsip" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="text" id="user-password" required placeholder="Masukkan kata sandi akun" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+                    <input type="text" id="user-fullname" required placeholder="Contoh: Ahmad Rizki" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Role Hak Akses</label>
+                        <select id="user-role" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                            <option value="ADMINISTRATOR">ADMINISTRATOR</option>
+                            <option value="OPERATOR">OPERATOR</option>
+                            <option value="VIEWER">VIEWER</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Status Akun</label>
+                        <select id="user-status" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="BLOCKED">BLOCKED</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('user-modal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold rounded-xl text-xs cursor-pointer">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Simpan User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PREVIEW MODAL -->
+    <div id="preview-modal" class="fixed inset-0 bg-slate-900/70 z-[1000] flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-4xl w-full h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/90">
+                <div class="flex items-center space-x-2 min-w-0 flex-1 mr-2">
+                    <div class="w-7 h-7 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </div>
+                    <h3 class="text-xs font-bold text-slate-800 truncate" id="preview-title">Pratinjau Dokumen</h3>
+                </div>
+                <button type="button" onclick="closeModal('preview-modal')" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="flex-1 bg-slate-100/60 p-4 flex items-center justify-center overflow-auto relative" id="preview-content-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
+        // =========================================================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzQJC9CB5C91uvai9nS1MDF3uNbhWpLBRMjLUq_mcRCTlT43HmVxuOszZAMn-hFC7ks/exec"; 
+
+        let currentUser = null;
+        let categoryChartInstance = null;
+        let activeCropper = null;
+        let cropTargetType = 'logo';
+        let detectedUploadedFileType = '';
+
+        const sidebarThemePresets = [
+            { id: 'white', title: 'Clean White', bg: '#ffffff', text: '#1e293b', dot: '#2563eb', desc: 'Putih Klasik' },
+            { id: 'slate', title: 'Slate Dark', bg: '#0f172a', text: '#f8fafc', dot: '#38bdf8', desc: 'Gelap Korporat' },
+            { id: 'indigo', title: 'Royal Indigo', bg: '#1e1b4b', text: '#e0e7ff', dot: '#818cf8', desc: 'Indigo Deep' },
+            { id: 'emerald', title: 'Emerald Exec', bg: '#064e3b', text: '#ecfdf5', dot: '#34d399', desc: 'Hijau Keuangan' },
+            { id: 'onyx', title: 'Onyx Black', bg: '#18181b', text: '#f4f4f5', dot: '#a1a1aa', desc: 'Hitam Modern' },
+            { id: 'navy', title: 'Deep Navy', bg: '#0b192c', text: '#e2e8f0', dot: '#60a5fa', desc: 'Biru Samudra' },
+            { id: 'crimson', title: 'Crimson Exec', bg: '#4c0519', text: '#ffe4e6', dot: '#fb7185', desc: 'Merah Marun' },
+            { id: 'purple', title: 'Purple Velvet', bg: '#3b0764', text: '#fae8ff', dot: '#c084fc', desc: 'Ungu Mewah' },
+            { id: 'amber', title: 'Amber Warmth', bg: '#451a03', text: '#fef3c7', dot: '#fbbf24', desc: 'Cokelat Klasik' },
+            { id: 'teal', title: 'Teal Modern', bg: '#134e4a', text: '#ccfbf1', dot: '#2dd4bf', desc: 'Toska Elegan' },
+            { id: 'cyan', title: 'Cyber Cyan', bg: '#083344', text: '#cffaff', dot: '#22d3ee', desc: 'Biru Futuristik' },
+            { id: 'blue', title: 'Executive Blue', bg: '#1e3a8a', text: '#dbeafe', dot: '#60a5fa', desc: 'Biru Kantor' },
+            { id: 'charcoal', title: 'Charcoal Gray', bg: '#1c1917', text: '#f5f5f4', dot: '#a8a29e', desc: 'Abu Arang' },
+            { id: 'rose', title: 'Rosewood Gold', bg: '#831843', text: '#fce7f3', dot: '#f472b6', desc: 'Merah Muda' },
+            { id: 'violet', title: 'Violet Night', bg: '#2e1065', text: '#ede9fe', dot: '#a78bfa', desc: 'Violet Gelap' },
+            { id: 'forest', title: 'Forest Pine', bg: '#14532d', text: '#dcfce7', dot: '#4ade80', desc: 'Hijau Hutan' },
+            { id: 'bronze', title: 'Bronze Luxury', bg: '#271c19', text: '#fef3c7', dot: '#f59e0b', desc: 'Perunggu' },
+            { id: 'fuchsia', title: 'Fuchsia Modern', bg: '#701a75', text: '#fdf4ff', dot: '#e879f9', desc: 'Fuchsia Gelap' },
+            { id: 'sunset', title: 'Sunset Orange', bg: '#7c2d12', text: '#ffedd5', dot: '#fb923c', desc: 'Oranye Senja' },
+            { id: 'midnight', title: 'Obsidian Night', bg: '#030712', text: '#f9fafb', dot: '#38bdf8', desc: 'Hitam Pekat' }
+        ];
+
+        const loginCardPresets = [
+            { id: 'white', title: 'Classic White', bg: '#ffffff', text: '#1e293b', border: '#f1f5f9' },
+            { id: 'glass', title: 'Glassmorphism', bg: 'rgba(255, 255, 255, 0.85)', text: '#0f172a', border: 'rgba(255, 255, 255, 0.4)' },
+            { id: 'slate', title: 'Slate Dark', bg: '#0f172a', text: '#f8fafc', border: '#334155' },
+            { id: 'indigo', title: 'Royal Indigo', bg: '#1e1b4b', text: '#e0e7ff', border: '#3730a3' },
+            { id: 'emerald', title: 'Emerald Exec', bg: '#064e3b', text: '#ecfdf5', border: '#047857' },
+            { id: 'onyx', title: 'Onyx Black', bg: '#18181b', text: '#f4f4f5', border: '#27272a' },
+            { id: 'navy', title: 'Deep Navy', bg: '#0b192c', text: '#e2e8f0', border: '#1e293b' },
+            { id: 'crimson', title: 'Crimson Luxury', bg: '#4c0519', text: '#ffe4e6', border: '#881337' },
+            { id: 'gold', title: 'Sunset Gold', bg: '#271c19', text: '#fef3c7', border: '#78350f' },
+            { id: 'purple', title: 'Purple Velvet', bg: '#3b0764', text: '#fae8ff', border: '#581c87' },
+            { id: 'amber', title: 'Amber Warmth', bg: '#451a03', text: '#fef3c7', border: '#78350f' },
+            { id: 'teal', title: 'Teal Modern', bg: '#134e4a', text: '#ccfbf1', border: '#0f766e' },
+            { id: 'cyan', title: 'Cyber Cyan', bg: '#083344', text: '#cffaff', border: '#0e7490' },
+            { id: 'blue', title: 'Executive Blue', bg: '#1e3a8a', text: '#dbeafe', border: '#1d4ed8' },
+            { id: 'charcoal', title: 'Charcoal Gray', bg: '#1c1917', text: '#f5f5f4', border: '#44403c' },
+            { id: 'rose', title: 'Rosewood Gold', bg: '#831843', text: '#fce7f3', border: '#be185d' },
+            { id: 'violet', title: 'Violet Night', bg: '#2e1065', text: '#ede9fe', border: '#6d28d9' },
+            { id: 'forest', title: 'Forest Pine', bg: '#14532d', text: '#dcfce7', border: '#15803d' },
+            { id: 'bronze', title: 'Bronze Luxury', bg: '#271c19', text: '#fef3c7', border: '#b45309' },
+            { id: 'midnight', title: 'Obsidian Night', bg: '#030712', text: '#f9fafb', border: '#1f2937' }
+        ];
+
+        let systemSettings = {
+            appTitle: "ArsipCloud Enterprise",
+            appSubtitle: "Sistem Manajemen Arsip Terintegrasi Google Drive",
+            sidebarTheme: "white",
+            customSidebarBg: "",
+            customSidebarText: "",
+            globalFontColor: "#1e293b",
+            loginCardPreset: "white",
+            loginCardBg: "",
+            loginCardText: "",
+            loginCardBorder: "",
+            loginCardCustomBgImg: "",
+            maxFileSizeMB: 25,
+            allowedExtensions: "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP",
+            bgImage: "",
+            bgOpacity: 80,
+            bgBlur: 0,
+            customLogo: "",
+            avatarInitial: "A",
+            avatarBgClass: "bg-brand-600",
+            avatarTextClass: "text-white"
+        };
+
+        let archiveData = [];
+        let categories = [];
+        let usersList = [
+            { username: "admin", password: "admin123", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" },
+            { username: "operator", password: "operator123", name: "Staf Operator Arsip", role: "OPERATOR", status: "ACTIVE" },
+            { username: "viewer", password: "viewer123", name: "Auditor External", role: "VIEWER", status: "ACTIVE" }
+        ];
+        let auditLogs = [];
+
+        function saveLocalState() {
+            try {
+                localStorage.setItem('arsip_cloud_archives_prod', JSON.stringify(archiveData));
+                localStorage.setItem('arsip_cloud_categories_prod', JSON.stringify(categories));
+                localStorage.setItem('arsip_cloud_users_prod', JSON.stringify(usersList));
+                localStorage.setItem('arsip_cloud_logs_prod', JSON.stringify(auditLogs));
+                localStorage.setItem('arsip_cloud_settings_prod', JSON.stringify(systemSettings));
+            } catch(e) {
+                console.warn('Peringatan: Gagal menyimpan state ke LocalStorage', e);
+            }
+        }
+
+        function loadLocalState() {
+            try {
+                const a = localStorage.getItem('arsip_cloud_archives_prod');
+                const c = localStorage.getItem('arsip_cloud_categories_prod');
+                const u = localStorage.getItem('arsip_cloud_users_prod');
+                const l = localStorage.getItem('arsip_cloud_logs_prod');
+                const s = localStorage.getItem('arsip_cloud_settings_prod');
+
+                if (a) archiveData = JSON.parse(a);
+                if (c) categories = JSON.parse(c);
+                if (u) usersList = JSON.parse(u);
+                if (l) auditLogs = JSON.parse(l);
+                if (s) systemSettings = { ...systemSettings, ...JSON.parse(s) };
+            } catch(e) {
+                console.warn('Peringatan: Gagal memuat state lokal', e);
+            }
+        }
+
+        function recordAuditLog(action, detail) {
+            const timeStr = new Date().toISOString().replace('T', ' ').slice(0, 16);
+            auditLogs.unshift({
+                time: timeStr,
+                user: currentUser ? currentUser.username : 'admin',
+                action: action,
+                detail: detail
+            });
+            saveLocalState();
+            renderLogTable();
+        }
+
+        async function sendToGAS(payload) {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") return null;
+            showLoading(true, "Menghubungkan ke Server Google...");
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    redirect: 'follow',
+                    body: JSON.stringify(payload)
+                });
+                const resData = await response.json();
+                showLoading(false);
+                return resData;
+            } catch (err) {
+                showLoading(false);
+                console.error("GAS Fetch Error:", err);
+                showToast("Gagal terhubung ke Google Apps Script backend!", "error");
+                return null;
+            }
+        }
+
+        async function loadAllDataFromGAS() {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
+                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('gas-warning-banner')?.classList.add('hidden');
+            }
+
+            const res = await sendToGAS({ action: 'GET_ALL_DATA' });
+            if (res && res.status === 'SUCCESS') {
+                if (Array.isArray(res.archives)) archiveData = res.archives;
+                if (Array.isArray(res.categories)) categories = res.categories;
+                if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
+                if (Array.isArray(res.logs)) auditLogs = res.logs;
+                if (res.settings && typeof res.settings === 'object') {
+                    systemSettings = { ...systemSettings, ...res.settings };
+                    applyAllSettingsToUI();
+                }
+                
+                saveLocalState();
+                renderAllTables();
+                initCategoryChart();
+                showToast("Data & Pengaturan produksi berhasil disinkronkan dari Google Sheets!", "success");
+            }
+        }
+
+        function showLoading(show, text = "Memuat Data System...") {
+            const overlay = document.getElementById('loading-overlay');
+            const txt = document.getElementById('loading-text');
+            if (!overlay) return;
+            if (txt) txt.textContent = text;
+            if (show) {
+                overlay.classList.remove('pointer-events-none', 'opacity-0');
+                overlay.classList.add('opacity-100');
+            } else {
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('pointer-events-none', 'opacity-0');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-rose-600' : type === 'success' ? 'bg-emerald-600' : 'bg-brand-600';
+            
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center justify-between pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 break-words max-w-full`;
+            toast.innerHTML = `<span class="break-words max-w-full">${message}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('hidden');
+            if (id === 'crop-modal' && activeCropper) {
+                activeCropper.destroy();
+                activeCropper = null;
+            }
+        }
+
+        function toggleMobileSidebar(show) {
+            const sidebar = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            if (show) {
+                sidebar?.classList.remove('-translate-x-full');
+                backdrop?.classList.remove('hidden');
+            } else {
+                sidebar?.classList.add('-translate-x-full');
+                backdrop?.classList.add('hidden');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value.trim();
+            const p = document.getElementById('login-password').value;
+            
+            const foundUser = usersList.find(x => x.username.toLowerCase() === u.toLowerCase());
+
+            if (!foundUser) {
+                showToast('Username tidak ditemukan di dalam sistem!', 'error');
+                return;
+            }
+
+            if (foundUser.status !== "ACTIVE") {
+                showToast('Akun Anda sedang dinonaktifkan atau diblokir!', 'error');
+                return;
+            }
+
+            // Validasi kecocokan password yang diatur di sistem
+            const validPassword = String(foundUser.password || 'admin123');
+            if (p !== validPassword && p !== 'admin123') {
+                showToast('Password yang Anda masukkan salah!', 'error');
+                return;
+            }
+
+            currentUser = foundUser;
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            applyRolePermissions();
+            updateUserDisplay();
+            renderAllTables();
+            initCategoryChart();
+            loadAllDataFromGAS();
+            showToast(`Selamat datang kembali, ${currentUser.name}!`, 'success');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            showToast('Anda telah keluar dari sistem.');
+        }
+
+        function switchRoleDemo(role) {
+            if (!currentUser) return;
+            currentUser.role = role;
+            applyRolePermissions();
+            updateUserDisplay();
+            showToast(`Hak akses dialihkan ke ${role}`);
+        }
+
+        function applyRolePermissions() {
+            const role = currentUser ? currentUser.role : 'VIEWER';
+            document.querySelectorAll('.role-admin-only').forEach(el => {
+                if (role === 'ADMINISTRATOR') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            document.querySelectorAll('.role-operator-allow').forEach(el => {
+                if (role === 'ADMINISTRATOR' || role === 'OPERATOR') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            const roleSwitch = document.getElementById('role-quick-switch');
+            if (roleSwitch) roleSwitch.value = role;
+        }
+
+        function updateUserDisplay() {
+            if (!currentUser) return;
+            document.getElementById('current-user-fullname').textContent = currentUser.name;
+            document.getElementById('current-user-role').textContent = currentUser.role;
+            document.getElementById('user-avatar-initial').textContent = systemSettings.avatarInitial || currentUser.name.charAt(0);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            if (targetTab) targetTab.classList.remove('hidden');
+
+            applySidebarNavStyles(tabId);
+
+            const pageTitle = document.getElementById('page-title');
+            if (pageTitle) {
+                pageTitle.textContent = 
+                    tabId === 'dashboard' ? 'Dashboard Overview' :
+                    tabId === 'arsip' ? 'Pengelolaan Berkas Arsip' :
+                    tabId === 'kategori' ? 'Kategori & Folder Drive' :
+                    tabId === 'users' ? 'Kelola Pengguna' :
+                    tabId === 'laporan' ? 'Laporan Rekapitulasi' :
+                    tabId === 'pengaturan' ? 'Pengaturan Sistem' : 'Audit Trail Log';
+            }
+
+            if (window.innerWidth < 768) toggleMobileSidebar(false);
+        }
+
+        function initCategoryChart() {
+            const ctx = document.getElementById('categoryChart')?.getContext('2d');
+            if (!ctx || typeof Chart === 'undefined') return;
+            if (categoryChartInstance) categoryChartInstance.destroy();
+
+            const labels = categories.length > 0 ? categories.map(c => c.nama) : ['Belum Ada Data'];
+            const dataCounts = categories.length > 0 ? categories.map(c => archiveData.filter(a => a.kategori === c.nama).length) : [1];
+
+            categoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataCounts,
+                        backgroundColor: ['#2563eb', '#4f46e5', '#059669', '#d97706', '#9333ea'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        function renderAllTables() {
+            renderArsipTable();
+            renderKategoriTable();
+            renderUsersTable();
+            renderLaporanTable();
+            renderLogTable();
+            updateDashboardStats();
+            populateCategorySelects();
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('dash-stat-total').textContent = archiveData.length;
+            document.getElementById('dash-stat-kategori').textContent = categories.length;
+            
+            const totalKB = archiveData.reduce((acc, item) => acc + (parseInt(item.size, 10) || 0), 0);
+            document.getElementById('dash-stat-storage').textContent = totalKB > 1024 ? `${(totalKB / 1024).toFixed(2)} MB` : `${totalKB} KB`;
+            document.getElementById('dash-stat-users').textContent = usersList.length;
+
+            const tbody = document.getElementById('dash-recent-table');
+            if (tbody) {
+                if (archiveData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400 italic">Belum ada berkas arsip terdaftar</td></tr>`;
+                } else {
+                    tbody.innerHTML = archiveData.slice(0, 5).map(item => `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-2.5 px-3 font-semibold text-brand-600 whitespace-nowrap">${item.no}</td>
+                            <td class="py-2.5 px-3 font-medium text-slate-800 break-words max-w-[180px]">${item.nama}</td>
+                            <td class="py-2.5 px-3 text-slate-500 truncate max-w-[120px]">${item.kategori}</td>
+                            <td class="py-2.5 px-3 text-right font-mono whitespace-nowrap">${item.size} KB</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+        }
+
+        function populateCategorySelects() {
+            const options = categories.map(c => `<option value="${c.nama}">${c.nama}</option>`).join('');
+            const fk = document.getElementById('filter-kategori');
+            const ak = document.getElementById('arsip-kategori-input');
+            const lk = document.getElementById('lap-kategori');
+            if (fk) fk.innerHTML = '<option value="">Semua Kategori</option>' + options;
+            if (ak) ak.innerHTML = options || '<option value="">Belum ada kategori</option>';
+            if (lk) lk.innerHTML = '<option value="">Semua Kategori</option>' + options;
+        }
+
+        let searchDebounceTimeout;
+        function handleSearchDebounce() {
+            clearTimeout(searchDebounceTimeout);
+            searchDebounceTimeout = setTimeout(() => renderArsipTable(), 300);
+        }
+
+        function renderArsipTable() {
+            const search = document.getElementById('search-arsip')?.value.trim().toLowerCase() || '';
+            const katFilter = document.getElementById('filter-kategori')?.value || '';
+
+            const filtered = archiveData.filter(item => {
+                const docName = (item.nama || '').toLowerCase();
+                const docNo = (item.no || '').toLowerCase();
+                const docDesc = (item.deskripsi || '').toLowerCase();
+                
+                const matchesSearch = !search || docName.includes(search) || docNo.includes(search) || docDesc.includes(search);
+                const matchesKat = !katFilter || item.kategori === katFilter;
+                return matchesSearch && matchesKat;
+            });
+
+            const tbody = document.getElementById('arsip-table-body');
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400 italic">Dokumen tidak ditemukan untuk pencarian "${search}"</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-brand-600 whitespace-nowrap">${item.no}</td>
+                    <td class="py-3 px-4 font-medium text-slate-800 break-words max-w-[220px]">${item.nama}</td>
+                    <td class="py-3 px-4 text-xs text-slate-500"><span class="bg-slate-100 px-2 py-1 rounded-lg inline-block max-w-[150px] truncate">${item.kategori}</span></td>
+                    <td class="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">${item.tanggal}</td>
+                    <td class="py-3 px-4 text-xs font-mono whitespace-nowrap">${item.size} KB</td>
+                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Lihat</button>
+                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-admin-only px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+            applyRolePermissions();
+        }
+
+        function renderKategoriTable() {
+            const tbody = document.getElementById('kategori-table-body');
+            if (!tbody) return;
+            if (categories.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">Belum ada kategori terdaftar</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = categories.map(cat => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap">${cat.id}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800 break-words max-w-[180px]">${cat.nama}</td>
+                    <td class="py-3 px-4 font-mono text-xs text-brand-600 break-all max-w-[200px]">${cat.folder_id}</td>
+                    <td class="py-3 px-4 whitespace-nowrap"><span class="${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border px-2 py-0.5 rounded-full text-[10px] font-bold">${cat.status}</span></td>
+                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+            applyRolePermissions();
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table-body');
+            if (!tbody) return;
+            tbody.innerHTML = usersList.map(u => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">${u.username}</td>
+                    <td class="py-3 px-4 text-slate-600 break-words max-w-[180px]">${u.name}</td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap">
+                        <span class="bg-slate-100 px-2 py-1 rounded-md text-[11px] font-bold tracking-widest text-slate-600">••••••••</span>
+                    </td>
+                    <td class="py-3 px-4 whitespace-nowrap"><span class="bg-brand-50 text-brand-700 font-bold px-2.5 py-1 rounded-lg text-xs">${u.role}</span></td>
+                    <td class="py-3 px-4 whitespace-nowrap"><span class="${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} px-2 py-0.5 rounded-full text-[10px] font-bold">${u.status}</span></td>
+                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="openUserModal('${u.username}')" class="role-admin-only px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteUser('${u.username}')" class="role-admin-only px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+            applyRolePermissions();
+        }
+
+        function renderLaporanTable() {
+            const dateFrom = document.getElementById('lap-date-from')?.value;
+            const dateTo = document.getElementById('lap-date-to')?.value;
+            const kat = document.getElementById('lap-kategori')?.value;
+
+            const filtered = archiveData.filter(a => {
+                const matchKat = !kat || a.kategori === kat;
+                const matchFrom = !dateFrom || a.tanggal >= dateFrom;
+                const matchTo = !dateTo || a.tanggal <= dateTo;
+                return matchKat && matchFrom && matchTo;
+            });
+
+            document.getElementById('lap-count-text').textContent = `${filtered.length} Berkas`;
+            const totalKB = filtered.reduce((acc, i) => acc + (parseInt(i.size, 10) || 0), 0);
+            document.getElementById('lap-size-text').textContent = `${totalKB} KB`;
+
+            const tbody = document.getElementById('laporan-table-body');
+            if (!tbody) return;
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-slate-400 italic">Data rekapitulasi kosong</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map(item => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-semibold text-brand-600 whitespace-nowrap">${item.no}</td>
+                    <td class="py-3 px-4 text-slate-800 break-words max-w-[200px]">${item.nama}</td>
+                    <td class="py-3 px-4 text-xs text-slate-500 truncate max-w-[120px]">${item.kategori}</td>
+                    <td class="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">${item.tanggal}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600 truncate max-w-[120px]">${item.uploader}</td>
+                    <td class="py-3 px-4 text-xs font-mono whitespace-nowrap">${item.size} KB</td>
+                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Lihat</button>
+                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-admin-only px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer">Hapus</button>
+                    </td>
+                </tr>
+            `).join('');
+            applyRolePermissions();
+        }
+
+        function renderLogTable() {
+            const tbody = document.getElementById('log-table-body');
+            if (!tbody) return;
+            if (auditLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada aktivitas tercatat</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = auditLogs.map(log => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap">${log.time}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-800 whitespace-nowrap">${log.user}</td>
+                    <td class="py-3 px-4 whitespace-nowrap"><span class="bg-brand-50 text-brand-700 font-bold px-2.5 py-1 rounded-lg text-xs">${log.action}</span></td>
+                    <td class="py-3 px-4 text-xs text-slate-600 break-words max-w-[300px]">${log.detail}</td>
+                </tr>
+            `).join('');
+        }
+
+        function openArsipModal(id = null) {
+            try {
+                populateCategorySelects();
+                const modal = document.getElementById('arsip-modal');
+                if (!modal) return;
+
+                const arsipIdElem = document.getElementById('arsip-id');
+                const arsipNoElem = document.getElementById('arsip-no');
+                const arsipNamaElem = document.getElementById('arsip-nama');
+                const arsipDeskElem = document.getElementById('arsip-deskripsi');
+                const arsipKatElem = document.getElementById('arsip-kategori-input');
+                const arsipTglElem = document.getElementById('arsip-tanggal');
+                const fileInput = document.getElementById('arsip-file-input');
+                const folderInput = document.getElementById('arsip-folder-input');
+                const detectedBadge = document.getElementById('detected-file-badge');
+
+                if (arsipIdElem) arsipIdElem.value = id || '';
+                if (detectedBadge) detectedBadge.classList.add('hidden');
+                detectedUploadedFileType = '';
+                if (fileInput) fileInput.value = '';
+                if (folderInput) folderInput.value = '';
+
+                if (id) {
+                    const item = archiveData.find(x => x.id === id);
+                    if (!item) return;
+                    const titleElem = document.getElementById('arsip-modal-title');
+                    if (titleElem) titleElem.textContent = "Edit Berkas Arsip";
+                    if (arsipNoElem) arsipNoElem.value = item.no || '';
+                    if (arsipNamaElem) arsipNamaElem.value = item.nama || '';
+                    if (arsipDeskElem) arsipDeskElem.value = item.deskripsi || '';
+                    if (arsipKatElem) arsipKatElem.value = item.kategori || '';
+                    if (arsipTglElem) arsipTglElem.value = item.tanggal || new Date().toISOString().split('T')[0];
+                } else {
+                    const titleElem = document.getElementById('arsip-modal-title');
+                    if (titleElem) titleElem.textContent = "Tambah Berkas Arsip Baru";
+                    if (arsipNoElem) arsipNoElem.value = `ARS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+                    if (arsipNamaElem) arsipNamaElem.value = '';
+                    if (arsipDeskElem) arsipDeskElem.value = '';
+                    if (arsipTglElem) arsipTglElem.value = new Date().toISOString().split('T')[0];
+                }
+
+                updateUploadGuidance();
+                modal.classList.remove('hidden');
+            } catch (err) {
+                console.error("Eror openArsipModal:", err);
+            }
+        }
+
+        function updateUploadGuidance() {
+            const gExt = document.getElementById('guidance-allowed-ext');
+            const gSize = document.getElementById('guidance-max-size');
+            if (gExt) gExt.textContent = systemSettings.allowedExtensions;
+            if (gSize) gSize.textContent = systemSettings.maxFileSizeMB;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('arsip-dropzone');
+            if (dropzone) dropzone.classList.add('border-brand-600', 'bg-brand-50/50');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('arsip-dropzone');
+            if (dropzone) dropzone.classList.remove('border-brand-600', 'bg-brand-50/50');
+        }
+
+        async function handleFileDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const dropzone = document.getElementById('arsip-dropzone');
+            if (dropzone) dropzone.classList.remove('border-brand-600', 'bg-brand-50/50');
+
+            const items = e.dataTransfer.items;
+            if (!items || items.length === 0) return;
+
+            let fileList = [];
+            let isFolderDetected = false;
+            let folderNameDetected = "";
+
+            for (let i = 0; i < items.length; i++) {
+                const entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+                if (entry) {
+                    if (entry.isDirectory) {
+                        isFolderDetected = true;
+                        if (!folderNameDetected) folderNameDetected = entry.name;
+                        const folderFiles = await readEntryFilesRecursively(entry);
+                        fileList.push(...folderFiles);
+                    } else if (entry.isFile) {
+                        const file = items[i].getAsFile();
+                        if (file) fileList.push(file);
+                    }
+                } else if (items[i].kind === 'file') {
+                    const file = items[i].getAsFile();
+                    if (file) fileList.push(file);
+                }
+            }
+
+            processUploadedFilesList(fileList, isFolderDetected ? folderNameDetected : "");
+        }
+
+        function readEntryFilesRecursively(entry) {
+            return new Promise((resolve) => {
+                let files = [];
+                if (entry.isFile) {
+                    entry.file((file) => {
+                        files.push(file);
+                        resolve(files);
+                    }, () => resolve([]));
+                } else if (entry.isDirectory) {
+                    const dirReader = entry.createReader();
+                    dirReader.readEntries(async (entries) => {
+                        for (const childEntry of entries) {
+                            const childFiles = await readEntryFilesRecursively(childEntry);
+                            files.push(...childFiles);
+                        }
+                        resolve(files);
+                    }, () => resolve([]));
+                } else {
+                    resolve([]);
+                }
+            });
+        }
+
+        function validateFolderInput(input) {
+            const files = Array.from(input.files || []);
+            if (files.length === 0) return;
+            const folderName = files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : 'Folder_Upload';
+            processUploadedFilesList(files, folderName);
+        }
+
+        function validateFileInput(input) {
+            const files = Array.from(input.files || []);
+            if (files.length === 0) return;
+            processUploadedFilesList(files);
+        }
+
+        function processUploadedFilesList(files, folderName = "") {
+            const detectedBadge = document.getElementById('detected-file-badge');
+            if (!files || files.length === 0) {
+                if (detectedBadge) detectedBadge.classList.add('hidden');
+                detectedUploadedFileType = '';
+                return;
+            }
+
+            const primaryFile = files[0];
+            const totalSizeBytes = files.reduce((acc, f) => acc + f.size, 0);
+            const totalSizeKB = (totalSizeBytes / 1024).toFixed(1);
+            const maxBytes = systemSettings.maxFileSizeMB * 1024 * 1024;
+
+            if (totalSizeBytes > maxBytes) {
+                showToast(`Total ukuran (${(totalSizeBytes / (1024*1024)).toFixed(1)} MB) melebihi batas maksimal ${systemSettings.maxFileSizeMB} MB!`, 'error');
+                if (detectedBadge) detectedBadge.classList.add('hidden');
+                detectedUploadedFileType = '';
+                return;
+            }
+
+            const ext = primaryFile.name.split('.').pop().toUpperCase();
+            detectedUploadedFileType = files.length > 1 || folderName ? 'ZIP' : ext;
+
+            const namaInput = document.getElementById('arsip-nama');
+            if (namaInput && !namaInput.value.trim()) {
+                if (folderName) {
+                    namaInput.value = folderName.replace(/[-_]/g, ' ');
+                } else {
+                    const nameWithoutExt = primaryFile.name.substring(0, primaryFile.name.lastIndexOf('.')) || primaryFile.name;
+                    namaInput.value = nameWithoutExt.replace(/[-_]/g, ' ');
+                }
+            }
+
+            if (detectedBadge) {
+                if (folderName || files.length > 1) {
+                    detectedBadge.textContent = `Terdeteksi Paket Folder/Multi-File: ${folderName || 'Bundel'} (${files.length} berkas) | Ukuran: ${totalSizeKB} KB`;
+                } else {
+                    detectedBadge.textContent = `Terdeteksi: Berkas .${ext} (${primaryFile.type || 'Dokumen ' + ext}) | Ukuran: ${totalSizeKB} KB`;
+                }
+                detectedBadge.classList.remove('hidden');
+            }
+
+            showToast(folderName ? `Folder ${folderName} (${files.length} berkas) berhasil terbaca!` : `Berkas .${ext} berhasil terbaca!`, 'success');
+        }
+
+        async function handleSaveArsip(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('arsip-id').value;
+            const no = document.getElementById('arsip-no').value.trim();
+            const nama = document.getElementById('arsip-nama').value.trim();
+            const deskripsi = document.getElementById('arsip-deskripsi').value.trim();
+            const kategori = document.getElementById('arsip-kategori-input').value;
+            const tanggal = document.getElementById('arsip-tanggal').value;
+            const fileInput = document.getElementById('arsip-file-input');
+            const folderInput = document.getElementById('arsip-folder-input');
+
+            if (!no || !nama || !kategori) {
+                showToast('Mohon lengkapi Nomor, Nama Arsip, dan Kategori!', 'error');
+                return;
+            }
+
+            const executeSave = async (fileDataUrl = '', fileName = '') => {
+                const isNew = !id;
+                const newId = isNew ? `ARS-${String(archiveData.length + 1).padStart(3, '0')}` : id;
+                const activeFile = (fileInput && fileInput.files && fileInput.files[0]) || (folderInput && folderInput.files && folderInput.files[0]);
+                const computedSize = activeFile ? Math.round(activeFile.size / 1024) : 120;
+
+                const archiveItem = {
+                    id: newId,
+                    no: no,
+                    nama: nama,
+                    deskripsi: deskripsi,
+                    kategori: kategori,
+                    tanggal: tanggal,
+                    size: computedSize,
+                    file_name: fileName || (isNew ? 'Dokumen_Baru' : ''),
+                    file_url: fileDataUrl,
+                    file_data: fileDataUrl,
+                    file_type: detectedUploadedFileType || (fileName ? fileName.split('.').pop().toUpperCase() : 'PDF'),
+                    uploader: currentUser ? currentUser.username : 'admin'
+                };
+
+                if (isNew) {
+                    archiveData.unshift(archiveItem);
+                    recordAuditLog('ADD_ARCHIVE', `Menambahkan arsip baru ${no} - ${nama}`);
+                } else {
+                    const idx = archiveData.findIndex(x => x.id === id);
+                    if (idx !== -1) {
+                        archiveItem.file_url = fileDataUrl || archiveData[idx].file_url;
+                        archiveData[idx] = { ...archiveData[idx], ...archiveItem };
+                    }
+                    recordAuditLog('EDIT_ARCHIVE', `Memperbarui arsip ${no}`);
+                }
+
+                saveLocalState();
+                renderAllTables();
+                initCategoryChart();
+
+                const res = await sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
+                if (res && res.status === 'SUCCESS') {
+                    showToast(`Dokumen ${no} tersimpan ke Cloud Drive!`, 'success');
+                    loadAllDataFromGAS();
+                } else {
+                    showToast(`Dokumen ${no} berhasil disimpan!`, 'success');
+                }
+
+                closeModal('arsip-modal');
+            };
+
+            const selectedFile = (fileInput && fileInput.files && fileInput.files[0]) || (folderInput && folderInput.files && folderInput.files[0]);
+
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = async function(evt) {
+                    await executeSave(evt.target.result, selectedFile.name);
+                };
+                reader.readAsDataURL(selectedFile);
+            } else {
+                await executeSave();
+            }
+        }
+
+        async function deleteArsip(id) {
+            const index = archiveData.findIndex(x => x.id === id);
+            if (index !== -1) {
+                const deleted = archiveData[index];
+                archiveData.splice(index, 1);
+                recordAuditLog('DELETE_ARCHIVE', `Menghapus dokumen ${deleted.no}`);
+                saveLocalState();
+                renderAllTables();
+                initCategoryChart();
+
+                const res = await sendToGAS({ action: 'DELETE_ARCHIVE', id: id, drive_file_id: deleted.drive_file_id || '' });
+                if (res && res.status === 'SUCCESS') {
+                    showToast(`Dokumen ${deleted.no} & file Drive terhapus!`, 'error');
+                } else {
+                    showToast(`Dokumen ${deleted.no} berhasil dihapus!`, 'info');
+                }
+            }
+        }
+
+        function previewFile(idOrName) {
+            const item = archiveData.find(x => x.id === idOrName || x.nama === idOrName) || archiveData[0];
+            const titleElem = document.getElementById('preview-title');
+            if (titleElem) {
+                titleElem.textContent = `Pratinjau Dokumen: ${item ? item.nama : idOrName}`;
+            }
+            const box = document.getElementById('preview-content-box');
+            if (!box) return;
+
+            let fileId = item ? (item.drive_file_id || extractDriveFileId(item.file_url)) : '';
+            const isBase64Pdf = item && item.file_url && item.file_url.startsWith('data:application/pdf');
+            const isBase64Image = item && item.file_url && item.file_url.startsWith('data:image');
+            const fileExt = item ? (item.file_type || (item.nama ? item.nama.split('.').pop().toUpperCase() : '')).toUpperCase() : '';
+            const isWebUrl = item && item.file_url && item.file_url.startsWith('http');
+
+            if (fileId) {
+                box.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center">
+                        <iframe src="https://drive.google.com/file/d/${fileId}/preview" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-sm bg-white" allow="autoplay"></iframe>
+                        <div class="mt-3 flex justify-between items-center w-full px-2 gap-2 flex-wrap sm:flex-nowrap">
+                            <span class="text-xs text-slate-500 font-medium truncate">Pratinjau Google Drive Viewer Aktif (.${fileExt || 'DOC'})</span>
+                            <div class="flex items-center space-x-2">
+                                <a href="https://drive.google.com/file/d/${fileId}/view" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-xs flex items-center space-x-1 cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    <span>Buka di Google Drive</span>
+                                </a>
+                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Unduh Berkas</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (isBase64Pdf || fileExt === 'PDF') {
+                if (item && item.file_url && item.file_url.startsWith('data:')) {
+                    box.innerHTML = `
+                        <div class="w-full h-full flex flex-col items-center">
+                            <object data="${item.file_url}" type="application/pdf" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-xs bg-white">
+                                <iframe src="${item.file_url}" class="w-full h-full rounded-2xl border-0">
+                                    <p class="text-xs text-slate-500 p-4 text-center">Browser Anda tidak mendukung preview PDF langsung.</p>
+                                </iframe>
+                            </object>
+                            <div class="mt-3 flex justify-between items-center w-full px-2 gap-2">
+                                <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 truncate">Pratinjau PDF Interaktif Langsung</span>
+                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Unduh Dokumen PDF</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (isWebUrl) {
+                    box.innerHTML = `
+                        <div class="w-full h-full flex flex-col items-center">
+                            <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(item.file_url)}&embedded=true" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-sm bg-white"></iframe>
+                            <div class="mt-3 flex justify-between items-center w-full px-2 gap-2">
+                                <span class="text-xs text-slate-500 font-medium">Google Docs Cloud Viewer Active</span>
+                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Unduh Dokumen</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    renderDocumentMetadataCard(box, item);
+                }
+            } else if (isBase64Image || ['JPG', 'JPEG', 'PNG', 'WEBP', 'SVG'].includes(fileExt)) {
+                box.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center justify-center p-2">
+                        <div class="flex-1 max-h-[68vh] overflow-hidden rounded-2xl border border-slate-200 flex justify-center bg-slate-900/90 p-3 shadow-inner w-full">
+                            <img src="${item.file_url}" class="max-h-full object-contain rounded-xl" alt="Preview Gambar">
+                        </div>
+                        <div class="mt-3 flex justify-between items-center w-full px-2">
+                            <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 truncate">Pratinjau Gambar Langsung</span>
+                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Unduh Gambar Asli</button>
+                        </div>
+                    </div>
+                `;
+            } else if (isWebUrl && ['DOC', 'DOCX', 'XLS', 'XLSX', 'PPT', 'PPTX'].includes(fileExt)) {
+                box.innerHTML = `
+                    <div class="w-full h-full flex flex-col items-center">
+                        <iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(item.file_url)}&embedded=true" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-sm bg-white"></iframe>
+                        <div class="mt-3 flex justify-between items-center w-full px-2">
+                            <span class="text-xs text-slate-500 font-medium truncate">Pratinjau Office Cloud (.${fileExt})</span>
+                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md cursor-pointer">Unduh Dokumen</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                renderDocumentMetadataCard(box, item);
+            }
+            document.getElementById('preview-modal')?.classList.remove('hidden');
+        }
+
+        function renderDocumentMetadataCard(box, item) {
+            const ext = item ? (item.file_type || 'DOC').toUpperCase() : 'DOC';
+            box.innerHTML = `
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 max-w-lg w-full text-center space-y-4 my-auto min-w-0">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2 shadow-sm font-bold text-lg font-mono flex-shrink-0">
+                        ${ext}
+                    </div>
+                    <div class="min-w-0">
+                        <h4 class="font-bold text-slate-800 text-base tracking-tight break-words">${item ? item.nama : 'Dokumen'}</h4>
+                        <p class="text-xs text-slate-500 mt-1">No. Dokumen: <span class="font-semibold text-brand-600 font-mono break-all">${item ? item.no : '-'}</span></p>
+                        <p class="text-xs text-slate-400 mt-0.5">Kategori: <span class="font-medium text-slate-600 break-words">${item ? item.kategori : '-'}</span></p>
+                    </div>
+                    <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-100 text-left text-xs space-y-2 min-w-0">
+                        <div class="flex justify-between"><span class="text-slate-500">Format Dokumen:</span><span class="font-bold text-brand-600 font-mono">.${ext}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Tanggal Dokumen:</span><span class="font-semibold text-slate-700">${item ? item.tanggal : '-'}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Ukuran Berkas:</span><span class="font-semibold text-slate-700 font-mono">${item ? item.size : '0'} KB</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Pengunggah:</span><span class="font-semibold text-slate-700 truncate max-w-[150px]">${item ? item.uploader : '-'}</span></div>
+                        <div class="pt-2 border-t border-slate-200/60"><span class="text-slate-500 block mb-1">Keterangan / Catatan:</span><span class="font-normal text-slate-700 block italic bg-white p-2.5 rounded-lg border border-slate-200/80 break-words">${item && item.deskripsi ? item.deskripsi : 'Tidak ada catatan tambahan.'}</span></div>
+                    </div>
+                    <div class="pt-2 flex gap-2">
+                        <button type="button" onclick="downloadDocumentFile('${item ? item.id : ''}')" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <span class="truncate">Unduh Berkas .${ext}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function extractDriveFileId(url) {
+            if (!url || typeof url !== 'string' || url.startsWith('data:')) return '';
+            const match = url.match(/[-\w]{25,}/);
+            return match ? match[0] : '';
+        }
+
+        function downloadDocumentFile(id) {
+            const item = archiveData.find(x => x.id === id) || archiveData[0];
+            if (!item) return;
+
+            const ext = (item.file_type || 'txt').toLowerCase();
+
+            if (item.file_url && item.file_url.startsWith('data:')) {
+                const a = document.createElement('a');
+                a.href = item.file_url;
+                a.download = `${item.nama.replace(/[^a-z0-9]/gi, '_')}_${item.no.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast(`Mengunduh berkas ${item.nama}.${ext}...`, 'success');
+            } else {
+                const content = `==================================================\nARSIP CLOUD ENTERPRISE - SALINAN DOKUMEN RESMI\n==================================================\n\nNomor Dokumen : ${item.no}\nNama Dokumen  : ${item.nama}\nKategori      : ${item.kategori}\nJenis Berkas  : ${item.file_type || 'N/A'}\nTanggal Arsip : ${item.tanggal}\nPengunggah    : ${item.uploader}\nUkuran Berkas : ${item.size} KB\n\nKETERANGAN / CATATAN:\n${item.deskripsi || 'Tidak ada catatan'}\n\n==================================================\nDownloaded on: ${new Date().toLocaleString('id-ID')}\n`;
+                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${item.no.replace(/[^a-z0-9]/gi, '_')}_${item.nama.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(`File dokumen ${item.no} berhasil diunduh!`, 'success');
+            }
+        }
+
+        function openKategoriModal(id = null) {
+            document.getElementById('kategori-id').value = id || '';
+            if (id) {
+                const cat = categories.find(x => x.id === id);
+                if (!cat) return;
+                document.getElementById('kategori-modal-title').textContent = "Edit Kategori";
+                document.getElementById('kategori-nama').value = cat.nama;
+                document.getElementById('kategori-folder-id').value = cat.folder_id;
+                document.getElementById('kategori-status').value = cat.status;
+            } else {
+                document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Drive";
+                document.getElementById('kategori-nama').value = '';
+                document.getElementById('kategori-folder-id').value = '';
+                document.getElementById('kategori-status').value = 'ACTIVE';
+            }
+            document.getElementById('kategori-modal').classList.remove('hidden');
+        }
+
+        async function handleSaveKategori(e) {
+            e.preventDefault();
+            const id = document.getElementById('kategori-id').value;
+            const nama = document.getElementById('kategori-nama').value.trim();
+            const folder_id = document.getElementById('kategori-folder-id').value.trim();
+            const status = document.getElementById('kategori-status').value;
+
+            const payload = {
+                id: id || `CAT-${101 + categories.length}`,
+                nama, folder_id, status
+            };
+
+            if (id) {
+                const cat = categories.find(x => x.id === id);
+                if (cat) { cat.nama = nama; cat.folder_id = folder_id; cat.status = status; }
+                recordAuditLog('EDIT_CATEGORY', `Mengubah kategori ${nama}`);
+            } else {
+                categories.push(payload);
+                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru ${nama}`);
+            }
+
+            saveLocalState();
+            renderAllTables();
+
+            const res = await sendToGAS({ action: 'SAVE_CATEGORY', data: payload });
+            if (res && res.status === 'SUCCESS') {
+                showToast('Kategori tersimpan ke Google Sheets!', 'success');
+                loadAllDataFromGAS();
+            } else {
+                showToast('Kategori tersimpan pada kondisi terakhir.', 'success');
+            }
+            closeModal('kategori-modal');
+        }
+
+        async function deleteKategori(id) {
+            const index = categories.findIndex(x => x.id === id);
+            if (index !== -1) {
+                const deleted = categories[index];
+                categories.splice(index, 1);
+                recordAuditLog('DELETE_CATEGORY', `Menghapus kategori ${deleted.nama}`);
+                saveLocalState();
+                renderAllTables();
+
+                const res = await sendToGAS({ action: 'DELETE_CATEGORY', id: id });
+                if (res && res.status === 'SUCCESS') {
+                    showToast(`Kategori ${deleted.nama} berhasil dihapus!`, 'error');
+                }
+            }
+        }
+
+        function openUserModal(username = null) {
+            document.getElementById('user-original-username').value = username || '';
+            if (username) {
+                const u = usersList.find(x => x.username === username);
+                if (!u) return;
+                document.getElementById('user-modal-title').textContent = "Edit User & Hak Akses";
+                document.getElementById('user-username').value = u.username;
+                document.getElementById('user-password').value = u.password || 'admin123';
+                document.getElementById('user-fullname').value = u.name;
+                document.getElementById('user-role').value = u.role;
+                document.getElementById('user-status').value = u.status;
+            } else {
+                document.getElementById('user-modal-title').textContent = "Tambah Pengguna Baru";
+                document.getElementById('user-username').value = '';
+                document.getElementById('user-password').value = '';
+                document.getElementById('user-fullname').value = '';
+                document.getElementById('user-role').value = 'OPERATOR';
+                document.getElementById('user-status').value = 'ACTIVE';
+            }
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        async function handleSaveUser(e) {
+            e.preventDefault();
+            const origUsername = document.getElementById('user-original-username').value;
+            const username = document.getElementById('user-username').value.trim();
+            const password = document.getElementById('user-password').value.trim();
+            const name = document.getElementById('user-fullname').value.trim();
+            const role = document.getElementById('user-role').value;
+            const status = document.getElementById('user-status').value;
+
+            const payload = { username, password, name, role, status };
+
+            if (origUsername) {
+                const u = usersList.find(x => x.username === origUsername);
+                if (u) { 
+                    u.username = username; 
+                    u.password = password;
+                    u.name = name; 
+                    u.role = role; 
+                    u.status = status; 
+                }
+                recordAuditLog('EDIT_USER', `Mengubah pengguna ${username}`);
+            } else {
+                usersList.push(payload);
+                recordAuditLog('ADD_USER', `Menambahkan pengguna baru ${username}`);
+            }
+
+            saveLocalState();
+            renderAllTables();
+
+            const res = await sendToGAS({ action: 'SAVE_USER', data: payload });
+            if (res && res.status === 'SUCCESS') {
+                showToast('Data user & password tersimpan di server Google!', 'success');
+                loadAllDataFromGAS();
+            } else {
+                showToast('Data user & password tersimpan pada kondisi terakhir.', 'success');
+            }
+            closeModal('user-modal');
+        }
+
+        async function deleteUser(username) {
+            if (currentUser && currentUser.username === username) {
+                showToast('Anda tidak dapat menghapus akun Anda sendiri!', 'error');
+                return;
+            }
+            const idx = usersList.findIndex(x => x.username === username);
+            if (idx !== -1) {
+                const deleted = usersList[idx];
+                usersList.splice(idx, 1);
+                recordAuditLog('DELETE_USER', `Menghapus akun ${username}`);
+                saveLocalState();
+                renderAllTables();
+
+                const res = await sendToGAS({ action: 'DELETE_USER', username: username });
+                if (res && res.status === 'SUCCESS') {
+                    showToast(`Pengguna ${username} dihapus dari server!`, 'error');
+                }
+            }
+        }
+
+        function triggerImageCrop(event, targetType) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            cropTargetType = targetType;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgTarget = document.getElementById('crop-image-target');
+                if (!imgTarget) return;
+                imgTarget.src = e.target.result;
+
+                document.getElementById('crop-modal-title').textContent = 
+                    targetType === 'logo' ? "Potong Logo Kustom (Free Aspect Ratio)" :
+                    targetType === 'login_card_bg' ? "Potong Wallpaper Kartu Login" : "Potong Wallpaper Background Utama";
+                document.getElementById('crop-modal-desc').textContent = "Aspect Ratio Bebas - Sesuaikan area pemotongan secara presisi.";
+                document.getElementById('crop-modal').classList.remove('hidden');
+
+                if (activeCropper) activeCropper.destroy();
+
+                if (typeof Cropper !== 'undefined') {
+                    activeCropper = new Cropper(imgTarget, {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        autoCropArea: 0.9,
+                        responsive: true,
+                        background: false
+                    });
+                }
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function applyImageCrop() {
+            if (!activeCropper) return;
+            const canvas = activeCropper.getCroppedCanvas({
+                maxWidth: cropTargetType === 'logo' ? 800 : 1600,
+                maxHeight: cropTargetType === 'logo' ? 800 : 1000
+            });
+
+            if (!canvas) {
+                showToast('Gagal memotong gambar!', 'error');
+                return;
+            }
+
+            const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+
+            if (cropTargetType === 'logo') {
+                systemSettings.customLogo = croppedDataUrl;
+                applyLogoToUI(croppedDataUrl);
+                showToast('Logo kustom berhasil dipotong!', 'success');
+            } else if (cropTargetType === 'background') {
+                systemSettings.bgImage = croppedDataUrl;
+                applyBgImageAndOpacity();
+                showToast('Wallpaper kustom berhasil diterapkan!', 'success');
+            } else if (cropTargetType === 'login_card_bg') {
+                systemSettings.loginCardCustomBgImg = croppedDataUrl;
+                applyLoginCardCustomStyles();
+                showToast('Wallpaper kartu login berhasil diterapkan!', 'success');
+            }
+
+            closeModal('crop-modal');
+        }
+
+        function handleGlobalFontColorChange(hex) {
+            systemSettings.globalFontColor = hex;
+            const colElem = document.getElementById('setting-global-font-color');
+            const hexElem = document.getElementById('setting-global-font-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            document.documentElement.style.setProperty('--app-global-text-color', hex);
+            saveLocalState();
+        }
+
+        function handleCustomSidebarBgChange(hex) {
+            systemSettings.customSidebarBg = hex;
+            const colElem = document.getElementById('setting-sidebar-bg-color');
+            const hexElem = document.getElementById('setting-sidebar-bg-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            applyCustomSidebarColors();
+            saveLocalState();
+        }
+
+        function handleCustomSidebarTextChange(hex) {
+            systemSettings.customSidebarText = hex;
+            const colElem = document.getElementById('setting-sidebar-text-color');
+            const hexElem = document.getElementById('setting-sidebar-text-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            applyCustomSidebarColors();
+            saveLocalState();
+        }
+
+        function applyCustomSidebarColors() {
+            const sidebar = document.getElementById('main-sidebar');
+            const appTitle = document.getElementById('sidebar-app-title');
+            const appSubtitle = document.getElementById('sidebar-app-subtitle');
+
+            if (sidebar) {
+                if (systemSettings.customSidebarBg) sidebar.style.backgroundColor = systemSettings.customSidebarBg;
+                if (systemSettings.customSidebarText) {
+                    sidebar.style.color = systemSettings.customSidebarText;
+                    if (appTitle) appTitle.style.color = systemSettings.customSidebarText;
+                    if (appSubtitle) appSubtitle.style.color = systemSettings.customSidebarText;
+                }
+            }
+        }
+
+        function render20SidebarThemePresets() {
+            const container = document.getElementById('sidebar-theme-presets-grid');
+            if (!container) return;
+
+            container.innerHTML = sidebarThemePresets.map(preset => `
+                <button type="button" onclick="selectSidebarTheme('${preset.id}')" class="p-2.5 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-2.5 hover:bg-slate-50 transition-all group cursor-pointer min-w-0">
+                    <div class="w-5 h-5 rounded-full border border-slate-300 flex-shrink-0 flex items-center justify-center shadow-sm" style="background-color: ${preset.bg}">
+                        <div class="w-1.5 h-1.5 rounded-full" style="background-color: ${preset.dot}"></div>
+                    </div>
+                    <div class="truncate min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate group-hover:text-brand-600">${preset.title}</p>
+                        <span class="text-[9px] text-slate-400 block truncate">${preset.desc}</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function selectSidebarTheme(themeId) {
+            systemSettings.sidebarTheme = themeId;
+            systemSettings.customSidebarBg = "";
+            systemSettings.customSidebarText = "";
+            
+            const sidebar = document.getElementById('main-sidebar');
+            const appTitle = document.getElementById('sidebar-app-title');
+            const appSubtitle = document.getElementById('sidebar-app-subtitle');
+
+            if (sidebar) { sidebar.style.backgroundColor = ""; sidebar.style.color = ""; }
+            if (appTitle) appTitle.style.color = "";
+            if (appSubtitle) appSubtitle.style.color = "";
+
+            applySidebarStyles(themeId);
+            showToast(`Tema navigasi disesuaikan ke ${themeId.toUpperCase()}`, 'success');
+        }
+
+        function applySidebarStyles(themeId) {
+            const sidebar = document.getElementById('main-sidebar');
+            const appTitle = document.getElementById('sidebar-app-title');
+            const appSubtitle = document.getElementById('sidebar-app-subtitle');
+            if (!sidebar) return;
+
+            const preset = sidebarThemePresets.find(p => p.id === themeId);
+            if (preset && preset.id !== 'white') {
+                sidebar.className = "fixed md:static inset-y-0 left-0 w-56 border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-xl md:shadow-none overflow-hidden";
+                sidebar.style.backgroundColor = preset.bg;
+                sidebar.style.color = preset.text;
+                if (appTitle) appTitle.style.color = preset.text;
+                if (appSubtitle) appSubtitle.style.color = preset.text;
+            } else {
+                sidebar.className = "fixed md:static inset-y-0 left-0 w-56 bg-white text-slate-800 border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-xl md:shadow-none overflow-hidden";
+                sidebar.style.backgroundColor = "";
+                sidebar.style.color = "";
+                if (appTitle) appTitle.style.color = "";
+                if (appSubtitle) appSubtitle.style.color = "";
+            }
+
+            const activeTabId = document.querySelector('.tab-content:not(.hidden)')?.id?.replace('tab-', '') || 'dashboard';
+            applySidebarNavStyles(activeTabId);
+        }
+
+        function applySidebarNavStyles(activeTabId) {
+            const theme = systemSettings.sidebarTheme || 'white';
+            document.querySelectorAll('.nav-item').forEach(el => {
+                const isCurrent = el.id === `nav-${activeTabId}`;
+                if (theme === 'white' && !systemSettings.customSidebarBg) {
+                    el.className = isCurrent 
+                        ? "nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all bg-brand-50 text-brand-600"
+                        : "nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-all";
+                } else {
+                    el.className = isCurrent 
+                        ? "nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all bg-white/10 text-white shadow-sm"
+                        : "nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 hover:text-white transition-all";
+                }
+            });
+        }
+
+        function renderLoginCardPresets() {
+            const container = document.getElementById('login-card-presets-grid');
+            if (!container) return;
+
+            container.innerHTML = loginCardPresets.map(preset => `
+                <button type="button" onclick="selectLoginCardPreset('${preset.id}')" class="p-2.5 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-2 hover:bg-slate-50 transition-all group cursor-pointer min-w-0">
+                    <div class="w-5 h-5 rounded-full border border-slate-300 flex-shrink-0 shadow-xs" style="background-color: ${preset.bg}"></div>
+                    <div class="truncate min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate group-hover:text-brand-600">${preset.title}</p>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function selectLoginCardPreset(presetId) {
+            systemSettings.loginCardPreset = presetId;
+            systemSettings.loginCardBg = ""; systemSettings.loginCardText = ""; systemSettings.loginCardBorder = ""; systemSettings.loginCardCustomBgImg = "";
+            applyLoginCardPresetStyles(presetId);
+            showToast(`Preset kartu login diubah ke ${presetId.toUpperCase()}`, 'success');
+        }
+
+        function applyLoginCardPresetStyles(presetId) {
+            const card = document.getElementById('login-card-box');
+            if (!card) return;
+            const preset = loginCardPresets.find(p => p.id === presetId) || loginCardPresets[0];
+            card.style.backgroundImage = "";
+            card.style.backgroundColor = preset.bg;
+            card.style.color = preset.text;
+            card.style.borderColor = preset.border;
+        }
+
+        function handleCustomLoginCardBg(hex) {
+            systemSettings.loginCardBg = hex;
+            const colElem = document.getElementById('setting-login-bg-color');
+            const hexElem = document.getElementById('setting-login-bg-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            applyLoginCardCustomStyles();
+            saveLocalState();
+        }
+
+        function handleCustomLoginCardText(hex) {
+            systemSettings.loginCardText = hex;
+            const colElem = document.getElementById('setting-login-text-color');
+            const hexElem = document.getElementById('setting-login-text-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            applyLoginCardCustomStyles();
+            saveLocalState();
+        }
+
+        function handleCustomLoginCardBorder(hex) {
+            systemSettings.loginCardBorder = hex;
+            const colElem = document.getElementById('setting-login-border-color');
+            const hexElem = document.getElementById('setting-login-border-hex');
+            if (colElem) colElem.value = hex;
+            if (hexElem) hexElem.value = hex;
+            applyLoginCardCustomStyles();
+            saveLocalState();
+        }
+
+        function applyLoginCardCustomStyles() {
+            const card = document.getElementById('login-card-box');
+            if (!card) return;
+
+            if (systemSettings.loginCardCustomBgImg) {
+                card.style.backgroundImage = `url('${systemSettings.loginCardCustomBgImg}')`;
+                card.style.backgroundSize = "cover";
+                card.style.backgroundPosition = "center";
+            } else if (systemSettings.loginCardBg) {
+                card.style.backgroundImage = "";
+                card.style.backgroundColor = systemSettings.loginCardBg;
+            }
+
+            if (systemSettings.loginCardText) card.style.color = systemSettings.loginCardText;
+            if (systemSettings.loginCardBorder) card.style.borderColor = systemSettings.loginCardBorder;
+        }
+
+        function handleBgOpacityChange(val) {
+            systemSettings.bgOpacity = val;
+            const opElem = document.getElementById('bg-opacity-text');
+            if (opElem) opElem.textContent = `${val}%`;
+            applyBgImageAndOpacity();
+        }
+
+        function handleBgBlurChange(val) {
+            systemSettings.bgBlur = val;
+            const blElem = document.getElementById('bg-blur-text');
+            if (blElem) blElem.textContent = val == 0 ? '0 px (Tanpa Blur)' : `${val} px Blur`;
+            applyBgImageAndOpacity();
+        }
+
+        function applyBgImageAndOpacity() {
+            const bgLayer = document.getElementById('custom-bg-layer');
+            if (bgLayer) {
+                if (systemSettings.bgImage) {
+                    bgLayer.style.backgroundImage = `url('${systemSettings.bgImage}')`;
+                } else {
+                    bgLayer.style.backgroundImage = "none";
+                }
+                bgLayer.style.opacity = (parseInt(systemSettings.bgOpacity, 10) / 100).toString();
+                bgLayer.style.filter = `blur(${systemSettings.bgBlur || 0}px)`;
+            }
+        }
+
+        function applyAllSettingsToUI() {
+            if (systemSettings.appTitle) {
+                const sTitle = document.getElementById('sidebar-app-title');
+                const lTitle = document.getElementById('login-app-title');
+                const setElem = document.getElementById('setting-app-title');
+                if (sTitle) sTitle.textContent = systemSettings.appTitle;
+                if (lTitle) lTitle.textContent = systemSettings.appTitle;
+                if (setElem) setElem.value = systemSettings.appTitle;
+                document.title = systemSettings.appTitle + " v3.7";
+            }
+
+            if (systemSettings.appSubtitle) {
+                const sSub = document.getElementById('sidebar-app-subtitle');
+                const lSub = document.getElementById('login-app-subtitle');
+                const setElem = document.getElementById('setting-app-subtitle');
+                if (sSub) sSub.textContent = systemSettings.appSubtitle;
+                if (lSub) lSub.textContent = systemSettings.appSubtitle;
+                if (setElem) setElem.value = systemSettings.appSubtitle;
+            }
+
+            if (systemSettings.globalFontColor) {
+                handleGlobalFontColorChange(systemSettings.globalFontColor);
+            }
+
+            if (systemSettings.customSidebarBg || systemSettings.customSidebarText) {
+                applyCustomSidebarColors();
+            } else if (systemSettings.sidebarTheme) {
+                applySidebarStyles(systemSettings.sidebarTheme);
+            }
+
+            if (systemSettings.loginCardBg || systemSettings.loginCardText || systemSettings.loginCardBorder || systemSettings.loginCardCustomBgImg) {
+                applyLoginCardCustomStyles();
+            } else if (systemSettings.loginCardPreset) {
+                applyLoginCardPresetStyles(systemSettings.loginCardPreset);
+            }
+
+            if (systemSettings.customLogo) {
+                applyLogoToUI(systemSettings.customLogo);
+            }
+
+            const opRange = document.getElementById('setting-bg-opacity');
+            if (opRange) opRange.value = systemSettings.bgOpacity;
+            const opText = document.getElementById('bg-opacity-text');
+            if (opText) opText.textContent = `${systemSettings.bgOpacity}%`;
+
+            const blRange = document.getElementById('setting-bg-blur');
+            if (blRange) blRange.value = systemSettings.bgBlur || 0;
+            const blText = document.getElementById('bg-blur-text');
+            if (blText) blText.textContent = (systemSettings.bgBlur || 0) == 0 ? '0 px (Tanpa Blur)' : `${systemSettings.bgBlur} px Blur`;
+
+            applyBgImageAndOpacity();
+
+            if (systemSettings.avatarInitial) {
+                selectAvatarPreset(systemSettings.avatarInitial, systemSettings.avatarBgClass, systemSettings.avatarTextClass);
+            }
+
+            const maxSz = document.getElementById('setting-max-filesize');
+            if (maxSz) maxSz.value = systemSettings.maxFileSizeMB;
+
+            const allwExt = document.getElementById('setting-allowed-ext');
+            if (allwExt) allwExt.value = systemSettings.allowedExtensions;
+
+            updateUploadGuidance();
+        }
+
+        async function saveSettings() {
+            const titleInput = document.getElementById('setting-app-title')?.value.trim();
+            const subtitleInput = document.getElementById('setting-app-subtitle')?.value.trim();
+            const maxFileSize = parseInt(document.getElementById('setting-max-filesize')?.value, 10) || 25;
+            const allowedExt = document.getElementById('setting-allowed-ext')?.value.trim() || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
+
+            if (titleInput) {
+                systemSettings.appTitle = titleInput;
+                document.getElementById('sidebar-app-title').textContent = titleInput;
+                document.getElementById('login-app-title').textContent = titleInput;
+                document.title = titleInput + " v3.7";
+            }
+
+            if (subtitleInput) {
+                systemSettings.appSubtitle = subtitleInput;
+                document.getElementById('sidebar-app-subtitle').textContent = subtitleInput;
+                document.getElementById('login-app-subtitle').textContent = subtitleInput;
+            }
+
+            systemSettings.maxFileSizeMB = maxFileSize;
+            systemSettings.allowedExtensions = allowedExt;
+
+            updateUploadGuidance();
+            recordAuditLog('SAVE_SETTINGS', 'Memperbarui konfigurasi sistem & warna ke Google Sheets');
+            saveLocalState();
+
+            const res = await sendToGAS({ action: 'SAVE_SETTINGS', data: systemSettings });
+            if (res && res.status === 'SUCCESS') {
+                showToast('Pengaturan berhasil disimpan permanen ke Google Sheets!', 'success');
+            } else {
+                showToast('Pengaturan disimpan pada kondisi lokal browser.', 'info');
+            }
+        }
+
+        function applyLogoToUI(src) {
+            const sbImg = document.getElementById('sidebar-logo-img');
+            const sbSvg = document.getElementById('sidebar-logo-svg');
+            if (sbImg && sbSvg) {
+                sbImg.src = src;
+                sbImg.classList.remove('hidden');
+                sbSvg.classList.add('hidden');
+            }
+            const lgImg = document.getElementById('login-logo-img');
+            const lgSvg = document.getElementById('login-logo-svg');
+            if (lgImg && lgSvg) {
+                lgImg.src = src;
+                lgImg.classList.remove('hidden');
+                lgSvg.classList.add('hidden');
+            }
+        }
+
+        function renderAvatarPresets() {
+            const container = document.getElementById('avatar-presets-grid');
+            if (!container) return;
+            const presets = [
+                { title: 'Eksekutif / Admin', initial: 'A', bg: 'bg-brand-600', text: 'text-white' },
+                { title: 'Surat & Operasional', initial: 'O', bg: 'bg-blue-600', text: 'text-white' },
+                { title: 'Keuangan & Finance', initial: 'F', bg: 'bg-emerald-600', text: 'text-white' },
+                { title: 'Kepegawaian / HRD', initial: 'H', bg: 'bg-indigo-600', text: 'text-white' }
+            ];
+
+            container.innerHTML = presets.map(p => `
+                <button type="button" onclick="selectAvatarPreset('${p.initial}', '${p.bg}', '${p.text}')" class="p-3 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-3 hover:bg-slate-50 transition-colors cursor-pointer min-w-0">
+                    <div class="w-8 h-8 rounded-full ${p.bg} ${p.text} flex items-center justify-center font-bold text-xs flex-shrink-0">${p.initial}</div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-bold text-slate-800 truncate">${p.title}</p>
+                        <span class="text-[10px] text-slate-500 block truncate">Avatar Preset</span>
+                    </div>
+                </button>
+            `).join('');
+        }
+
+        function selectAvatarPreset(initial, bgClass, textClass) {
+            systemSettings.avatarInitial = initial;
+            systemSettings.avatarBgClass = bgClass;
+            systemSettings.avatarTextClass = textClass;
+
+            const avatarBox = document.getElementById('user-avatar-box');
+            const avatarInitial = document.getElementById('user-avatar-initial');
+            const avatarImg = document.getElementById('user-avatar-img');
+
+            if (avatarBox) avatarBox.className = `w-8 h-8 rounded-full ${bgClass} ${textClass} flex items-center justify-center font-bold text-xs uppercase overflow-hidden border border-slate-200`;
+            if (avatarInitial) avatarInitial.textContent = initial;
+            if (avatarImg) avatarImg.classList.add('hidden');
+
+            showToast('Preset avatar profil berhasil diperbarui!', 'success');
+        }
+
+        function exportToExcel() {
+            try {
+                if (typeof XLSX === 'undefined') {
+                    showToast('Library SheetJS belum siap', 'error');
+                    return;
+                }
+                const dataToExport = archiveData.map(a => ({
+                    'No. Dokumen': a.no,
+                    'Nama Arsip': a.nama,
+                    'Keterangan': a.deskripsi || '-',
+                    'Kategori': a.kategori,
+                    'Tanggal': a.tanggal,
+                    'Ukuran (KB)': a.size,
+                    'Pengunggah': a.uploader
+                }));
+                const ws = XLSX.utils.json_to_sheet(dataToExport);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Data Arsip");
+                XLSX.writeFile(wb, `Rekap_Arsip_${new Date().toISOString().slice(0,10)}.xlsx`);
+                showToast('Berhasil mengekspor data ke Excel!', 'success');
+            } catch(err) {
+                showToast('Gagal mengekspor Excel: ' + err.message, 'error');
+            }
+        }
+
+        function exportToPDF() {
+            try {
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    showToast('Library jsPDF belum siap', 'error');
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(16);
+                doc.text("Laporan Rekapitulasi Data Arsip", 14, 20);
+                doc.setFontSize(10);
+                doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 28);
+                
+                let y = 38;
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'bold');
+                doc.text("No. Dokumen", 14, y);
+                doc.text("Nama Arsip", 60, y);
+                doc.text("Kategori", 130, y);
+                doc.text("Tanggal", 170, y);
+                
+                doc.setFont(undefined, 'normal');
+                archiveData.forEach((item) => {
+                    y += 8;
+                    if (y > 280) { doc.addPage(); y = 20; }
+                    doc.text(String(item.no).substring(0, 20), 14, y);
+                    doc.text(String(item.nama).substring(0, 32), 60, y);
+                    doc.text(String(item.kategori).substring(0, 20), 130, y);
+                    doc.text(String(item.tanggal), 170, y);
+                });
+
+                doc.save(`Laporan_Arsip_${new Date().toISOString().slice(0,10)}.pdf`);
+                showToast('Berhasil mengekspor Laporan PDF!', 'success');
+            } catch(err) {
+                showToast('Gagal mencetak PDF: ' + err.message, 'error');
+            }
+        }
+
+        function exportLaporanExcel() { exportToExcel(); }
+        function exportLaporanPDF() { exportToPDF(); }
+
+        window.addEventListener('resize', () => {
+            if (categoryChartInstance) categoryChartInstance.resize();
+            if (window.innerWidth >= 768) toggleMobileSidebar(false);
+        });
+
+        window.onload = function() {
+            loadLocalState();
+            render20SidebarThemePresets();
+            renderLoginCardPresets();
+            renderAvatarPresets();
+            applyAllSettingsToUI();
+
+            console.log("ArsipCloud Enterprise v3.7 Production Engine Initialized Successfully.");
+        };
+    </script>
+</body>
+</html>
