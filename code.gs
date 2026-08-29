@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.7 - High Performance & Full Persistence
+ * ArsipCloud Enterprise v3.8 - High Performance & Full Persistence
  * Auto-Database Setup, Multi-Folder Drive Sync, LockService & Realtime Config
  * ============================================================================
  */
@@ -72,7 +72,7 @@ function doPost(e) {
         break;
 
       case 'SAVE_SETTINGS':
-        saveSettings(contents.data || {});
+        result = saveSettings(contents.data || {});
         break;
 
       default:
@@ -100,7 +100,7 @@ function doGet(e) {
   setupDatabase();
   return createJsonResponse({ 
     status: 'ACTIVE', 
-    version: 'ArsipCloud Enterprise v3.7 Production Engine' 
+    version: 'ArsipCloud Enterprise v3.8 Production Engine' 
   });
 }
 
@@ -486,11 +486,40 @@ function saveSettings(data) {
   sheet.appendRow(['Key', 'Value']);
   sheet.getRange(1, 1, 1, 2).setFontWeight('bold').setBackground('#f1f5f9');
 
+  let sanitizedSettings = {};
+
   if (data && typeof data === 'object') {
+    const assetFolder = getOrCreateDriveFolder("ArsipCloud_System_Assets");
+    
     Object.keys(data).forEach(k => {
-      sheet.appendRow([k, JSON.stringify(data[k])]);
+      let val = data[k];
+
+      if (typeof val === 'string' && val.startsWith('data:image')) {
+        try {
+          const splitData = val.split(',');
+          if (splitData.length >= 2) {
+            const mimeMatch = splitData[0].match(/:(.*?);/);
+            const contentType = mimeMatch ? mimeMatch[1] : "image/png";
+            const decoded = Utilities.base64Decode(splitData[1]);
+            const ext = contentType.includes('jpeg') || contentType.includes('jpg') ? '.jpg' : '.png';
+            const blob = Utilities.newBlob(decoded, contentType, "Asset_" + k + "_" + Date.now() + ext);
+            
+            const file = assetFolder.createFile(blob);
+            file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+            val = "https://lh3.googleusercontent.com/d/" + file.getId();
+          }
+        } catch (assetErr) {
+          Logger.log("Gagal mengonversi asset gambar ke Drive: " + assetErr.toString());
+        }
+      }
+
+      sanitizedSettings[k] = val;
+      sheet.appendRow([k, JSON.stringify(val)]);
     });
   }
+
+  logAction('system', 'SAVE_SETTINGS', 'Konfigurasi merek, tema visual, dan preferensi sistem v3.8 diperbarui');
+  return { status: 'SUCCESS', settings: sanitizedSettings };
 }
 
 function logAction(user, action, detail) {
