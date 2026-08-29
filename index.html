@@ -87,6 +87,12 @@
         <p class="text-white font-medium text-sm tracking-wide" id="loading-text">Memuat Data System...</p>
     </div>
 
+    <!-- Global Connection Status Pill Indicator -->
+    <div id="connection-status-pill" class="fixed bottom-4 right-4 z-[2000] hidden items-center space-x-2 bg-slate-900/80 text-white text-[11px] font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm border border-slate-700/60 transition-all duration-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" id="connection-dot"></span>
+        <span id="connection-status-text">Tersambung ke Google Cloud</span>
+    </div>
+
     <!-- Global Toast Container -->
     <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2 max-w-sm w-full pointer-events-none px-2 sm:px-0"></div>
 
@@ -211,6 +217,10 @@
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
+                    <button type="button" onclick="refreshDataRealtime()" title="Sinkronisasi Ulang Data" class="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all border border-slate-200/80 shadow-xs active:scale-95 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" id="refresh-icon-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span class="hidden sm:inline">Sinkronisasi</span>
+                    </button>
                     <div class="hidden sm:flex items-center space-x-2 bg-slate-100 p-1 rounded-xl border border-slate-200/80 text-xs shadow-xs">
                         <span class="px-2 text-slate-500 font-medium">Role:</span>
                         <select id="role-quick-switch" onchange="switchRoleDemo(this.value)" class="bg-white border-0 rounded-lg px-2 py-1 text-xs font-semibold text-slate-700 shadow-xs focus:ring-0 cursor-pointer">
@@ -844,7 +854,7 @@
         // =========================================================================
         // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwTIXNb61NPPj3KDhKcNpe54Ws9Hm2uz8mIgGkngzbofwrQlYmAhJlQ2lJnAyEsTilDzg/exec"; 
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxL930XfUT4RpYZC4-ssl23XNuPzPThEfc3VE4EoX9Paxxdh7YtFisJ8fon4VlKgdrEVA/exec"; 
 
         let currentUser = null;
         let categoryChartInstance = null;
@@ -1031,6 +1041,32 @@
                 overlay.classList.remove('opacity-100');
                 overlay.classList.add('pointer-events-none', 'opacity-0');
             }
+        }
+
+        function updateConnectionPill(status, label) {
+            const pill = document.getElementById('connection-status-pill');
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-status-text');
+            if (!pill || !dot || !text) return;
+            
+            pill.classList.remove('hidden', 'flex');
+            pill.classList.add('flex');
+            text.textContent = label;
+
+            if (status === 'syncing') {
+                dot.className = "w-2 h-2 rounded-full bg-amber-400 animate-ping";
+            } else if (status === 'connected') {
+                dot.className = "w-2 h-2 rounded-full bg-emerald-400";
+            } else {
+                dot.className = "w-2 h-2 rounded-full bg-rose-400";
+            }
+        }
+
+        async function refreshDataRealtime() {
+            const spin = document.getElementById('refresh-icon-spin');
+            if (spin) spin.classList.add('animate-spin');
+            await loadAllDataFromGAS();
+            if (spin) setTimeout(() => spin.classList.remove('animate-spin'), 600);
         }
 
         function showToast(message, type = 'info') {
@@ -2501,6 +2537,12 @@
             renderLoginCardPresets();
             renderAvatarPresets();
             applyAllSettingsToUI();
+
+            if (GAS_API_URL && GAS_API_URL.trim() !== "") {
+                updateConnectionPill('connected', 'Tersambung ke Google Cloud');
+            } else {
+                updateConnectionPill('local', 'Mode Offline (Lokal)');
+            }
 
             console.log("ArsipCloud Enterprise v3.7 Production Engine Initialized Successfully.");
         };
