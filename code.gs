@@ -1,9 +1,8 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.7
- * Auto-Database Initialization, Multi-Folder Google Drive Upload, 
- * LockService Safety, Drive Trash Sync, & Persistent System Settings
+ * ArsipCloud Enterprise v3.7 - High Performance & Full Persistence
+ * Auto-Database Setup, Multi-Folder Drive Sync, LockService & Realtime Config
  * ============================================================================
  */
 
@@ -18,25 +17,24 @@ const SHEET_NAMES = {
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
-    // Thread safety up to 15 seconds to prevent race conditions
     lock.waitLock(15000);
     setupDatabase();
 
     if (!e || !e.postData || !e.postData.contents) {
-      return ContentService.createTextOutput(JSON.stringify({
+      return createJsonResponse({
         status: 'ERROR',
         message: 'Payload POST kosong atau tidak valid'
-      })).setMimeType(ContentService.MimeType.JSON);
+      });
     }
 
     let contents;
     try {
       contents = JSON.parse(e.postData.contents);
     } catch (parseErr) {
-      return ContentService.createTextOutput(JSON.stringify({
+      return createJsonResponse({
         status: 'ERROR',
         message: 'Format data JSON tidak valid: ' + parseErr.toString()
-      })).setMimeType(ContentService.MimeType.JSON);
+      });
     }
 
     const action = contents.action;
@@ -81,15 +79,14 @@ function doPost(e) {
         result = { status: 'ERROR', message: 'Aksi permintaan tidak dikenali: ' + action };
     }
 
-    return ContentService.createTextOutput(JSON.stringify(result))
-      .setMimeType(ContentService.MimeType.JSON);
+    return createJsonResponse(result);
 
   } catch (error) {
     Logger.log("doPost Error: " + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({ 
+    return createJsonResponse({ 
       status: 'ERROR', 
       message: error.toString() 
-    })).setMimeType(ContentService.MimeType.JSON);
+    });
   } finally {
     try {
       lock.releaseLock();
@@ -101,10 +98,15 @@ function doPost(e) {
 
 function doGet(e) {
   setupDatabase();
-  return ContentService.createTextOutput(JSON.stringify({ 
+  return createJsonResponse({ 
     status: 'ACTIVE', 
     version: 'ArsipCloud Enterprise v3.7 Production Engine' 
-  })).setMimeType(ContentService.MimeType.JSON);
+  });
+}
+
+function createJsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function setupDatabase() {
@@ -128,7 +130,6 @@ function setupDatabase() {
     sheetCategory.appendRow(['ID Kategori', 'Nama Kategori', 'Folder ID Google Drive', 'Status']);
     sheetCategory.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#f1f5f9');
     
-    // Auto-create initial categorized Google Drive folders
     const suratFolder = getOrCreateDriveFolder("Surat Masuk & Keluar");
     const invoiceFolder = getOrCreateDriveFolder("Invoice & Perpajakan");
     const hrdFolder = getOrCreateDriveFolder("Dokumen Kepegawaian");
@@ -138,7 +139,7 @@ function setupDatabase() {
     sheetCategory.appendRow(['CAT-103', 'Dokumen Kepegawaian', hrdFolder.getId(), 'ACTIVE']);
   }
 
-  // 3. Tab Sheet: Users (Dukungan Password Lengkap)
+  // 3. Tab Sheet: Users
   let sheetUsers = ss.getSheetByName(SHEET_NAMES.USERS);
   if (!sheetUsers) {
     sheetUsers = ss.insertSheet(SHEET_NAMES.USERS);
@@ -261,7 +262,6 @@ function saveArchive(data) {
   let targetFolderId = getCategoryFolderId(data.kategori);
   const rawBase64 = data.file_data || (data.file_url && String(data.file_url).startsWith("data:") ? data.file_url : "");
 
-  // Upload file data to corresponding Google Drive category directory
   if (rawBase64 && String(rawBase64).startsWith("data:")) {
     const uploadObj = uploadBase64ToDrive(rawBase64, data.file_name || (data.no + "." + (data.file_type || "pdf").toLowerCase()), data.kategori, targetFolderId);
     if (uploadObj.url) fileDirectUrl = uploadObj.url;
@@ -377,7 +377,6 @@ function deleteArchive(id, driveFileId) {
     }
   }
 
-  // Move physical file to Google Drive trash
   if (targetDriveId && String(targetDriveId).trim() !== "") {
     try {
       const file = DriveApp.getFileById(String(targetDriveId).trim());
@@ -432,7 +431,6 @@ function deleteCategory(id, folderId) {
     }
   }
 
-  // Move associated Drive folder to trash if exists
   if (targetFolderId && String(targetFolderId).trim() !== "") {
     try {
       const folder = DriveApp.getFolderById(String(targetFolderId).trim());
