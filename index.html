@@ -43,6 +43,7 @@
         };
     </script>
 
+    <!-- External Production Libraries -->
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -84,17 +85,6 @@
     <!-- Custom Background Overlay Layer -->
     <div id="custom-bg-layer" class="opacity-80"></div>
 
-    <!-- Loading Overlay (z-[9999]) -->
-    <div id="loading-overlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-[9999] flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="relative flex items-center justify-center">
-            <div class="w-14 h-14 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin"></div>
-            <div class="absolute w-8 h-8 rounded-full bg-brand-500/10 flex items-center justify-center">
-                <div class="w-3 h-3 rounded-full bg-brand-500 animate-pulse"></div>
-            </div>
-        </div>
-        <p class="text-white font-medium text-xs tracking-wider uppercase mt-4" id="loading-text">Sinkronisasi Cloud Enterprise...</p>
-    </div>
-
     <!-- Global Toast Container (z-[2000]) -->
     <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
 
@@ -106,8 +96,8 @@
                     <svg id="login-logo-svg" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z"></path></svg>
                     <img id="login-logo-img" class="w-full h-full object-contain rounded-2xl hidden" alt="Logo">
                 </div>
-                <h2 class="text-2xl font-extrabold tracking-tight text-slate-900" id="login-app-title">ArsipCloud Enterprise</h2>
-                <p class="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
+                <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 truncate" id="login-app-title">ArsipCloud Enterprise</h2>
+                <p class="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed break-words" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold tracking-wider mt-3 border border-brand-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping"></span>
                     PRODUCTION SUITE v3.8
@@ -217,17 +207,17 @@
         <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
             <!-- Topbar Header -->
             <header class="h-18 px-5 md:px-8 bg-white/85 border-b border-slate-200/80 flex items-center justify-between z-10 backdrop-blur-md">
-                <div class="flex items-center space-x-3.5">
-                    <button type="button" onclick="toggleMobileSidebar(true)" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer">
+                <div class="flex items-center space-x-3.5 min-w-0">
+                    <button type="button" onclick="toggleMobileSidebar(true)" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer flex-shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
-                    <div>
-                        <h2 class="text-base font-extrabold text-slate-900 tracking-tight" id="page-title">Dashboard Overview</h2>
-                        <p class="text-[11px] text-slate-400 hidden sm:block font-medium">Sistem Manajemen Berkas & Dokumen Terintegrasi Google Cloud Drive</p>
+                    <div class="min-w-0">
+                        <h2 class="text-base font-extrabold text-slate-900 tracking-tight truncate" id="page-title">Dashboard Overview</h2>
+                        <p class="text-[11px] text-slate-400 hidden sm:block font-medium truncate">Sistem Manajemen Berkas & Dokumen Terintegrasi Google Cloud Drive</p>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-3 flex-shrink-0">
                     <button type="button" onclick="loadAllDataFromGAS()" title="Sinkronisasi Data Real-time" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-all cursor-pointer">
                         <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         <span>Sync Cloud</span>
@@ -381,7 +371,6 @@
                                         <th class="py-3.5 px-4">No. Dokumen</th>
                                         <th class="py-3.5 px-4">Nama Arsip</th>
                                         <th class="py-3.5 px-4">Kategori</th>
-                                        <th class="py-3.5 px-4">Tanggal</th>
                                         <th class="py-3.5 px-4">Ukuran</th>
                                         <th class="py-3.5 px-4 text-right">Aksi</th>
                                     </tr>
@@ -496,7 +485,6 @@
                                         <th class="py-3 px-4">No. Dokumen</th>
                                         <th class="py-3 px-4">Nama Arsip</th>
                                         <th class="py-3 px-4">Kategori</th>
-                                        <th class="py-3 px-4">Tanggal Arsip</th>
                                         <th class="py-3 px-4">Pengunggah</th>
                                         <th class="py-3 px-4">Ukuran</th>
                                         <th class="py-3 px-4 text-right">Aksi</th>
@@ -718,6 +706,7 @@
             <h3 class="text-base font-extrabold text-slate-900" id="arsip-modal-title">Tambah Berkas Arsip</h3>
             <form onsubmit="handleSaveArsip(event)" class="space-y-3.5">
                 <input type="hidden" id="arsip-id">
+                <input type="hidden" id="arsip-tanggal">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Dokumen</label>
                     <input type="text" id="arsip-no" required placeholder="Contoh: 001/SK/2026" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-semibold">
@@ -730,15 +719,9 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan / Catatan Tambahan</label>
                     <textarea id="arsip-deskripsi" rows="2" placeholder="Catatan ringkas isi dokumen..." class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
-                        <select id="arsip-kategori-input" required class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-medium"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Dokumen</label>
-                        <input type="date" id="arsip-tanggal" required class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
+                    <select id="arsip-kategori-input" required class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-medium"></select>
                 </div>
 
                 <div>
@@ -811,6 +794,10 @@
                     <input type="text" id="user-username" required placeholder="Contoh: staff_arsip" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
                 </div>
                 <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="user-password" placeholder="•••••••• (Kosongkan jika tidak diubah)" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap</label>
                     <input type="text" id="user-fullname" required placeholder="Contoh: Ahmad Rizki" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
                 </div>
@@ -861,7 +848,7 @@
         // =========================================================================
         // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxHX3vKotifz4UaaIvnk77kAxMF9pIEyf_VspHPpqZu7zWZPmI14GyvKSK9FMYNxyrzPg/exec"; 
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx-rhCGZz_aIRdlW0A2MFnaXXbx2UMko0do2qBq0WZfZeOsZ6DjNpBSpbRLZWQFhDEH6A/exec"; 
 
         let currentUser = null;
         let categoryChartInstance = null;
@@ -942,7 +929,7 @@
         let archiveData = [];
         let categories = [];
         let usersList = [
-            { username: "admin", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" }
+            { username: "admin", password: "admin123", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" }
         ];
         let auditLogs = [];
 
@@ -962,38 +949,67 @@
                         console.warn("Auto-sync settings warning:", err);
                     }
                 }
-            }, 600);
+            }, 800);
         }
 
-        function handleAppNameChange(val) {
-            systemSettings.appTitle = val.trim() || "ArsipCloud Enterprise";
-            const sTitle = document.getElementById('sidebar-app-title');
-            const lTitle = document.getElementById('login-app-title');
-            if (sTitle) sTitle.textContent = systemSettings.appTitle;
-            if (lTitle) lTitle.textContent = systemSettings.appTitle;
-            document.title = systemSettings.appTitle + " v3.8";
-            triggerDebouncedSettingsSave();
+        async function sendToGAS(payload) {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") return null;
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    redirect: 'follow',
+                    body: JSON.stringify(payload)
+                });
+                return await response.json();
+            } catch (err) {
+                console.error("GAS Fetch Error:", err);
+                return null;
+            }
         }
 
-        function handleAppSubtitleChange(val) {
-            systemSettings.appSubtitle = val.trim() || "Sistem Manajemen Arsip Terintegrasi Google Drive";
-            const sSub = document.getElementById('sidebar-app-subtitle');
-            const lSub = document.getElementById('login-app-subtitle');
-            if (sSub) sSub.textContent = systemSettings.appSubtitle;
-            if (lSub) lSub.textContent = systemSettings.appSubtitle;
-            triggerDebouncedSettingsSave();
+        async function fetchInitialSettingsFromGAS() {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
+                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('gas-warning-banner')?.classList.add('hidden');
+            }
+
+            try {
+                const res = await sendToGAS({ action: 'GET_SETTINGS' });
+                if (res && res.status === 'SUCCESS' && res.settings && Object.keys(res.settings).length > 0) {
+                    systemSettings = { ...systemSettings, ...res.settings };
+                    saveLocalState();
+                    applyAllSettingsToUI();
+                }
+            } catch (err) {
+                console.warn("Gagal memuat setting awal:", err);
+            }
         }
 
-        function handleMaxFileSizeChange(val) {
-            systemSettings.maxFileSizeMB = parseInt(val, 10) || 25;
-            updateUploadGuidance();
-            triggerDebouncedSettingsSave();
-        }
+        async function loadAllDataFromGAS() {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
+                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('gas-warning-banner')?.classList.add('hidden');
+            }
 
-        function handleAllowedExtChange(val) {
-            systemSettings.allowedExtensions = val.trim() || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
-            updateUploadGuidance();
-            triggerDebouncedSettingsSave();
+            const res = await sendToGAS({ action: 'GET_ALL_DATA' });
+            if (res && res.status === 'SUCCESS') {
+                if (Array.isArray(res.archives)) archiveData = res.archives;
+                if (Array.isArray(res.categories)) categories = res.categories;
+                if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
+                if (Array.isArray(res.logs)) auditLogs = res.logs;
+                if (res.settings && Object.keys(res.settings).length > 0) systemSettings = { ...systemSettings, ...res.settings };
+                
+                saveLocalState();
+                applyAllSettingsToUI();
+                renderAllTables();
+                initCategoryChart();
+                showToast("Data produksi tersinkronisasi!", "success");
+            }
         }
 
         function saveLocalState() {
@@ -1004,17 +1020,17 @@
                 localStorage.setItem('arsip_cloud_logs_v38', JSON.stringify(auditLogs));
                 localStorage.setItem('arsip_cloud_settings_v38', JSON.stringify(systemSettings));
             } catch(e) {
-                console.warn('Gagal menyimpan state lokal', e);
+                console.warn('Peringatan: Gagal menyimpan state ke LocalStorage', e);
             }
         }
 
         function loadLocalState() {
             try {
-                const a = localStorage.getItem('arsip_cloud_archives_v38') || localStorage.getItem('arsip_cloud_archives_prod');
-                const c = localStorage.getItem('arsip_cloud_categories_v38') || localStorage.getItem('arsip_cloud_categories_prod');
-                const u = localStorage.getItem('arsip_cloud_users_v38') || localStorage.getItem('arsip_cloud_users_prod');
-                const l = localStorage.getItem('arsip_cloud_logs_v38') || localStorage.getItem('arsip_cloud_logs_prod');
-                const s = localStorage.getItem('arsip_cloud_settings_v38') || localStorage.getItem('arsip_cloud_settings_prod');
+                const a = localStorage.getItem('arsip_cloud_archives_v38');
+                const c = localStorage.getItem('arsip_cloud_categories_v38');
+                const u = localStorage.getItem('arsip_cloud_users_v38');
+                const l = localStorage.getItem('arsip_cloud_logs_v38');
+                const s = localStorage.getItem('arsip_cloud_settings_v38');
 
                 if (a) archiveData = JSON.parse(a);
                 if (c) categories = JSON.parse(c);
@@ -1036,65 +1052,6 @@
             });
             saveLocalState();
             renderLogTable();
-        }
-
-        async function sendToGAS(payload) {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") return null;
-            showLoading(true, "Sinkronisasi Cloud Enterprise...");
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    redirect: 'follow',
-                    body: JSON.stringify(payload)
-                });
-                const resData = await response.json();
-                showLoading(false);
-                return resData;
-            } catch (err) {
-                showLoading(false);
-                console.error("GAS Fetch Error:", err);
-                showToast("Gagal terhubung ke Google Apps Script backend!", "error");
-                return null;
-            }
-        }
-
-        async function loadAllDataFromGAS() {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
-                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
-                return;
-            } else {
-                document.getElementById('gas-warning-banner')?.classList.add('hidden');
-            }
-
-            const res = await sendToGAS({ action: 'GET_ALL_DATA' });
-            if (res && res.status === 'SUCCESS') {
-                if (Array.isArray(res.archives)) archiveData = res.archives;
-                if (Array.isArray(res.categories)) categories = res.categories;
-                if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
-                if (Array.isArray(res.logs)) auditLogs = res.logs;
-                if (res.settings) systemSettings = { ...systemSettings, ...res.settings };
-                
-                saveLocalState();
-                applyAllSettingsToUI();
-                renderAllTables();
-                initCategoryChart();
-                showToast("Data produksi berhasil disinkronkan dari Google Sheets!", "success");
-            }
-        }
-
-        function showLoading(show, text = "Memuat Data System...") {
-            const overlay = document.getElementById('loading-overlay');
-            const txt = document.getElementById('loading-text');
-            if (!overlay) return;
-            if (txt) txt.textContent = text;
-            if (show) {
-                overlay.classList.remove('pointer-events-none', 'opacity-0');
-                overlay.classList.add('opacity-100');
-            } else {
-                overlay.classList.remove('opacity-100');
-                overlay.classList.add('pointer-events-none', 'opacity-0');
-            }
         }
 
         function showToast(message, type = 'info') {
@@ -1272,10 +1229,10 @@
                 } else {
                     tbody.innerHTML = archiveData.slice(0, 5).map(item => `
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="py-3 px-3 font-mono font-bold text-brand-600">${item.no}</td>
-                            <td class="py-3 px-3 font-semibold text-slate-800">${item.nama}</td>
-                            <td class="py-3 px-3 text-slate-500">${item.kategori}</td>
-                            <td class="py-3 px-3 text-right font-mono font-bold text-slate-700">${item.size} KB</td>
+                            <td class="py-3 px-3 font-mono font-bold text-brand-600 truncate max-w-[120px]">${item.no}</td>
+                            <td class="py-3 px-3 font-semibold text-slate-800 truncate max-w-[200px]">${item.nama}</td>
+                            <td class="py-3 px-3 text-slate-500 truncate max-w-[140px]">${item.kategori}</td>
+                            <td class="py-3 px-3 text-right font-mono font-bold text-slate-700 whitespace-nowrap">${item.size} KB</td>
                         </tr>
                     `).join('');
                 }
@@ -1316,17 +1273,16 @@
             if (!tbody) return;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Dokumen tidak ditemukan</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">Dokumen tidak ditemukan</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs">${item.no}</td>
-                    <td class="py-3.5 px-4 font-semibold text-slate-800">${item.nama}</td>
-                    <td class="py-3.5 px-4 text-xs text-slate-500"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200/60">${item.kategori}</span></td>
-                    <td class="py-3.5 px-4 text-xs text-slate-500 font-mono">${item.tanggal}</td>
-                    <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700">${item.size} KB</td>
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs truncate max-w-[140px]">${item.no}</td>
+                    <td class="py-3.5 px-4 font-semibold text-slate-800 truncate max-w-[240px]">${item.nama}</td>
+                    <td class="py-3.5 px-4 text-xs text-slate-500"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200/60 truncate max-w-[160px] inline-block">${item.kategori}</span></td>
+                    <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700 whitespace-nowrap">${item.size} KB</td>
                     <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
                         <button type="button" onclick="previewFile('${item.id}')" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-brand-200/60">Lihat</button>
                         <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
@@ -1348,7 +1304,7 @@
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-500">${cat.id}</td>
                     <td class="py-3.5 px-4 font-bold text-slate-800">${cat.nama}</td>
-                    <td class="py-3.5 px-4 font-mono text-xs text-brand-600">${cat.folder_id}</td>
+                    <td class="py-3.5 px-4 font-mono text-xs text-brand-600 truncate max-w-[180px]">${cat.folder_id}</td>
                     <td class="py-3.5 px-4"><span class="${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border px-2.5 py-0.5 rounded-full text-[10px] font-bold">${cat.status}</span></td>
                     <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
                         <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
@@ -1384,8 +1340,8 @@
 
             const filtered = archiveData.filter(a => {
                 const matchKat = !kat || a.kategori === kat;
-                const matchFrom = !dateFrom || a.tanggal >= dateFrom;
-                const matchTo = !dateTo || a.tanggal <= dateTo;
+                const matchFrom = !dateFrom || (a.tanggal && a.tanggal >= dateFrom);
+                const matchTo = !dateTo || (a.tanggal && a.tanggal <= dateTo);
                 return matchKat && matchFrom && matchTo;
             });
 
@@ -1396,15 +1352,14 @@
             const tbody = document.getElementById('laporan-table-body');
             if (!tbody) return;
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 italic">Data rekapitulasi kosong</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Data rekapitulasi kosong</td></tr>`;
                 return;
             }
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs">${item.no}</td>
-                    <td class="py-3.5 px-4 text-slate-800 font-semibold">${item.nama}</td>
+                    <td class="py-3.5 px-4 text-slate-800 font-semibold truncate max-w-[200px]">${item.nama}</td>
                     <td class="py-3.5 px-4 text-xs text-slate-500">${item.kategori}</td>
-                    <td class="py-3.5 px-4 text-xs text-slate-500 font-mono">${item.tanggal}</td>
                     <td class="py-3.5 px-4 text-xs text-slate-600 font-medium">${item.uploader}</td>
                     <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700">${item.size} KB</td>
                     <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
@@ -1518,7 +1473,7 @@
         }
 
         function validateFolderInput(input) {
-            if (input.files && input.files.length > 0) {
+            if (input.files && input.files[0]) {
                 uploadedFolderFiles = Array.from(input.files);
                 const firstFile = uploadedFolderFiles[0];
                 const folderPath = firstFile.webkitRelativePath || '';
@@ -1744,7 +1699,6 @@
                     </div>
                     <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 text-left text-xs space-y-2">
                         <div class="flex justify-between"><span class="text-slate-500">Format Dokumen:</span><span class="font-bold text-brand-600 font-mono">.${ext}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Tanggal Dokumen:</span><span class="font-semibold text-slate-700">${item ? item.tanggal : '-'}</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Ukuran Berkas:</span><span class="font-bold text-slate-700 font-mono">${item ? item.size : '0'} KB</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Pengunggah:</span><span class="font-semibold text-slate-700">${item ? item.uploader : '-'}</span></div>
                         <div class="pt-2 border-t border-slate-200/60"><span class="text-slate-500 block mb-1">Keterangan:</span><span class="font-normal text-slate-700 block italic bg-white p-2.5 rounded-xl border border-slate-200/80">${item && item.deskripsi ? item.deskripsi : 'Tidak ada catatan tambahan.'}</span></div>
@@ -1869,12 +1823,14 @@
                 if (!u) return;
                 document.getElementById('user-modal-title').textContent = "Edit User & Hak Akses";
                 document.getElementById('user-username').value = u.username;
+                document.getElementById('user-password').value = '';
                 document.getElementById('user-fullname').value = u.name;
                 document.getElementById('user-role').value = u.role;
                 document.getElementById('user-status').value = u.status;
             } else {
                 document.getElementById('user-modal-title').textContent = "Tambah Pengguna Baru";
                 document.getElementById('user-username').value = '';
+                document.getElementById('user-password').value = '';
                 document.getElementById('user-fullname').value = '';
                 document.getElementById('user-role').value = 'OPERATOR';
                 document.getElementById('user-status').value = 'ACTIVE';
@@ -1886,15 +1842,19 @@
             e.preventDefault();
             const origUsername = document.getElementById('user-original-username').value;
             const username = document.getElementById('user-username').value.trim();
+            const password = document.getElementById('user-password').value.trim();
             const name = document.getElementById('user-fullname').value.trim();
             const role = document.getElementById('user-role').value;
             const status = document.getElementById('user-status').value;
 
-            const payload = { username, name, role, status };
+            const existingUser = usersList.find(x => x.username === (origUsername || username));
+            const finalPassword = password || (existingUser ? existingUser.password : 'admin123');
+
+            const payload = { username, password: finalPassword, name, role, status };
 
             if (origUsername) {
                 const u = usersList.find(x => x.username === origUsername);
-                if (u) { u.username = username; u.name = name; u.role = role; u.status = status; }
+                if (u) { u.username = username; u.password = finalPassword; u.name = name; u.role = role; u.status = status; }
                 recordAuditLog('EDIT_USER', `Mengubah pengguna ${username}`);
             } else {
                 usersList.push(payload);
@@ -2187,6 +2147,33 @@
             if (systemSettings.loginCardBorder) card.style.borderColor = systemSettings.loginCardBorder;
         }
 
+        function handleAppNameChange(val) {
+            systemSettings.appTitle = val;
+            document.getElementById('sidebar-app-title').textContent = val;
+            document.getElementById('login-app-title').textContent = val;
+            document.title = val + " v3.8";
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleAppSubtitleChange(val) {
+            systemSettings.appSubtitle = val;
+            document.getElementById('sidebar-app-subtitle').textContent = val;
+            document.getElementById('login-app-subtitle').textContent = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleMaxFileSizeChange(val) {
+            systemSettings.maxFileSizeMB = parseInt(val, 10) || 25;
+            updateUploadGuidance();
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleAllowedExtChange(val) {
+            systemSettings.allowedExtensions = val;
+            updateUploadGuidance();
+            triggerDebouncedSettingsSave();
+        }
+
         function handleBgOpacityChange(val) {
             systemSettings.bgOpacity = val;
             document.getElementById('bg-opacity-text').textContent = `${val}%`;
@@ -2353,7 +2340,6 @@
                     'Nama Arsip': a.nama,
                     'Keterangan': a.deskripsi || '-',
                     'Kategori': a.kategori,
-                    'Tanggal': a.tanggal,
                     'Ukuran (KB)': a.size,
                     'Pengunggah': a.uploader
                 }));
@@ -2386,7 +2372,7 @@
                 doc.text("No. Dokumen", 14, y);
                 doc.text("Nama Arsip", 60, y);
                 doc.text("Kategori", 130, y);
-                doc.text("Tanggal", 170, y);
+                doc.text("Pengunggah", 170, y);
                 
                 doc.setFont(undefined, 'normal');
                 archiveData.forEach((item) => {
@@ -2395,7 +2381,7 @@
                     doc.text(String(item.no).substring(0, 20), 14, y);
                     doc.text(String(item.nama).substring(0, 32), 60, y);
                     doc.text(String(item.kategori).substring(0, 20), 130, y);
-                    doc.text(String(item.tanggal), 170, y);
+                    doc.text(String(item.uploader || '-').substring(0, 15), 170, y);
                 });
 
                 doc.save(`Laporan_Arsip_${new Date().toISOString().slice(0,10)}.pdf`);
@@ -2419,6 +2405,7 @@
             renderLoginCardPresets();
             renderAvatarPresets();
             applyAllSettingsToUI();
+            fetchInitialSettingsFromGAS();
             console.log("ArsipCloud Enterprise v3.8 Production Engine Initialized Successfully.");
         };
     </script>
