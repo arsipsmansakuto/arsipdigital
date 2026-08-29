@@ -1,8 +1,7 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.8 - High Performance & Full Persistence
- * Auto-Database Setup, Multi-Folder Drive Sync, LockService & Realtime Config
+ * ArsipCloud Enterprise v3.8 - Full Persistence & Cross-Browser Sync
  * ============================================================================
  */
 
@@ -41,6 +40,10 @@ function doPost(e) {
     let result = { status: 'SUCCESS', message: 'Operasi berhasil dieksekusi' };
 
     switch (action) {
+      case 'GET_SETTINGS':
+        result = getSettingsData();
+        break;
+
       case 'GET_ALL_DATA':
         result = getAllData();
         break;
@@ -98,9 +101,11 @@ function doPost(e) {
 
 function doGet(e) {
   setupDatabase();
+  const settingsObj = getSettingsData().settings || {};
   return createJsonResponse({ 
     status: 'ACTIVE', 
-    version: 'ArsipCloud Enterprise v3.8 Production Engine' 
+    version: 'ArsipCloud Enterprise v3.8 Production Engine',
+    settings: settingsObj
   });
 }
 
@@ -167,6 +172,26 @@ function setupDatabase() {
   }
 }
 
+function getSettingsData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const settingsSheet = ss.getSheetByName(SHEET_NAMES.SETTINGS);
+  let settingsObj = {};
+  if (settingsSheet && settingsSheet.getLastRow() > 1) {
+    const sRows = settingsSheet.getRange(2, 1, settingsSheet.getLastRow() - 1, 2).getValues();
+    for (let i = 0; i < sRows.length; i++) {
+      try {
+        settingsObj[sRows[i][0]] = JSON.parse(sRows[i][1]);
+      } catch (e) {
+        settingsObj[sRows[i][0]] = sRows[i][1];
+      }
+    }
+  }
+  return {
+    status: 'SUCCESS',
+    settings: settingsObj
+  };
+}
+
 function getAllData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -230,18 +255,7 @@ function getAllData() {
       })).reverse() 
     : [];
 
-  const settingsSheet = ss.getSheetByName(SHEET_NAMES.SETTINGS);
-  let settingsObj = {};
-  if (settingsSheet && settingsSheet.getLastRow() > 1) {
-    const sRows = settingsSheet.getRange(2, 1, settingsSheet.getLastRow() - 1, 2).getValues();
-    for (let i = 0; i < sRows.length; i++) {
-      try {
-        settingsObj[sRows[i][0]] = JSON.parse(sRows[i][1]);
-      } catch (e) {
-        settingsObj[sRows[i][0]] = sRows[i][1];
-      }
-    }
-  }
+  const settingsObj = getSettingsData().settings;
 
   return {
     status: 'SUCCESS',
