@@ -59,7 +59,7 @@ function doPost(e) {
         break;
 
       case 'SAVE_CATEGORY':
-        saveCategory(contents.data || {});
+        result = saveCategory(contents.data || {});
         break;
 
       case 'DELETE_CATEGORY':
@@ -415,9 +415,32 @@ function saveCategory(data) {
     }
   }
 
-  let folderId = data.folder_id;
-  if (!folderId || String(folderId).trim() === "") {
-    folderId = getOrCreateDriveFolder(data.nama).getId();
+  let folderId = data.folder_id ? String(data.folder_id).trim() : "";
+
+  // Otomatis membuat folder baru di Google Drive jika folderId kosong, bertanda AUTO, atau berupa ID generator lokal
+  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO") {
+    try {
+      const rootFolder = getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+      const newFolder = rootFolder.createFolder(data.nama);
+      newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      folderId = newFolder.getId();
+      Logger.log("Folder Google Drive baru berhasil dibuat: " + data.nama + " (ID: " + folderId + ")");
+    } catch (e) {
+      Logger.log("Gagal membuat folder Google Drive: " + e.toString());
+      folderId = getOrCreateDriveFolder(data.nama).getId();
+    }
+  } else {
+    // Validasi apakah folder ID yang dimasukkan valid di Google Drive
+    try {
+      const existingFolder = DriveApp.getFolderById(folderId);
+      // Folder valid dan ditemukan
+    } catch (err) {
+      Logger.log("Folder ID kustom tidak ditemukan, membuat folder baru: " + err.toString());
+      const rootFolder = getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+      const fallbackFolder = rootFolder.createFolder(data.nama);
+      fallbackFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      folderId = fallbackFolder.getId();
+    }
   }
 
   const rowData = [data.id, data.nama, folderId, data.status || "ACTIVE"];
@@ -426,6 +449,18 @@ function saveCategory(data) {
   } else {
     sheet.appendRow(rowData);
   }
+
+  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_CATEGORY' : 'ADD_CATEGORY', `Kategori "${data.nama}" tersambung ke Google Drive Folder ID: ${folderId}`);
+  return { 
+    status: 'SUCCESS', 
+    message: `Folder Google Drive "${data.nama}" berhasil dihubungkan!`,
+    category: {
+      id: data.id,
+      nama: data.nama,
+      folder_id: folderId,
+      status: data.status || 'ACTIVE'
+    }
+  };
 }
 
 function deleteCategory(id, folderId) {
