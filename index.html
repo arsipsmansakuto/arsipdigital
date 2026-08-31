@@ -371,6 +371,7 @@
                                         <th class="py-3.5 px-4">No. Dokumen</th>
                                         <th class="py-3.5 px-4">Nama Arsip</th>
                                         <th class="py-3.5 px-4">Kategori</th>
+                                        <th class="py-3.5 px-4">Waktu Unggah (Tgl & Jam)</th>
                                         <th class="py-3.5 px-4">Ukuran</th>
                                         <th class="py-3.5 px-4 text-right">Aksi</th>
                                     </tr>
@@ -386,7 +387,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-sm font-bold text-slate-800">Manajemen Kategori & Folder Drive</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder khusus Google Drive.</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder otomatis Google Drive.</p>
                         </div>
                         <button type="button" onclick="openKategoriModal()" class="role-admin-only px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -401,7 +402,7 @@
                                     <tr>
                                         <th class="py-3.5 px-4">ID Kategori</th>
                                         <th class="py-3.5 px-4">Nama Kategori</th>
-                                        <th class="py-3.5 px-4">Folder ID Google Drive</th>
+                                        <th class="py-3.5 px-4">Folder Google Drive</th>
                                         <th class="py-3.5 px-4">Status</th>
                                         <th class="py-3.5 px-4 text-right">Aksi</th>
                                     </tr>
@@ -757,20 +758,34 @@
     <!-- KATEGORI MODAL -->
     <div id="kategori-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-[28px] max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-            <h3 class="text-base font-bold text-slate-800" id="kategori-modal-title">Tambah Kategori & Drive</h3>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-800" id="kategori-modal-title">Tambah Kategori & Drive</h3>
+                </div>
+                <button type="button" onclick="closeModal('kategori-modal')" class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
             <form onsubmit="handleSaveKategori(event)" class="space-y-3.5">
                 <input type="hidden" id="kategori-id">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kategori</label>
-                    <input type="text" id="kategori-nama" required placeholder="Contoh: Arsip Perpajakan" oninput="handleCategoryNameInput(this.value)" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kategori Arsip</label>
+                    <input type="text" id="kategori-nama" required placeholder="Contoh: Arsip Keuangan 2026" oninput="handleCategoryNameInput(this.value)" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-semibold">
+                    <div class="mt-2 p-2.5 bg-brand-50/70 rounded-xl border border-brand-100 flex items-start space-x-2">
+                        <svg class="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <p class="text-[11px] text-brand-900 leading-snug font-medium">Folder baru dengan nama kategori ini akan <strong>otomatis dibuat di Google Drive</strong> saat disimpan.</p>
+                    </div>
                 </div>
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="block text-xs font-bold text-slate-700">Folder ID Google Drive</label>
-                        <button type="button" onclick="refreshAutoFolderId()" class="text-[10px] text-brand-600 font-bold hover:underline cursor-pointer">Auto-Generate ID</button>
+                        <label class="block text-xs font-bold text-slate-700">Folder ID Google Drive (Opsional)</label>
+                        <button type="button" onclick="refreshAutoFolderId()" class="text-[10px] text-brand-600 font-bold hover:underline cursor-pointer">Set Otomatis Drive</button>
                     </div>
-                    <input type="text" id="kategori-folder-id" required oninput="isManualFolderIdEdited = true" placeholder="Contoh: 1A2B3C_DRIVE_FOLDER_ID" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-mono">
-                    <p class="text-[10px] text-slate-400 mt-1">ID dibuat otomatis oleh sistem, dapat diedit atau diganti dengan ID Folder Drive Anda.</p>
+                    <input type="text" id="kategori-folder-id" oninput="isManualFolderIdEdited = true" placeholder="Kosongkan untuk auto-create di Google Drive, atau masukkan ID folder yang ada" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-mono text-slate-700">
+                    <p class="text-[10px] text-slate-400 mt-1">Biarkan kosong atau bertanda otomatis agar Google Drive membuat folder baru secara instan.</p>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Status Kategori</label>
@@ -781,7 +796,10 @@
                 </div>
                 <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeModal('kategori-modal')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs cursor-pointer">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Simpan Kategori</button>
+                    <button type="submit" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Simpan & Buat Folder Drive</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -852,7 +870,7 @@
         // =========================================================================
         // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxRnZyFJu2op5OsDlUNMyeUOA1-djFAK0ULqIhwLY9sVGhXraxiroq_0b6SCUlLAmfjjQ/exec"; 
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzmrOs-zsEhakbH2bkbceHwtju28JWRgNM7MyQjSlDxCCr5XQX_CqEE-ubWZQycw7MJ/exec"; 
 
         let currentUser = null;
         let categoryChartInstance = null;
@@ -1259,6 +1277,22 @@
             searchDebounceTimeout = setTimeout(() => renderArsipTable(), 250);
         }
 
+        function formatDateTimeDisplay(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) {
+                    return dateStr;
+                }
+                const pad = (n) => String(n).padStart(2, '0');
+                const tgl = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                const jam = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+                return `${tgl} • ${jam} WIB`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
         function renderArsipTable() {
             const search = document.getElementById('search-arsip')?.value.trim().toLowerCase() || '';
             const katFilter = document.getElementById('filter-kategori')?.value || '';
@@ -1277,7 +1311,7 @@
             if (!tbody) return;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">Dokumen tidak ditemukan</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Dokumen tidak ditemukan</td></tr>`;
                 return;
             }
 
@@ -1286,6 +1320,12 @@
                     <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs truncate max-w-[140px]">${item.no}</td>
                     <td class="py-3.5 px-4 font-semibold text-slate-800 truncate max-w-[240px]">${item.nama}</td>
                     <td class="py-3.5 px-4 text-xs text-slate-500"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200/60 truncate max-w-[160px] inline-block">${item.kategori}</span></td>
+                    <td class="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/90 border border-slate-200/70 text-slate-700 font-mono text-[11px]">
+                            <svg class="w-3.5 h-3.5 text-brand-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>${formatDateTimeDisplay(item.tanggal)}</span>
+                        </div>
+                    </td>
                     <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700 whitespace-nowrap">${item.size} KB</td>
                     <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
                         <button type="button" onclick="previewFile('${item.id}')" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-brand-200/60">Lihat</button>
@@ -1304,18 +1344,31 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">Belum ada kategori terdaftar</td></tr>`;
                 return;
             }
-            tbody.innerHTML = categories.map(cat => `
+            tbody.innerHTML = categories.map(cat => {
+                const isRealDriveId = cat.folder_id && !cat.folder_id.startsWith('FLD_');
+                const driveLinkHtml = isRealDriveId
+                    ? `<a href="https://drive.google.com/drive/folders/${cat.folder_id}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200/80 transition-colors" title="Buka Folder di Google Drive">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        <span class="truncate max-w-[110px] font-mono">${cat.folder_id}</span>
+                       </a>`
+                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-xs border border-slate-200 truncate max-w-[160px]" title="ID Sementara (Akan terbuat otomatis saat online)">
+                        <svg class="w-3 h-3 text-brand-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        ${cat.folder_id || 'Auto Google Drive'}
+                       </span>`;
+
+                return `
                 <tr class="hover:bg-slate-50 transition-colors">
                     <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-500">${cat.id}</td>
                     <td class="py-3.5 px-4 font-bold text-slate-800">${cat.nama}</td>
-                    <td class="py-3.5 px-4 font-mono text-xs text-brand-600 truncate max-w-[180px]">${cat.folder_id}</td>
+                    <td class="py-3.5 px-4">${driveLinkHtml}</td>
                     <td class="py-3.5 px-4"><span class="${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border px-2.5 py-0.5 rounded-full text-[10px] font-bold">${cat.status}</span></td>
                     <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
                         <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
                         <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-rose-200/60">Hapus</button>
                     </td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
             applyRolePermissions();
         }
 
@@ -1423,14 +1476,14 @@
                     if (arsipNamaElem) arsipNamaElem.value = item.nama || '';
                     if (arsipDeskElem) arsipDeskElem.value = item.deskripsi || '';
                     if (arsipKatElem) arsipKatElem.value = item.kategori || '';
-                    if (arsipTglElem) arsipTglElem.value = item.tanggal || new Date().toISOString().split('T')[0];
+                    if (arsipTglElem) arsipTglElem.value = item.tanggal || '';
                 } else {
                     const titleElem = document.getElementById('arsip-modal-title');
                     if (titleElem) titleElem.textContent = "Tambah Berkas Arsip Baru";
                     if (arsipNoElem) arsipNoElem.value = `ARS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
                     if (arsipNamaElem) arsipNamaElem.value = '';
                     if (arsipDeskElem) arsipDeskElem.value = '';
-                    if (arsipTglElem) arsipTglElem.value = new Date().toISOString().split('T')[0];
+                    if (arsipTglElem) arsipTglElem.value = '';
                 }
 
                 updateUploadGuidance();
@@ -1544,12 +1597,20 @@
             const nama = document.getElementById('arsip-nama').value.trim();
             const deskripsi = document.getElementById('arsip-deskripsi').value.trim();
             const kategori = document.getElementById('arsip-kategori-input').value;
-            const tanggal = document.getElementById('arsip-tanggal').value;
+            let tanggal = document.getElementById('arsip-tanggal').value;
             const fileInput = document.getElementById('arsip-file-input');
 
             if (!no || !nama || !kategori) {
                 showToast('Mohon lengkapi Nomor, Nama Arsip, dan Kategori!', 'error');
                 return;
+            }
+
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const currentTimestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+            if (!tanggal || !id) {
+                tanggal = currentTimestamp;
             }
 
             const executeSave = async (fileDataUrl = '', fileName = '') => {
@@ -1703,6 +1764,7 @@
                     </div>
                     <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 text-left text-xs space-y-2">
                         <div class="flex justify-between"><span class="text-slate-500">Format Dokumen:</span><span class="font-bold text-brand-600 font-mono">.${ext}</span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Waktu Unggah:</span><span class="font-bold text-slate-700 font-mono">${formatDateTimeDisplay(item ? item.tanggal : '')}</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Ukuran Berkas:</span><span class="font-bold text-slate-700 font-mono">${item ? item.size : '0'} KB</span></div>
                         <div class="flex justify-between"><span class="text-slate-500">Pengunggah:</span><span class="font-semibold text-slate-700">${item ? item.uploader : '-'}</span></div>
                         <div class="pt-2 border-t border-slate-200/60"><span class="text-slate-500 block mb-1">Keterangan:</span><span class="font-normal text-slate-700 block italic bg-white p-2.5 rounded-xl border border-slate-200/80">${item && item.deskripsi ? item.deskripsi : 'Tidak ada catatan tambahan.'}</span></div>
@@ -1755,12 +1817,11 @@
         let isManualFolderIdEdited = false;
 
         function generateAutoFolderId(name = '') {
-            const randomHash = Math.random().toString(36).substring(2, 8).toUpperCase() + '_' + Date.now().toString().slice(-4);
             if (name && name.trim()) {
-                const cleanName = name.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase().slice(0, 10);
-                return `FLD_${cleanName}_${randomHash}`;
+                const cleanName = name.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase().slice(0, 12);
+                return `AUTO_${cleanName}`;
             }
-            return `FLD_DRIVE_${randomHash}`;
+            return `AUTO_GOOGLE_DRIVE`;
         }
 
         function handleCategoryNameInput(val) {
@@ -1777,7 +1838,7 @@
             if (folderIdInput) {
                 folderIdInput.value = generateAutoFolderId(catName);
                 isManualFolderIdEdited = false;
-                showToast('Folder ID baru berhasil dibuat otomatis', 'info');
+                showToast('Folder ID diset untuk pembuatan otomatis di Google Drive', 'info');
             }
         }
 
@@ -1788,15 +1849,15 @@
             if (id) {
                 const cat = categories.find(x => x.id === id);
                 if (!cat) return;
-                document.getElementById('kategori-modal-title').textContent = "Edit Kategori";
+                document.getElementById('kategori-modal-title').textContent = "Edit Kategori & Drive";
                 document.getElementById('kategori-nama').value = cat.nama;
                 document.getElementById('kategori-folder-id').value = cat.folder_id;
                 document.getElementById('kategori-status').value = cat.status;
                 isManualFolderIdEdited = true;
             } else {
-                document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Drive";
+                document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Hubungkan Drive";
                 document.getElementById('kategori-nama').value = '';
-                document.getElementById('kategori-folder-id').value = generateAutoFolderId();
+                document.getElementById('kategori-folder-id').value = '';
                 document.getElementById('kategori-status').value = 'ACTIVE';
             }
             document.getElementById('kategori-modal').classList.remove('hidden');
@@ -1806,12 +1867,16 @@
             e.preventDefault();
             const id = document.getElementById('kategori-id').value;
             const nama = document.getElementById('kategori-nama').value.trim();
-            const folder_id = document.getElementById('kategori-folder-id').value.trim() || generateAutoFolderId(nama);
+            let folder_id = document.getElementById('kategori-folder-id').value.trim();
             const status = document.getElementById('kategori-status').value;
 
             if (!nama) {
                 showToast('Nama kategori tidak boleh kosong!', 'error');
                 return;
+            }
+
+            if (!folder_id) {
+                folder_id = generateAutoFolderId(nama);
             }
 
             let payload;
@@ -1834,41 +1899,34 @@
                     id: `CAT-${maxNum + 1}`,
                     nama,
                     folder_id,
-                    status: status || 'ACTIVE'
+                    status: status || 'ACTIVE',
+                    uploader: currentUser ? currentUser.username : 'admin'
                 };
                 categories.push(payload);
-                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru ${nama}`);
-                showToast(`Kategori "${nama}" berhasil ditambahkan!`, 'success');
+                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru "${nama}" terhubung Google Drive`);
+                showToast(`Menyimpan kategori & menghubungkan folder Google Drive "${nama}"...`, 'info');
             }
 
             saveLocalState();
             renderAllTables();
             initCategoryChart();
-
-            // Otomatis menutup kotakan modal
             closeModal('kategori-modal');
 
+            // Sinkronisasi ke backend Google Apps Script untuk membuat folder fisik di Google Drive
             if (GAS_API_URL && GAS_API_URL.trim() !== "") {
-                sendToGAS({ action: 'SAVE_CATEGORY', data: payload }).then(res => {
-                    if (res && res.status === 'SUCCESS') {
-                        loadAllDataFromGAS();
+                try {
+                    const res = await sendToGAS({ action: 'SAVE_CATEGORY', data: payload });
+                    if (res && res.status === 'SUCCESS' && res.category) {
+                        const targetIdx = categories.findIndex(c => c.id === payload.id);
+                        if (targetIdx !== -1) {
+                            categories[targetIdx].folder_id = res.category.folder_id;
+                            saveLocalState();
+                            renderKategoriTable();
+                        }
+                        showToast(`Folder Google Drive "${nama}" berhasil dibuat & terhubung!`, 'success');
                     }
-                }).catch(err => console.warn("GAS Save Category Sync:", err));
-            }
-        }
-
-        async function deleteKategori(id) {
-            const index = categories.findIndex(x => x.id === id);
-            if (index !== -1) {
-                const deleted = categories[index];
-                categories.splice(index, 1);
-                recordAuditLog('DELETE_CATEGORY', `Menghapus kategori ${deleted.nama}`);
-                saveLocalState();
-                renderAllTables();
-
-                const res = await sendToGAS({ action: 'DELETE_CATEGORY', id: id });
-                if (res && res.status === 'SUCCESS') {
-                    showToast(`Kategori ${deleted.nama} berhasil dihapus!`, 'error');
+                } catch (err) {
+                    console.warn("GAS Save Category Sync Error:", err);
                 }
             }
         }
@@ -2395,10 +2453,11 @@
                 const dataToExport = archiveData.map(a => ({
                     'No. Dokumen': a.no,
                     'Nama Arsip': a.nama,
-                    'Keterangan': a.deskripsi || '-',
                     'Kategori': a.kategori,
+                    'Waktu Unggah': formatDateTimeDisplay(a.tanggal),
                     'Ukuran (KB)': a.size,
-                    'Pengunggah': a.uploader
+                    'Pengunggah': a.uploader,
+                    'Keterangan': a.deskripsi || '-'
                 }));
                 const ws = XLSX.utils.json_to_sheet(dataToExport);
                 const wb = XLSX.utils.book_new();
@@ -2467,4 +2526,4 @@
         };
     </script>
 </body>
-</html>
+</html>f
