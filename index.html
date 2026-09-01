@@ -870,7 +870,7 @@
         // =========================================================================
         // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
         // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzmrOs-zsEhakbH2bkbceHwtju28JWRgNM7MyQjSlDxCCr5XQX_CqEE-ubWZQycw7MJ/exec"; 
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwWILY8n0KVztugvdaBg3Kso1NwSqZ3KJ-KJ_auH1V1FeZr20CCOEdsAtaL4wM8Aqq2/exec"; 
 
         let currentUser = null;
         let categoryChartInstance = null;
@@ -1904,7 +1904,7 @@
                 };
                 categories.push(payload);
                 recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru "${nama}" terhubung Google Drive`);
-                showToast(`Menyimpan kategori & menghubungkan folder Google Drive "${nama}"...`, 'info');
+                showToast(`Menyimpan kategori & membuat folder Google Drive "${nama}"...`, 'info');
             }
 
             saveLocalState();
@@ -1912,7 +1912,7 @@
             initCategoryChart();
             closeModal('kategori-modal');
 
-            // Sinkronisasi ke backend Google Apps Script untuk membuat folder fisik di Google Drive
+            // Sinkronisasi ke backend Google Apps Script untuk membuat folder fisik di Google Drive ID 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r
             if (GAS_API_URL && GAS_API_URL.trim() !== "") {
                 try {
                     const res = await sendToGAS({ action: 'SAVE_CATEGORY', data: payload });
@@ -1927,6 +1927,25 @@
                     }
                 } catch (err) {
                     console.warn("GAS Save Category Sync Error:", err);
+                }
+            }
+        }
+
+        async function deleteKategori(id) {
+            const index = categories.findIndex(x => x.id === id);
+            if (index !== -1) {
+                const deleted = categories[index];
+                categories.splice(index, 1);
+                recordAuditLog('DELETE_CATEGORY', `Menghapus kategori ${deleted.nama}`);
+                saveLocalState();
+                renderAllTables();
+                initCategoryChart();
+
+                const res = await sendToGAS({ action: 'DELETE_CATEGORY', id: id, folder_id: deleted.folder_id || '' });
+                if (res && res.status === 'SUCCESS') {
+                    showToast(`Kategori "${deleted.nama}" & folder Google Drive berhasil dihapus!`, 'error');
+                } else {
+                    showToast(`Kategori "${deleted.nama}" berhasil dihapus!`, 'info');
                 }
             }
         }
@@ -2526,4 +2545,4 @@
         };
     </script>
 </body>
-</html>f
+</html>
