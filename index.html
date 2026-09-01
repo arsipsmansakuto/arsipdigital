@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArsipCloud Enterprise v3.8</title>
+    <title>ArsipCloud Enterprise v3.9</title>
 
     <!-- Inline SVG Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233b82f6'><path d='M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z'/></svg>">
@@ -44,11 +44,11 @@
     </script>
 
     <!-- External Production Libraries -->
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <style>
         ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -100,7 +100,7 @@
                 <p class="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed break-words" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold tracking-wider mt-3 border border-brand-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping"></span>
-                    PRODUCTION SUITE v3.8
+                    PRODUCTION SUITE v3.9
                 </div>
             </div>
 
@@ -137,7 +137,7 @@
                     </div>
                     <div class="leading-tight min-w-0 flex-1">
                         <h1 class="font-extrabold text-slate-900 text-xs sm:text-sm tracking-tight truncate w-full block" id="sidebar-app-title">ArsipCloud</h1>
-                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block truncate w-full" id="sidebar-app-subtitle">Enterprise v3.8</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block truncate w-full" id="sidebar-app-subtitle">Enterprise v3.9</span>
                     </div>
                 </div>
                 <button type="button" onclick="toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0">
@@ -145,7 +145,7 @@
                 </button>
             </div>
 
-            <!-- Navigation Links -->
+            <!-- Navigation Links (7 Core Menus) -->
             <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto" id="sidebar-nav-container">
                 <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-50 text-brand-600 shadow-xs">
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -218,9 +218,9 @@
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
-                    <button type="button" onclick="loadAllDataFromGAS()" title="Sinkronisasi Data Real-time" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-all cursor-pointer">
+                    <button type="button" onclick="loadAllDataFromGAS()" title="Sinkronisasi Data Real-time" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-all cursor-pointer">
                         <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        <span>Sync Cloud</span>
+                        <span class="hidden sm:inline">Sync Cloud</span>
                     </button>
                     <div class="flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 text-xs shadow-xs">
                         <span class="px-2 text-slate-500 font-semibold text-[11px]">Role:</span>
@@ -242,7 +242,7 @@
                     </div>
                     <div class="flex-1 text-xs text-amber-900 leading-relaxed">
                         <strong class="font-bold block text-sm mb-0.5">Mode Produksi Aktif - URL Backend Google Apps Script Belum Dikonfigurasi</strong>
-                        <span>Silakan masukkan Web App URL dari Google Apps Script ke variabel <code class="bg-amber-100 font-mono px-1.5 py-0.5 rounded text-amber-950 font-bold">GAS_API_URL</code> pada file <code class="bg-amber-100 font-mono px-1.5 py-0.5 rounded text-amber-950 font-bold">index.html</code> untuk mengaktifkan sinkronisasi real-time Google Sheets & Drive.</span>
+                        <span>Silakan masukkan Web App URL dari Google Apps Script ke variabel <code class="bg-amber-100 font-mono px-1.5 py-0.5 rounded text-amber-950 font-bold">GAS_API_URL</code> pada baris kode JavaScript untuk mengaktifkan sinkronisasi real-time Google Sheets & Drive.</span>
                     </div>
                 </div>
 
@@ -387,7 +387,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-sm font-bold text-slate-800">Manajemen Kategori & Folder Drive</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder otomatis Google Drive.</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder otomatis Google Drive (ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
                         </div>
                         <button type="button" onclick="openKategoriModal()" class="role-admin-only px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -520,6 +520,7 @@
                             </div>
                         </div>
 
+                        <!-- Typography and Sidebar Presets -->
                         <div class="pt-5 border-t border-slate-100 space-y-4">
                             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Pengaturan Warna Typography & Custom Navigasi Kiri</h4>
                             
@@ -557,6 +558,7 @@
                             </div>
                         </div>
 
+                        <!-- Login Card Customization -->
                         <div class="pt-5 border-t border-slate-100 space-y-4">
                             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Pengaturan Tema & Warna Kotakan Login (Card Modal)</h4>
                             
@@ -597,6 +599,7 @@
                             </div>
                         </div>
 
+                        <!-- Upload Limitations -->
                         <div class="pt-5 border-t border-slate-100 space-y-4">
                             <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Batasan Ukuran & Format Berkas Unggahan</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -611,6 +614,7 @@
                             </div>
                         </div>
 
+                        <!-- Wallpaper & Transparency -->
                         <div class="pt-5 border-t border-slate-100 space-y-4">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-600 mb-1.5">Unggah Wallpaper Background Utama Kustom (Crop Bebas)</label>
@@ -636,6 +640,7 @@
                             </div>
                         </div>
 
+                        <!-- Avatar Presets -->
                         <div class="pt-5 border-t border-slate-100">
                             <label class="block text-xs font-semibold text-slate-600 mb-2.5">Preset Profil Avatar Berdasarkan Divisi</label>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="avatar-presets-grid"></div>
@@ -674,7 +679,7 @@
         </main>
     </div>
 
-    <!-- CROP MODAL -->
+    <!-- MODAL DIALOGS -->
     <div id="crop-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -703,7 +708,7 @@
 
     <!-- ARSIP MODAL -->
     <div id="arsip-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-4">
+        <div class="bg-white rounded-[28px] max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 class="text-base font-extrabold text-slate-900" id="arsip-modal-title">Tambah Berkas Arsip</h3>
             <form onsubmit="handleSaveArsip(event)" class="space-y-3.5">
                 <input type="hidden" id="arsip-id">
@@ -729,12 +734,12 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Upload Berkas / Folder (Drag & Drop + Auto-Detect)</label>
                     <div id="dropzone-area" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)" class="border-2 border-dashed border-slate-200 hover:border-brand-500 bg-slate-50/70 p-4 rounded-2xl text-center transition-all cursor-pointer">
                         <svg class="w-8 h-8 text-brand-500 mx-auto mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        <p class="text-xs font-bold text-slate-700">Tarik & Jatuhkan berkas/folder di sini</p>
-                        <p class="text-[10px] text-slate-400 mt-0.5">atau pilih melalui opsi di bawah</p>
+                        <p class="text-xs font-bold text-slate-700">Tarik & Jatuhkan satu atau beberapa berkas/folder di sini</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">Mendukung upload banyak file sekaligus</p>
                         <div class="flex items-center justify-center gap-2 mt-3">
                             <label class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-[11px] cursor-pointer border border-brand-200">
-                                Pilih Berkas
-                                <input type="file" id="arsip-file-input" onchange="validateFileInput(this)" class="hidden">
+                                Pilih Berkas (Bisa > 1)
+                                <input type="file" id="arsip-file-input" multiple onchange="validateFileInput(this)" class="hidden">
                             </label>
                             <label class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold rounded-lg text-[11px] cursor-pointer border border-indigo-200">
                                 Pilih Folder
@@ -743,7 +748,7 @@
                         </div>
                     </div>
                     <p class="text-[10px] text-slate-500 font-medium mt-1.5 p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-1">
-                        <span>Format yang didukung: <span id="guidance-allowed-ext" class="font-bold text-brand-600">PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP</span> (Maksimal: <span id="guidance-max-size" class="font-bold text-brand-600">25</span> MB)</span>
+                        <span>Format yang didukung: <span id="guidance-allowed-ext" class="font-bold text-brand-600">PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP</span> (Maksimal: <span id="guidance-max-size" class="font-bold text-brand-600">25</span> MB per file)</span>
                         <span id="detected-file-badge" class="hidden text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 self-start mt-0.5"></span>
                     </p>
                 </div>
@@ -866,18 +871,23 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT PRODUCTION ENGINE -->
     <script>
-        // =========================================================================
-        // CONFIGURATION: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI SINI
-        // =========================================================================
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwWILY8n0KVztugvdaBg3Kso1NwSqZ3KJ-KJ_auH1V1FeZr20CCOEdsAtaL4wM8Aqq2/exec"; 
+        /* =========================================================================
+           CONFIG: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI VARIABEL INI
+           ========================================================================= */
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbywgWWePsjA7Np7cVavJfHPgkBT5dpppcMXcaI4WOPK4SWGLh-WtGFkAHFIp8EevSfB/exec"; 
 
         let currentUser = null;
         let categoryChartInstance = null;
         let activeCropper = null;
         let cropTargetType = 'logo';
         let detectedUploadedFileType = '';
+        let uploadedMultipleFiles = [];
         let uploadedFolderFiles = [];
+        let isManualFolderIdEdited = false;
+        let searchDebounceTimer = null;
+        let settingsAutoSaveTimer = null;
 
         const sidebarThemePresets = [
             { id: 'white', title: 'Clean White', bg: '#ffffff', text: '#0f172a', dot: '#2563eb', desc: 'Putih Klasik' },
@@ -948,14 +958,140 @@
             avatarTextClass: "text-white"
         };
 
-        let archiveData = [];
-        let categories = [];
-        let usersList = [
-            { username: "admin", password: "admin123", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" }
+        let archiveData = [
+            { id: "ARS-001", no: "001/SK-DIR/2026", nama: "Surat Keputusan Direksi Pembentukan Tim Kerja", deskripsi: "SK pengangkatan tim audit operasional 2026", kategori: "Surat Masuk / Keluar", tanggal: "2026-03-15 08:30:00", size: 450, file_type: "PDF", uploader: "admin" },
+            { id: "ARS-002", no: "INV-2026-098", nama: "Invoice Pengadaan Server Cloud Q1", deskripsi: "Faktur tagihan lisensi infrastruktur cloud Google", kategori: "Invoice & Tagihan", tanggal: "2026-03-20 14:15:22", size: 120, file_type: "PDF", uploader: "admin" },
+            { id: "ARS-003", no: "HRD-KTR-042", nama: "Kontrak Kerja Tim Engineering Enterprise", deskripsi: "Dokumen perjanjian kerja staf divisi IT", kategori: "Dokumen Kepegawaian", tanggal: "2026-03-22 10:00:11", size: 780, file_type: "DOCX", uploader: "operator" }
         ];
-        let auditLogs = [];
 
-        let settingsAutoSaveTimer = null;
+        let categories = [
+            { id: "CAT-101", nama: "Surat Masuk / Keluar", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" },
+            { id: "CAT-102", nama: "Invoice & Tagihan", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" },
+            { id: "CAT-103", nama: "Dokumen Kepegawaian", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" }
+        ];
+
+        let usersList = [
+            { username: "admin", password: "admin123", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" },
+            { username: "operator", password: "operator123", name: "Staf Operator Arsip", role: "OPERATOR", status: "ACTIVE" },
+            { username: "viewer", password: "viewer123", name: "Auditor External", role: "VIEWER", status: "ACTIVE" }
+        ];
+
+        let auditLogs = [
+            { time: "2026-03-22 10:00", user: "system", action: "INITIALIZE", detail: "Sistem ArsipCloud Enterprise v3.9 Aktif" }
+        ];
+
+        /* =========================================================================
+           CORE UTILITY & NOTIFICATION FUNCTIONS
+           ========================================================================= */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-600' :
+                            type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+
+            toast.className = `${bgClass} text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs font-semibold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
+            toast.innerHTML = `
+                <span class="w-2 h-2 rounded-full bg-white flex-shrink-0 animate-ping"></span>
+                <span class="flex-1 leading-snug">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function toggleMobileSidebar(show) {
+            const sidebar = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            if (!sidebar || !backdrop) return;
+
+            if (show) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        function formatDateTimeDisplay(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} WIB`;
+            } catch(e) {
+                return dateStr;
+            }
+        }
+
+        function recordAuditLog(action, detail) {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+            
+            auditLogs.unshift({
+                time: timeStr,
+                user: currentUser ? currentUser.username : 'system',
+                action: action,
+                detail: detail
+            });
+            if (auditLogs.length > 50) auditLogs.pop();
+            renderAuditLogTable();
+        }
+
+        /* =========================================================================
+           LOCAL STATE & PERSISTENCE
+           ========================================================================= */
+        function saveLocalState() {
+            try {
+                localStorage.setItem('arsipcloud_settings_v39', JSON.stringify(systemSettings));
+                localStorage.setItem('arsipcloud_archives_v39', JSON.stringify(archiveData));
+                localStorage.setItem('arsipcloud_categories_v39', JSON.stringify(categories));
+                localStorage.setItem('arsipcloud_users_v39', JSON.stringify(usersList));
+                localStorage.setItem('arsipcloud_logs_v39', JSON.stringify(auditLogs));
+            } catch(e) {
+                console.warn("Storage warning:", e);
+            }
+        }
+
+        function loadLocalState() {
+            try {
+                const s = localStorage.getItem('arsipcloud_settings_v39');
+                const a = localStorage.getItem('arsipcloud_archives_v39');
+                const c = localStorage.getItem('arsipcloud_categories_v39');
+                const u = localStorage.getItem('arsipcloud_users_v39');
+                const l = localStorage.getItem('arsipcloud_logs_v39');
+
+                if (s) systemSettings = { ...systemSettings, ...JSON.parse(s) };
+                if (a) archiveData = JSON.parse(a);
+                if (c) categories = JSON.parse(c);
+                if (u) usersList = JSON.parse(u);
+                if (l) auditLogs = JSON.parse(l);
+            } catch(e) {
+                console.warn("Error loading local state:", e);
+            }
+        }
+
         function triggerDebouncedSettingsSave() {
             saveLocalState();
             clearTimeout(settingsAutoSaveTimer);
@@ -1013,491 +1149,477 @@
         async function loadAllDataFromGAS() {
             if (!GAS_API_URL || GAS_API_URL.trim() === "") {
                 document.getElementById('gas-warning-banner')?.classList.remove('hidden');
+                showToast("URL Backend GAS belum dikonfigurasi", "info");
                 return;
             } else {
                 document.getElementById('gas-warning-banner')?.classList.add('hidden');
             }
 
-            const res = await sendToGAS({ action: 'GET_ALL_DATA' });
-            if (res && res.status === 'SUCCESS') {
-                if (Array.isArray(res.archives)) archiveData = res.archives;
-                if (Array.isArray(res.categories)) categories = res.categories;
-                if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
-                if (Array.isArray(res.logs)) auditLogs = res.logs;
-                if (res.settings && Object.keys(res.settings).length > 0) systemSettings = { ...systemSettings, ...res.settings };
-                
-                saveLocalState();
-                applyAllSettingsToUI();
-                renderAllTables();
-                initCategoryChart();
-                showToast("Data produksi tersinkronisasi!", "success");
-            }
-        }
-
-        function saveLocalState() {
             try {
-                localStorage.setItem('arsip_cloud_archives_v38', JSON.stringify(archiveData));
-                localStorage.setItem('arsip_cloud_categories_v38', JSON.stringify(categories));
-                localStorage.setItem('arsip_cloud_users_v38', JSON.stringify(usersList));
-                localStorage.setItem('arsip_cloud_logs_v38', JSON.stringify(auditLogs));
-                localStorage.setItem('arsip_cloud_settings_v38', JSON.stringify(systemSettings));
-            } catch(e) {
-                console.warn('Peringatan: Gagal menyimpan state ke LocalStorage', e);
+                const res = await sendToGAS({ action: 'GET_ALL_DATA' });
+                if (res && res.status === 'SUCCESS') {
+                    if (Array.isArray(res.archives)) archiveData = res.archives;
+                    if (Array.isArray(res.categories) && res.categories.length > 0) categories = res.categories;
+                    if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
+                    if (Array.isArray(res.logs) && res.logs.length > 0) auditLogs = res.logs;
+                    if (res.settings && Object.keys(res.settings).length > 0) systemSettings = { ...systemSettings, ...res.settings };
+                    
+                    saveLocalState();
+                    applyAllSettingsToUI();
+                    renderAllTables();
+                    initCategoryChart();
+                    showToast("Data produksi tersinkronisasi!", "success");
+                }
+            } catch(err) {
+                showToast("Gagal sinkronisasi data cloud: " + err.message, "error");
             }
         }
 
-        function loadLocalState() {
-            try {
-                const a = localStorage.getItem('arsip_cloud_archives_v38');
-                const c = localStorage.getItem('arsip_cloud_categories_v38');
-                const u = localStorage.getItem('arsip_cloud_users_v38');
-                const l = localStorage.getItem('arsip_cloud_logs_v38');
-                const s = localStorage.getItem('arsip_cloud_settings_v38');
-
-                if (a) archiveData = JSON.parse(a);
-                if (c) categories = JSON.parse(c);
-                if (u) usersList = JSON.parse(u);
-                if (l) auditLogs = JSON.parse(l);
-                if (s) systemSettings = { ...systemSettings, ...JSON.parse(s) };
-            } catch(e) {
-                console.warn('Gagal memuat state lokal', e);
-            }
-        }
-
-        function recordAuditLog(action, detail) {
-            const timeStr = new Date().toISOString().replace('T', ' ').slice(0, 16);
-            auditLogs.unshift({
-                time: timeStr,
-                user: currentUser ? currentUser.username : 'admin',
-                action: action,
-                detail: detail
-            });
-            saveLocalState();
-            renderLogTable();
-        }
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            const bgClass = type === 'error' ? 'bg-rose-600 text-white' : type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white';
-            
-            toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-xl text-xs font-bold flex items-center justify-between pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 border border-white/10`;
-            toast.innerHTML = `<span>${message}</span>`;
-            
-            container.appendChild(toast);
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            });
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 3200);
-        }
-
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.add('hidden');
-            if (id === 'crop-modal' && activeCropper) {
-                activeCropper.destroy();
-                activeCropper = null;
-            }
-        }
-
-        function toggleMobileSidebar(show) {
-            const sidebar = document.getElementById('main-sidebar');
-            const backdrop = document.getElementById('mobile-sidebar-backdrop');
-            if (show) {
-                sidebar?.classList.remove('-translate-x-full');
-                backdrop?.classList.remove('hidden');
-            } else {
-                sidebar?.classList.add('-translate-x-full');
-                backdrop?.classList.add('hidden');
-            }
-        }
-
+        /* =========================================================================
+           AUTHENTICATION & ROLE-BASED ACCESS CONTROL
+           ========================================================================= */
         function handleLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('login-username').value.trim();
-            const p = document.getElementById('login-password').value.trim();
-            const foundUser = usersList.find(x => x.username.toLowerCase() === u.toLowerCase());
+            const usernameInput = document.getElementById('login-username')?.value.trim();
+            const passwordInput = document.getElementById('login-password')?.value.trim();
 
-            if (foundUser && foundUser.status === "ACTIVE") {
-                if (foundUser.password && foundUser.password !== p) {
-                    showToast('Password yang Anda masukkan salah!', 'error');
-                    return;
-                }
-                currentUser = foundUser;
-                document.getElementById('auth-modal').classList.add('hidden');
-                document.getElementById('main-app').classList.remove('hidden');
-                
-                applyRolePermissions();
-                updateUserDisplay();
-                renderAllTables();
-                initCategoryChart();
-                loadAllDataFromGAS();
-                showToast(`Selamat datang kembali, ${currentUser.name}!`, 'success');
-            } else {
-                showToast('Username / Akun tidak terdaftar atau terblokir!', 'error');
+            const user = usersList.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
+
+            if (!user) {
+                showToast('Akun username tidak terdaftar di sistem!', 'error');
+                return;
             }
+
+            if (user.status !== 'ACTIVE') {
+                showToast('Akun Anda saat ini diblokir. Hubungi administrator!', 'error');
+                return;
+            }
+
+            if (user.password && user.password !== passwordInput) {
+                showToast('Password yang Anda masukkan salah!', 'error');
+                return;
+            }
+
+            currentUser = user;
+            document.getElementById('auth-modal')?.classList.add('hidden');
+            document.getElementById('main-app')?.classList.remove('hidden');
+
+            const nameElem = document.getElementById('current-user-fullname');
+            const roleElem = document.getElementById('current-user-role');
+            const roleSwitch = document.getElementById('role-quick-switch');
+
+            if (nameElem) nameElem.textContent = user.name;
+            if (roleElem) roleElem.textContent = user.role;
+            if (roleSwitch) roleSwitch.value = user.role;
+
+            applyRolePermissions(user.role);
+            renderAllTables();
+            initCategoryChart();
+            recordAuditLog('LOGIN', `Pengguna ${user.username} berhasil login`);
+            showToast(`Selamat datang kembali, ${user.name}!`, 'success');
         }
 
         function handleLogout() {
+            if (currentUser) {
+                recordAuditLog('LOGOUT', `Pengguna ${currentUser.username} logout`);
+            }
             currentUser = null;
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('auth-modal').classList.remove('hidden');
-            showToast('Anda telah keluar dari sistem.');
+            document.getElementById('main-app')?.classList.add('hidden');
+            document.getElementById('auth-modal')?.classList.remove('hidden');
+            const userInp = document.getElementById('login-username');
+            const passInp = document.getElementById('login-password');
+            if (userInp) userInp.value = '';
+            if (passInp) passInp.value = '';
+            showToast('Anda telah berhasil keluar dari sistem.', 'info');
         }
 
         function switchRoleDemo(role) {
-            if (!currentUser) return;
-            currentUser.role = role;
-            applyRolePermissions();
-            updateUserDisplay();
-            showToast(`Hak akses dialihkan ke ${role}`);
+            if (currentUser) currentUser.role = role;
+            const roleElem = document.getElementById('current-user-role');
+            if (roleElem) roleElem.textContent = role;
+            applyRolePermissions(role);
+            showToast(`Hak akses diubah ke role ${role}`, 'info');
         }
 
-        function applyRolePermissions() {
-            const role = currentUser ? currentUser.role : 'VIEWER';
-            document.querySelectorAll('.role-admin-only').forEach(el => {
-                if (role === 'ADMINISTRATOR') el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            });
-            document.querySelectorAll('.role-operator-allow').forEach(el => {
-                if (role === 'ADMINISTRATOR' || role === 'OPERATOR') el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            });
-            const roleSwitch = document.getElementById('role-quick-switch');
-            if (roleSwitch) roleSwitch.value = role;
-        }
+        function applyRolePermissions(role) {
+            const adminElements = document.querySelectorAll('.role-admin-only');
+            const operatorElements = document.querySelectorAll('.role-operator-allow');
 
-        function updateUserDisplay() {
-            if (!currentUser) return;
-            document.getElementById('current-user-fullname').textContent = currentUser.name;
-            document.getElementById('current-user-role').textContent = currentUser.role;
-            document.getElementById('user-avatar-initial').textContent = systemSettings.avatarInitial || currentUser.name.charAt(0);
+            if (role === 'ADMINISTRATOR') {
+                adminElements.forEach(el => el.classList.remove('hidden'));
+                operatorElements.forEach(el => el.classList.remove('hidden'));
+            } else if (role === 'OPERATOR') {
+                adminElements.forEach(el => el.classList.add('hidden'));
+                operatorElements.forEach(el => el.classList.remove('hidden'));
+            } else {
+                // VIEWER
+                adminElements.forEach(el => el.classList.add('hidden'));
+                operatorElements.forEach(el => el.classList.add('hidden'));
+            }
         }
 
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             const targetTab = document.getElementById(`tab-${tabId}`);
             if (targetTab) targetTab.classList.remove('hidden');
-
-            applySidebarNavStyles(tabId);
 
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
                 pageTitle.textContent = 
                     tabId === 'dashboard' ? 'Dashboard Overview' :
-                    tabId === 'arsip' ? 'Pengelolaan Berkas Arsip' :
-                    tabId === 'kategori' ? 'Kategori & Folder Drive' :
+                    tabId === 'arsip' ? 'Kelola Berkas Arsip' :
+                    tabId === 'kategori' ? 'Kategori & Google Drive' :
                     tabId === 'users' ? 'Kelola Pengguna' :
-                    tabId === 'laporan' ? 'Laporan Rekapitulasi' :
+                    tabId === 'laporan' ? 'Laporan & Rekapitulasi' :
                     tabId === 'pengaturan' ? 'Pengaturan Sistem' : 'Audit Trail Log';
             }
 
-            if (window.innerWidth < 768) toggleMobileSidebar(false);
+            applySidebarNavStyles(tabId);
+            toggleMobileSidebar(false);
+
+            if (tabId === 'dashboard') initCategoryChart();
+            if (tabId === 'arsip') renderArsipTable();
+            if (tabId === 'kategori') renderKategoriTable();
+            if (tabId === 'users') renderUsersTable();
+            if (tabId === 'laporan') renderLaporanTable();
+            if (tabId === 'log') renderAuditLogTable();
         }
 
-        function initCategoryChart() {
-            const ctx = document.getElementById('categoryChart')?.getContext('2d');
-            if (!ctx || typeof Chart === 'undefined') return;
-            if (categoryChartInstance) categoryChartInstance.destroy();
-
-            const labels = categories.length > 0 ? categories.map(c => c.nama) : ['Belum Ada Data'];
-            const dataCounts = categories.length > 0 ? categories.map(c => archiveData.filter(a => a.kategori === c.nama).length) : [1];
-
-            categoryChartInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: dataCounts,
-                        backgroundColor: ['#2563eb', '#4f46e5', '#059669', '#d97706', '#9333ea', '#0891b2'],
-                        borderWidth: 0,
-                        hoverOffset: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Plus Jakarta Sans' } } } }
-                }
-            });
-        }
-
+        /* =========================================================================
+           DATA RENDERING & CHART CONTROLLERS
+           ========================================================================= */
         function renderAllTables() {
+            populateCategorySelects();
             renderArsipTable();
             renderKategoriTable();
             renderUsersTable();
             renderLaporanTable();
-            renderLogTable();
+            renderAuditLogTable();
             updateDashboardStats();
-            populateCategorySelects();
+        }
+
+        function populateCategorySelects() {
+            const filterKat = document.getElementById('filter-kategori');
+            const lapKat = document.getElementById('lap-kategori');
+            const arsipKat = document.getElementById('arsip-kategori-input');
+
+            const activeCats = categories.filter(c => c.status === 'ACTIVE');
+
+            if (filterKat) {
+                const currentVal = filterKat.value;
+                filterKat.innerHTML = '<option value="">Semua Kategori</option>' + 
+                    categories.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
+            }
+
+            if (lapKat) {
+                const currentVal = lapKat.value;
+                lapKat.innerHTML = '<option value="">Semua Kategori</option>' + 
+                    categories.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
+            }
+
+            if (arsipKat) {
+                const currentVal = arsipKat.value;
+                arsipKat.innerHTML = activeCats.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
+            }
         }
 
         function updateDashboardStats() {
-            document.getElementById('dash-stat-total').textContent = archiveData.length;
-            document.getElementById('dash-stat-kategori').textContent = categories.length;
-            
-            const totalKB = archiveData.reduce((acc, item) => acc + (parseInt(item.size, 10) || 0), 0);
-            document.getElementById('dash-stat-storage').textContent = totalKB > 1024 ? `${(totalKB / 1024).toFixed(2)} MB` : `${totalKB} KB`;
-            document.getElementById('dash-stat-users').textContent = usersList.length;
+            const totalDocs = archiveData.length;
+            const totalCats = categories.length;
+            const totalUsers = usersList.length;
+            const totalStorage = archiveData.reduce((acc, curr) => acc + (parseInt(curr.size, 10) || 0), 0);
 
-            const tbody = document.getElementById('dash-recent-table');
-            if (tbody) {
+            const totalDocElem = document.getElementById('dash-stat-total');
+            const totalCatElem = document.getElementById('dash-stat-kategori');
+            const totalUserElem = document.getElementById('dash-stat-users');
+            const totalStorElem = document.getElementById('dash-stat-storage');
+
+            if (totalDocElem) totalDocElem.textContent = totalDocs.toString();
+            if (totalCatElem) totalCatElem.textContent = totalCats.toString();
+            if (totalUserElem) totalUserElem.textContent = totalUsers.toString();
+            if (totalStorElem) totalStorElem.textContent = `${totalStorage.toLocaleString('id-ID')} KB`;
+
+            // Recent Table
+            const recentTable = document.getElementById('dash-recent-table');
+            if (recentTable) {
                 if (archiveData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada berkas arsip terdaftar</td></tr>`;
+                    recentTable.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Belum ada dokumen tersimpan.</td></tr>';
                 } else {
-                    tbody.innerHTML = archiveData.slice(0, 5).map(item => `
+                    recentTable.innerHTML = archiveData.slice(0, 5).map(item => `
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="py-3 px-3 font-mono font-bold text-brand-600 truncate max-w-[120px]">${item.no}</td>
-                            <td class="py-3 px-3 font-semibold text-slate-800 truncate max-w-[200px]">${item.nama}</td>
-                            <td class="py-3 px-3 text-slate-500 truncate max-w-[140px]">${item.kategori}</td>
-                            <td class="py-3 px-3 text-right font-mono font-bold text-slate-700 whitespace-nowrap">${item.size} KB</td>
+                            <td class="py-3 px-3 font-mono font-bold text-brand-600">${item.no}</td>
+                            <td class="py-3 px-3 font-semibold text-slate-800">${item.nama}</td>
+                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 font-semibold text-[10px]">${item.kategori}</span></td>
+                            <td class="py-3 px-3 text-right font-mono text-slate-500">${item.size || 0} KB</td>
                         </tr>
                     `).join('');
                 }
             }
         }
 
-        function populateCategorySelects() {
-            const options = categories.map(c => `<option value="${c.nama}">${c.nama}</option>`).join('');
-            const fk = document.getElementById('filter-kategori');
-            const ak = document.getElementById('arsip-kategori-input');
-            const lk = document.getElementById('lap-kategori');
-            if (fk) fk.innerHTML = '<option value="">Semua Kategori</option>' + options;
-            if (ak) ak.innerHTML = options || '<option value="">Belum ada kategori</option>';
-            if (lk) lk.innerHTML = '<option value="">Semua Kategori</option>' + options;
-        }
+        function initCategoryChart() {
+            const canvas = document.getElementById('categoryChart');
+            if (!canvas || typeof Chart === 'undefined') return;
 
-        let searchDebounceTimeout;
-        function handleSearchDebounce() {
-            clearTimeout(searchDebounceTimeout);
-            searchDebounceTimeout = setTimeout(() => renderArsipTable(), 250);
-        }
-
-        function formatDateTimeDisplay(dateStr) {
-            if (!dateStr) return '-';
-            try {
-                const d = new Date(dateStr);
-                if (isNaN(d.getTime())) {
-                    return dateStr;
+            const categoryCounts = {};
+            categories.forEach(c => categoryCounts[c.nama] = 0);
+            archiveData.forEach(a => {
+                if (categoryCounts[a.kategori] !== undefined) {
+                    categoryCounts[a.kategori]++;
+                } else {
+                    categoryCounts[a.kategori] = 1;
                 }
-                const pad = (n) => String(n).padStart(2, '0');
-                const tgl = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-                const jam = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-                return `${tgl} • ${jam} WIB`;
-            } catch (e) {
-                return dateStr;
+            });
+
+            const labels = Object.keys(categoryCounts);
+            const dataValues = Object.values(categoryCounts);
+
+            if (categoryChartInstance) {
+                categoryChartInstance.destroy();
             }
+
+            const ctx = canvas.getContext('2d');
+            categoryChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels.length > 0 ? labels : ['Belum Ada Kategori'],
+                    datasets: [{
+                        data: dataValues.length > 0 && dataValues.some(v => v > 0) ? dataValues : [1],
+                        backgroundColor: [
+                            '#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ec4899', 
+                            '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { family: 'Plus Jakarta Sans', size: 10 }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
         }
 
         function renderArsipTable() {
-            const search = document.getElementById('search-arsip')?.value.trim().toLowerCase() || '';
-            const katFilter = document.getElementById('filter-kategori')?.value || '';
-
-            const filtered = archiveData.filter(item => {
-                const docName = (item.nama || '').toLowerCase();
-                const docNo = (item.no || '').toLowerCase();
-                const docDesc = (item.deskripsi || '').toLowerCase();
-                
-                const matchesSearch = !search || docName.includes(search) || docNo.includes(search) || docDesc.includes(search);
-                const matchesKat = !katFilter || item.kategori === katFilter;
-                return matchesSearch && matchesKat;
-            });
-
             const tbody = document.getElementById('arsip-table-body');
             if (!tbody) return;
 
+            const searchVal = document.getElementById('search-arsip')?.value.toLowerCase().trim() || '';
+            const katFilter = document.getElementById('filter-kategori')?.value || '';
+
+            const filtered = archiveData.filter(item => {
+                const matchSearch = item.no.toLowerCase().includes(searchVal) || 
+                                    item.nama.toLowerCase().includes(searchVal) || 
+                                    (item.deskripsi && item.deskripsi.toLowerCase().includes(searchVal));
+                const matchKat = katFilter === '' || item.kategori === katFilter;
+                return matchSearch && matchKat;
+            });
+
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Dokumen tidak ditemukan</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Tidak ada data arsip yang ditemukan.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs truncate max-w-[140px]">${item.no}</td>
-                    <td class="py-3.5 px-4 font-semibold text-slate-800 truncate max-w-[240px]">${item.nama}</td>
-                    <td class="py-3.5 px-4 text-xs text-slate-500"><span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg font-medium border border-slate-200/60 truncate max-w-[160px] inline-block">${item.kategori}</span></td>
-                    <td class="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
-                        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/90 border border-slate-200/70 text-slate-700 font-mono text-[11px]">
-                            <svg class="w-3.5 h-3.5 text-brand-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <span>${formatDateTimeDisplay(item.tanggal)}</span>
-                        </div>
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-mono font-bold text-brand-600">${item.no}</td>
+                    <td class="py-3 px-4">
+                        <div class="font-bold text-slate-900">${item.nama}</div>
+                        <div class="text-[11px] text-slate-400 line-clamp-1">${item.deskripsi || '-'}</div>
                     </td>
-                    <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700 whitespace-nowrap">${item.size} KB</td>
-                    <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                        <button type="button" onclick="previewFile('${item.id}')" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-brand-200/60">Lihat</button>
-                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
-                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-admin-only px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-rose-200/60">Hapus</button>
+                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg text-xs">${item.kategori}</span></td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-600">${formatDateTimeDisplay(item.tanggal)}</td>
+                    <td class="py-3 px-4 font-mono text-xs text-slate-600">${item.size || 0} KB</td>
+                    <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        <button type="button" onclick="previewFile('${item.id}')" class="p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors cursor-pointer" title="Pratinjau">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-operator-allow p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </td>
                 </tr>
             `).join('');
-            applyRolePermissions();
+        }
+
+        function handleSearchDebounce() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+                renderArsipTable();
+            }, 300);
         }
 
         function renderKategoriTable() {
             const tbody = document.getElementById('kategori-table-body');
             if (!tbody) return;
-            if (categories.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">Belum ada kategori terdaftar</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = categories.map(cat => {
-                const isRealDriveId = cat.folder_id && !cat.folder_id.startsWith('FLD_');
-                const driveLinkHtml = isRealDriveId
-                    ? `<a href="https://drive.google.com/drive/folders/${cat.folder_id}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200/80 transition-colors" title="Buka Folder di Google Drive">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        <span class="truncate max-w-[110px] font-mono">${cat.folder_id}</span>
-                       </a>`
-                    : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-xs border border-slate-200 truncate max-w-[160px]" title="ID Sementara (Akan terbuat otomatis saat online)">
-                        <svg class="w-3 h-3 text-brand-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        ${cat.folder_id || 'Auto Google Drive'}
-                       </span>`;
 
-                return `
+            tbody.innerHTML = categories.map(cat => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3.5 px-4 font-mono text-xs font-bold text-slate-500">${cat.id}</td>
-                    <td class="py-3.5 px-4 font-bold text-slate-800">${cat.nama}</td>
-                    <td class="py-3.5 px-4">${driveLinkHtml}</td>
-                    <td class="py-3.5 px-4"><span class="${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'} border px-2.5 py-0.5 rounded-full text-[10px] font-bold">${cat.status}</span></td>
-                    <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                        <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
-                        <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-rose-200/60">Hapus</button>
+                    <td class="py-3 px-4 font-mono font-bold text-slate-700">${cat.id}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">${cat.nama}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono text-xs text-slate-500 max-w-[140px] truncate">${cat.folder_id}</span>
+                            <a href="https://drive.google.com/drive/folders/${cat.folder_id}" target="_blank" class="px-2 py-1 bg-brand-50 text-brand-600 hover:bg-brand-100 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                <span>Buka Drive</span>
+                            </a>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">${cat.status}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-1.5">
+                        <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </td>
                 </tr>
-            `;
-            }).join('');
-            applyRolePermissions();
+            `).join('');
         }
 
         function renderUsersTable() {
             const tbody = document.getElementById('users-table-body');
             if (!tbody) return;
+
             tbody.innerHTML = usersList.map(u => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3.5 px-4 font-bold text-slate-800">${u.username}</td>
-                    <td class="py-3.5 px-4 text-slate-600 font-medium">${u.name}</td>
-                    <td class="py-3.5 px-4"><span class="bg-brand-50 text-brand-700 font-bold px-3 py-1 rounded-xl text-xs border border-brand-100">${u.role}</span></td>
-                    <td class="py-3.5 px-4"><span class="${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200'} border px-2.5 py-0.5 rounded-full text-[10px] font-bold">${u.status}</span></td>
-                    <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                        <button type="button" onclick="openUserModal('${u.username}')" class="role-admin-only px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
-                        <button type="button" onclick="deleteUser('${u.username}')" class="role-admin-only px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-rose-200/60">Hapus</button>
+                    <td class="py-3 px-4 font-mono font-bold text-slate-800">${u.username}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">${u.name}</td>
+                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-brand-50 text-brand-700 font-bold rounded-lg text-[10px] border border-brand-100">${u.role}</span></td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">${u.status}</span>
+                    </td>
+                    <td class="py-3 px-4 text-right space-x-1.5">
+                        <button type="button" onclick="openUserModal('${u.username}')" class="role-admin-only p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </button>
+                        <button type="button" onclick="deleteUser('${u.username}')" class="role-admin-only p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
                     </td>
                 </tr>
             `).join('');
-            applyRolePermissions();
         }
 
         function renderLaporanTable() {
-            const dateFrom = document.getElementById('lap-date-from')?.value;
-            const dateTo = document.getElementById('lap-date-to')?.value;
-            const kat = document.getElementById('lap-kategori')?.value;
-
-            const filtered = archiveData.filter(a => {
-                const matchKat = !kat || a.kategori === kat;
-                const matchFrom = !dateFrom || (a.tanggal && a.tanggal >= dateFrom);
-                const matchTo = !dateTo || (a.tanggal && a.tanggal <= dateTo);
-                return matchKat && matchFrom && matchTo;
-            });
-
-            document.getElementById('lap-count-text').textContent = `${filtered.length} Berkas`;
-            const totalKB = filtered.reduce((acc, i) => acc + (parseInt(i.size, 10) || 0), 0);
-            document.getElementById('lap-size-text').textContent = `${totalKB} KB`;
-
             const tbody = document.getElementById('laporan-table-body');
             if (!tbody) return;
+
+            const fromDate = document.getElementById('lap-date-from')?.value;
+            const toDate = document.getElementById('lap-date-to')?.value;
+            const kat = document.getElementById('lap-kategori')?.value;
+
+            const filtered = archiveData.filter(item => {
+                let matchDate = true;
+                if (fromDate && item.tanggal < fromDate) matchDate = false;
+                if (toDate && item.tanggal > toDate + " 23:59:59") matchDate = false;
+                let matchKat = kat ? item.kategori === kat : true;
+                return matchDate && matchKat;
+            });
+
+            const countElem = document.getElementById('lap-count-text');
+            const sizeElem = document.getElementById('lap-size-text');
+            const totalSize = filtered.reduce((acc, curr) => acc + (parseInt(curr.size, 10) || 0), 0);
+
+            if (countElem) countElem.textContent = `${filtered.length} Berkas`;
+            if (sizeElem) sizeElem.textContent = `${totalSize.toLocaleString('id-ID')} KB`;
+
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 italic">Data rekapitulasi kosong</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Tidak ada rekapitulasi data arsip sesuai filter.</td></tr>`;
                 return;
             }
+
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs">${item.no}</td>
-                    <td class="py-3.5 px-4 text-slate-800 font-semibold truncate max-w-[200px]">${item.nama}</td>
-                    <td class="py-3.5 px-4 text-xs text-slate-500">${item.kategori}</td>
-                    <td class="py-3.5 px-4 text-xs text-slate-600 font-medium">${item.uploader}</td>
-                    <td class="py-3.5 px-4 text-xs font-mono font-bold text-slate-700">${item.size} KB</td>
-                    <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-                        <button type="button" onclick="previewFile('${item.id}')" class="px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-brand-200/60">Lihat</button>
-                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-amber-200/60">Edit</button>
-                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-admin-only px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-rose-200/60">Hapus</button>
+                    <td class="py-3 px-4 font-mono font-bold text-brand-600">${item.no}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900">${item.nama}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 bg-slate-100 font-semibold rounded text-xs">${item.kategori}</span></td>
+                    <td class="py-3 px-4 text-slate-600 text-xs">${item.uploader || 'admin'}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${item.size || 0} KB</td>
+                    <td class="py-3 px-4 text-right">
+                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold rounded-lg text-xs cursor-pointer">Lihat</button>
                     </td>
                 </tr>
             `).join('');
-            applyRolePermissions();
         }
 
-        function renderLogTable() {
+        function renderAuditLogTable() {
             const tbody = document.getElementById('log-table-body');
             if (!tbody) return;
-            if (auditLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 italic">Belum ada aktivitas tercatat</td></tr>`;
-                return;
-            }
+
             tbody.innerHTML = auditLogs.map(log => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3.5 px-4 font-mono text-xs text-slate-500">${log.time}</td>
-                    <td class="py-3.5 px-4 font-bold text-slate-800">${log.user}</td>
-                    <td class="py-3.5 px-4"><span class="bg-brand-50 text-brand-700 font-bold px-3 py-1 rounded-xl text-xs border border-brand-100">${log.action}</span></td>
-                    <td class="py-3.5 px-4 text-xs text-slate-600 font-medium">${log.detail}</td>
+                <tr class="hover:bg-slate-50 transition-colors text-xs">
+                    <td class="py-3 px-4 font-mono text-slate-500">${log.time}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${log.user}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-bold text-[10px]">${log.action}</span></td>
+                    <td class="py-3 px-4 text-slate-600">${log.detail}</td>
                 </tr>
             `).join('');
         }
 
+        /* =========================================================================
+           CRUD: ARSIP / DOKUMEN (DRAG & DROP + MULTI-FILE)
+           ========================================================================= */
         function openArsipModal(id = null) {
-            try {
-                populateCategorySelects();
-                const modal = document.getElementById('arsip-modal');
-                if (!modal) return;
+            populateCategorySelects();
+            const modal = document.getElementById('arsip-modal');
+            if (!modal) return;
 
-                const arsipIdElem = document.getElementById('arsip-id');
-                const arsipNoElem = document.getElementById('arsip-no');
-                const arsipNamaElem = document.getElementById('arsip-nama');
-                const arsipDeskElem = document.getElementById('arsip-deskripsi');
-                const arsipKatElem = document.getElementById('arsip-kategori-input');
-                const arsipTglElem = document.getElementById('arsip-tanggal');
-                const fileInput = document.getElementById('arsip-file-input');
-                const detectedBadge = document.getElementById('detected-file-badge');
+            const arsipIdElem = document.getElementById('arsip-id');
+            const arsipNoElem = document.getElementById('arsip-no');
+            const arsipNamaElem = document.getElementById('arsip-nama');
+            const arsipDeskElem = document.getElementById('arsip-deskripsi');
+            const arsipKatElem = document.getElementById('arsip-kategori-input');
+            const arsipTglElem = document.getElementById('arsip-tanggal');
+            const fileInput = document.getElementById('arsip-file-input');
+            const detectedBadge = document.getElementById('detected-file-badge');
 
-                if (arsipIdElem) arsipIdElem.value = id || '';
-                if (detectedBadge) detectedBadge.classList.add('hidden');
-                detectedUploadedFileType = '';
-                uploadedFolderFiles = [];
-                if (fileInput) fileInput.value = '';
+            if (arsipIdElem) arsipIdElem.value = id || '';
+            if (detectedBadge) detectedBadge.classList.add('hidden');
+            detectedUploadedFileType = '';
+            uploadedMultipleFiles = [];
+            uploadedFolderFiles = [];
+            if (fileInput) fileInput.value = '';
 
-                if (id) {
-                    const item = archiveData.find(x => x.id === id);
-                    if (!item) return;
-                    const titleElem = document.getElementById('arsip-modal-title');
-                    if (titleElem) titleElem.textContent = "Edit Berkas Arsip";
-                    if (arsipNoElem) arsipNoElem.value = item.no || '';
-                    if (arsipNamaElem) arsipNamaElem.value = item.nama || '';
-                    if (arsipDeskElem) arsipDeskElem.value = item.deskripsi || '';
-                    if (arsipKatElem) arsipKatElem.value = item.kategori || '';
-                    if (arsipTglElem) arsipTglElem.value = item.tanggal || '';
-                } else {
-                    const titleElem = document.getElementById('arsip-modal-title');
-                    if (titleElem) titleElem.textContent = "Tambah Berkas Arsip Baru";
-                    if (arsipNoElem) arsipNoElem.value = `ARS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
-                    if (arsipNamaElem) arsipNamaElem.value = '';
-                    if (arsipDeskElem) arsipDeskElem.value = '';
-                    if (arsipTglElem) arsipTglElem.value = '';
-                }
-
-                updateUploadGuidance();
-                modal.classList.remove('hidden');
-            } catch (err) {
-                console.error("Eror openArsipModal:", err);
+            if (id) {
+                const item = archiveData.find(x => x.id === id);
+                if (!item) return;
+                const titleElem = document.getElementById('arsip-modal-title');
+                if (titleElem) titleElem.textContent = "Edit Berkas Arsip";
+                if (arsipNoElem) arsipNoElem.value = item.no || '';
+                if (arsipNamaElem) arsipNamaElem.value = item.nama || '';
+                if (arsipDeskElem) arsipDeskElem.value = item.deskripsi || '';
+                if (arsipKatElem) arsipKatElem.value = item.kategori || '';
+                if (arsipTglElem) arsipTglElem.value = item.tanggal || '';
+            } else {
+                const titleElem = document.getElementById('arsip-modal-title');
+                if (titleElem) titleElem.textContent = "Tambah Berkas Arsip Baru";
+                const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+                if (arsipNoElem) arsipNoElem.value = `ARS-${new Date().getFullYear()}-${randomSuffix}`;
+                if (arsipNamaElem) arsipNamaElem.value = '';
+                if (arsipDeskElem) arsipDeskElem.value = '';
+                if (arsipTglElem) arsipTglElem.value = '';
             }
-        }
 
-        function updateUploadGuidance() {
-            const gExt = document.getElementById('guidance-allowed-ext');
-            const gSize = document.getElementById('guidance-max-size');
-            if (gExt) gExt.textContent = systemSettings.allowedExtensions;
-            if (gSize) gSize.textContent = systemSettings.maxFileSizeMB;
+            updateUploadGuidance();
+            modal.classList.remove('hidden');
         }
 
         function handleDragOver(e) {
@@ -1519,19 +1641,28 @@
 
             const files = e.dataTransfer.files;
             if (files && files.length > 0) {
-                processSingleFileSelection(files[0]);
+                if (files.length === 1) {
+                    processSingleFileSelection(files[0]);
+                } else {
+                    processMultipleFilesSelection(Array.from(files));
+                }
             }
         }
 
         function validateFileInput(input) {
-            if (input.files && input.files[0]) {
-                processSingleFileSelection(input.files[0]);
+            if (input.files && input.files.length > 0) {
+                if (input.files.length === 1) {
+                    processSingleFileSelection(input.files[0]);
+                } else {
+                    processMultipleFilesSelection(Array.from(input.files));
+                }
             }
         }
 
         function validateFolderInput(input) {
-            if (input.files && input.files[0]) {
+            if (input.files && input.files.length > 0) {
                 uploadedFolderFiles = Array.from(input.files);
+                uploadedMultipleFiles = Array.from(input.files);
                 const firstFile = uploadedFolderFiles[0];
                 const folderPath = firstFile.webkitRelativePath || '';
                 const folderName = folderPath.split('/')[0] || 'Folder Terpilih';
@@ -1572,6 +1703,7 @@
                 return;
             }
 
+            uploadedMultipleFiles = [file];
             detectedUploadedFileType = ext;
 
             const namaInput = document.getElementById('arsip-nama');
@@ -1582,25 +1714,62 @@
 
             const fileSizeKB = (file.size / 1024).toFixed(1);
             if (detectedBadge) {
-                detectedBadge.textContent = `Terdeteksi: Format .${ext} (${file.type || 'Dokumen ' + ext}) | Ukuran: ${fileSizeKB} KB`;
+                detectedBadge.textContent = `Terdeteksi: Format .${ext} | Ukuran: ${fileSizeKB} KB`;
                 detectedBadge.classList.remove('hidden');
             }
 
             showToast(`Dokumen .${ext} berhasil terbaca (${fileSizeKB} KB)!`, 'success');
         }
 
+        function processMultipleFilesSelection(files) {
+            const detectedBadge = document.getElementById('detected-file-badge');
+            const allowed = systemSettings.allowedExtensions.split(',').map(s => s.trim().toUpperCase());
+            const maxBytes = systemSettings.maxFileSizeMB * 1024 * 1024;
+            
+            uploadedMultipleFiles = [];
+            let validCount = 0;
+            let totalBytes = 0;
+
+            for (let f of files) {
+                const ext = f.name.split('.').pop().toUpperCase();
+                if (f.size <= maxBytes && allowed.includes(ext)) {
+                    uploadedMultipleFiles.push(f);
+                    totalBytes += f.size;
+                    validCount++;
+                }
+            }
+
+            if (validCount === 0) {
+                showToast('Tidak ada berkas yang valid sesuai ekstensi atau ukuran yang diizinkan!', 'error');
+                return;
+            }
+
+            const totalKB = (totalBytes / 1024).toFixed(1);
+            const namaInput = document.getElementById('arsip-nama');
+            if (namaInput && !namaInput.value.trim()) {
+                namaInput.value = `Batch Upload (${validCount} Dokumen)`;
+            }
+
+            if (detectedBadge) {
+                detectedBadge.textContent = `Terdeteksi ${validCount} Berkas Terpilih | Total: ${totalKB} KB`;
+                detectedBadge.classList.remove('hidden');
+            }
+
+            detectedUploadedFileType = 'MULTIPLE';
+            showToast(`${validCount} berkas berhasil dipilih untuk diunggah!`, 'success');
+        }
+
         async function handleSaveArsip(e) {
             e.preventDefault();
             
             const id = document.getElementById('arsip-id').value;
-            const no = document.getElementById('arsip-no').value.trim();
-            const nama = document.getElementById('arsip-nama').value.trim();
+            const baseNo = document.getElementById('arsip-no').value.trim();
+            const baseNama = document.getElementById('arsip-nama').value.trim();
             const deskripsi = document.getElementById('arsip-deskripsi').value.trim();
             const kategori = document.getElementById('arsip-kategori-input').value;
             let tanggal = document.getElementById('arsip-tanggal').value;
-            const fileInput = document.getElementById('arsip-file-input');
 
-            if (!no || !nama || !kategori) {
+            if (!baseNo || !baseNama || !kategori) {
                 showToast('Mohon lengkapi Nomor, Nama Arsip, dan Kategori!', 'error');
                 return;
             }
@@ -1613,15 +1782,67 @@
                 tanggal = currentTimestamp;
             }
 
-            const executeSave = async (fileDataUrl = '', fileName = '') => {
+            if (!id && uploadedMultipleFiles && uploadedMultipleFiles.length > 1) {
+                showToast(`Menyimpan ${uploadedMultipleFiles.length} berkas arsip secara batch...`, 'info');
+                const totalFiles = uploadedMultipleFiles.length;
+
+                for (let i = 0; i < totalFiles; i++) {
+                    const file = uploadedMultipleFiles[i];
+                    const ext = file.name.split('.').pop().toUpperCase();
+                    const cleanNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                    const docName = baseNama.includes('Batch Upload') ? cleanNameWithoutExt.replace(/[-_]/g, ' ') : `${baseNama} - ${cleanNameWithoutExt}`;
+                    const docNo = totalFiles > 1 ? `${baseNo}/${i + 1}` : baseNo;
+                    const uniqueId = `ARS-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
+
+                    const readFileBase64 = (fileObj) => {
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (evt) => resolve(evt.target.result);
+                            reader.onerror = () => resolve('');
+                            reader.readAsDataURL(fileObj);
+                        });
+                    };
+
+                    const fileDataUrl = await readFileBase64(file);
+                    const computedSize = Math.round(file.size / 1024) || 1;
+
+                    const archiveItem = {
+                        id: uniqueId,
+                        no: docNo,
+                        nama: docName,
+                        deskripsi: deskripsi || `Berkas ${i + 1} dari batch upload ${file.name}`,
+                        kategori: kategori,
+                        tanggal: tanggal,
+                        size: computedSize,
+                        file_name: file.name,
+                        file_url: fileDataUrl,
+                        file_type: ext,
+                        uploader: currentUser ? currentUser.username : 'admin'
+                    };
+
+                    archiveData.unshift(archiveItem);
+                    recordAuditLog('ADD_ARCHIVE', `Batch upload dokumen ${docNo} - ${docName}`);
+                    sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
+                }
+
+                saveLocalState();
+                renderAllTables();
+                initCategoryChart();
+                closeModal('arsip-modal');
+                showToast(`Berhasil menyimpan ${totalFiles} berkas arsip!`, 'success');
+                return;
+            }
+
+            const executeSaveSingle = async (fileDataUrl = '', fileName = '') => {
                 const isNew = !id;
-                const newId = isNew ? `ARS-${String(archiveData.length + 1).padStart(3, '0')}` : id;
-                const computedSize = fileInput && fileInput.files && fileInput.files[0] ? Math.round(fileInput.files[0].size / 1024) : 120;
+                const uniqueId = isNew ? `ARS-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}` : id;
+                const fileObj = uploadedMultipleFiles && uploadedMultipleFiles.length === 1 ? uploadedMultipleFiles[0] : null;
+                const computedSize = fileObj ? Math.round(fileObj.size / 1024) : (isNew ? 120 : 0);
 
                 const archiveItem = {
-                    id: newId,
-                    no: no,
-                    nama: nama,
+                    id: uniqueId,
+                    no: baseNo,
+                    nama: baseNama,
                     deskripsi: deskripsi,
                     kategori: kategori,
                     tanggal: tanggal,
@@ -1634,43 +1855,35 @@
 
                 if (isNew) {
                     archiveData.unshift(archiveItem);
-                    recordAuditLog('ADD_ARCHIVE', `Menambahkan arsip baru ${no} - ${nama}`);
+                    recordAuditLog('ADD_ARCHIVE', `Menambahkan arsip baru ${baseNo} - ${baseNama}`);
                 } else {
                     const idx = archiveData.findIndex(x => x.id === id);
                     if (idx !== -1) {
                         archiveItem.file_url = fileDataUrl || archiveData[idx].file_url;
+                        archiveItem.size = computedSize || archiveData[idx].size;
                         archiveData[idx] = { ...archiveData[idx], ...archiveItem };
                     }
-                    recordAuditLog('EDIT_ARCHIVE', `Memperbarui arsip ${no}`);
+                    recordAuditLog('EDIT_ARCHIVE', `Memperbarui arsip ${baseNo}`);
                 }
 
                 saveLocalState();
                 renderAllTables();
                 initCategoryChart();
 
-                const res = await sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
-                if (res && res.status === 'SUCCESS') {
-                    showToast(`Dokumen ${no} tersimpan ke Cloud Drive!`, 'success');
-                    loadAllDataFromGAS();
-                } else {
-                    showToast(`Dokumen ${no} berhasil disimpan!`, 'success');
-                }
-
+                sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
+                showToast(`Dokumen ${baseNo} berhasil disimpan!`, 'success');
                 closeModal('arsip-modal');
             };
 
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
+            if (uploadedMultipleFiles && uploadedMultipleFiles.length === 1) {
+                const file = uploadedMultipleFiles[0];
                 const reader = new FileReader();
                 reader.onload = async function(evt) {
-                    await executeSave(evt.target.result, file.name);
-                };
-                reader.onerror = function() {
-                    showToast('Gagal membaca berkas unggahan', 'error');
+                    await executeSaveSingle(evt.target.result, file.name);
                 };
                 reader.readAsDataURL(file);
             } else {
-                await executeSave();
+                await executeSaveSingle();
             }
         }
 
@@ -1684,15 +1897,14 @@
                 renderAllTables();
                 initCategoryChart();
 
-                const res = await sendToGAS({ action: 'DELETE_ARCHIVE', id: id, drive_file_id: deleted.drive_file_id || '' });
-                if (res && res.status === 'SUCCESS') {
-                    showToast(`Dokumen ${deleted.no} & file Drive terhapus!`, 'error');
-                } else {
-                    showToast(`Dokumen ${deleted.no} berhasil dihapus!`, 'info');
-                }
+                sendToGAS({ action: 'DELETE_ARCHIVE', id: id, drive_file_id: deleted.drive_file_id || '' });
+                showToast(`Dokumen ${deleted.no} berhasil dihapus!`, 'info');
             }
         }
 
+        /* =========================================================================
+           DOCUMENT PREVIEW & DOWNLOAD CONTROLLER
+           ========================================================================= */
         function previewFile(idOrName) {
             const item = archiveData.find(x => x.id === idOrName || x.nama === idOrName) || archiveData[0];
             document.getElementById('preview-title').textContent = `Pratinjau Dokumen: ${item ? item.nama : idOrName}`;
@@ -1710,7 +1922,7 @@
                         <iframe src="https://drive.google.com/file/d/${fileId}/preview" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-sm" allow="autoplay"></iframe>
                         <div class="mt-3.5 flex justify-between items-center w-full px-2">
                             <span class="text-xs font-bold text-slate-500">Google Drive Cloud Viewer Active</span>
-                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Berkas Asli</button>
+                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Berkas</button>
                         </div>
                     </div>
                 `;
@@ -1720,12 +1932,12 @@
                         <div class="w-full h-full flex flex-col items-center">
                             <object data="${item.file_url}" type="application/pdf" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-xs">
                                 <iframe src="${item.file_url}" class="w-full h-full rounded-2xl border-0">
-                                    <p class="text-xs text-slate-500 p-4 text-center">Browser Anda tidak mendukung preview PDF langsung.</p>
+                                    <p class="text-xs text-slate-500 p-4 text-center">Browser tidak mendukung preview PDF langsung.</p>
                                 </iframe>
                             </object>
                             <div class="mt-3.5 flex justify-between items-center w-full px-2">
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">Pratinjau PDF Interaktif Langsung</span>
-                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Dokumen PDF</button>
+                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">Pratinjau PDF Interaktif</span>
+                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh PDF</button>
                             </div>
                         </div>
                     `;
@@ -1739,15 +1951,15 @@
                             <img src="${item.file_url}" class="max-h-full object-contain rounded-xl" alt="Preview Gambar">
                         </div>
                         <div class="mt-3.5 flex justify-between items-center w-full px-2">
-                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200">Pratinjau Gambar Langsung</span>
-                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Gambar Asli</button>
+                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200">Pratinjau Gambar</span>
+                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Gambar</button>
                         </div>
                     </div>
                 `;
             } else {
                 renderDocumentMetadataCard(box, item);
             }
-            document.getElementById('preview-modal').classList.remove('hidden');
+            openModal('preview-modal');
         }
 
         function renderDocumentMetadataCard(box, item) {
@@ -1800,7 +2012,7 @@
                 document.body.removeChild(a);
                 showToast(`Mengunduh berkas ${item.nama}.${ext}...`, 'success');
             } else {
-                const content = `==================================================\nARSIP CLOUD ENTERPRISE v3.8 - SALINAN DOKUMEN RESMI\n==================================================\n\nNomor Dokumen : ${item.no}\nNama Dokumen  : ${item.nama}\nKategori      : ${item.kategori}\nJenis Berkas  : ${item.file_type || 'N/A'}\nTanggal Arsip : ${item.tanggal}\nPengunggah    : ${item.uploader}\nUkuran Berkas : ${item.size} KB\n\nKETERANGAN / CATATAN:\n${item.deskripsi || 'Tidak ada catatan'}\n\n==================================================\nDownloaded on: ${new Date().toLocaleString('id-ID')}\n`;
+                const content = `==================================================\nARSIP CLOUD ENTERPRISE v3.9 - SALINAN DOKUMEN RESMI\n==================================================\n\nNomor Dokumen : ${item.no}\nNama Dokumen  : ${item.nama}\nKategori      : ${item.kategori}\nJenis Berkas  : ${item.file_type || 'N/A'}\nTanggal Arsip : ${item.tanggal}\nPengunggah    : ${item.uploader}\nUkuran Berkas : ${item.size} KB\n\nKETERANGAN / CATATAN:\n${item.deskripsi || 'Tidak ada catatan'}\n\n==================================================\nDownloaded on: ${new Date().toLocaleString('id-ID')}\n`;
                 const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1814,8 +2026,9 @@
             }
         }
 
-        let isManualFolderIdEdited = false;
-
+        /* =========================================================================
+           CRUD: KATEGORI & GOOGLE DRIVE INTEGRATION
+           ========================================================================= */
         function generateAutoFolderId(name = '') {
             if (name && name.trim()) {
                 const cleanName = name.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase().slice(0, 12);
@@ -1857,10 +2070,10 @@
             } else {
                 document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Hubungkan Drive";
                 document.getElementById('kategori-nama').value = '';
-                document.getElementById('kategori-folder-id').value = '';
+                document.getElementById('kategori-folder-id').value = generateAutoFolderId();
                 document.getElementById('kategori-status').value = 'ACTIVE';
             }
-            document.getElementById('kategori-modal').classList.remove('hidden');
+            openModal('kategori-modal');
         }
 
         async function handleSaveKategori(e) {
@@ -1903,8 +2116,8 @@
                     uploader: currentUser ? currentUser.username : 'admin'
                 };
                 categories.push(payload);
-                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru "${nama}" terhubung Google Drive`);
-                showToast(`Menyimpan kategori & membuat folder Google Drive "${nama}"...`, 'info');
+                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru "${nama}"`);
+                showToast(`Kategori "${nama}" berhasil dibuat!`, 'success');
             }
 
             saveLocalState();
@@ -1912,7 +2125,6 @@
             initCategoryChart();
             closeModal('kategori-modal');
 
-            // Sinkronisasi ke backend Google Apps Script untuk membuat folder fisik di Google Drive ID 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r
             if (GAS_API_URL && GAS_API_URL.trim() !== "") {
                 try {
                     const res = await sendToGAS({ action: 'SAVE_CATEGORY', data: payload });
@@ -1923,7 +2135,6 @@
                             saveLocalState();
                             renderKategoriTable();
                         }
-                        showToast(`Folder Google Drive "${nama}" berhasil dibuat & terhubung!`, 'success');
                     }
                 } catch (err) {
                     console.warn("GAS Save Category Sync Error:", err);
@@ -1941,15 +2152,14 @@
                 renderAllTables();
                 initCategoryChart();
 
-                const res = await sendToGAS({ action: 'DELETE_CATEGORY', id: id, folder_id: deleted.folder_id || '' });
-                if (res && res.status === 'SUCCESS') {
-                    showToast(`Kategori "${deleted.nama}" & folder Google Drive berhasil dihapus!`, 'error');
-                } else {
-                    showToast(`Kategori "${deleted.nama}" berhasil dihapus!`, 'info');
-                }
+                sendToGAS({ action: 'DELETE_CATEGORY', id: id, folder_id: deleted.folder_id || '' });
+                showToast(`Kategori "${deleted.nama}" berhasil dihapus!`, 'info');
             }
         }
 
+        /* =========================================================================
+           CRUD: PENGGUNA (USERS & ROLES)
+           ========================================================================= */
         function openUserModal(username = null) {
             document.getElementById('user-original-username').value = username || '';
             if (username) {
@@ -1969,7 +2179,7 @@
                 document.getElementById('user-role').value = 'OPERATOR';
                 document.getElementById('user-status').value = 'ACTIVE';
             }
-            document.getElementById('user-modal').classList.remove('hidden');
+            openModal('user-modal');
         }
 
         async function handleSaveUser(e) {
@@ -1997,14 +2207,8 @@
 
             saveLocalState();
             renderAllTables();
-
-            const res = await sendToGAS({ action: 'SAVE_USER', data: payload });
-            if (res && res.status === 'SUCCESS') {
-                showToast('Data user tersimpan di server Google!', 'success');
-                loadAllDataFromGAS();
-            } else {
-                showToast('Data user tersimpan pada kondisi terakhir.', 'success');
-            }
+            sendToGAS({ action: 'SAVE_USER', data: payload });
+            showToast(`Data user ${username} berhasil disimpan!`, 'success');
             closeModal('user-modal');
         }
 
@@ -2015,19 +2219,19 @@
             }
             const idx = usersList.findIndex(x => x.username === username);
             if (idx !== -1) {
-                const deleted = usersList[idx];
                 usersList.splice(idx, 1);
                 recordAuditLog('DELETE_USER', `Menghapus akun ${username}`);
                 saveLocalState();
                 renderAllTables();
 
-                const res = await sendToGAS({ action: 'DELETE_USER', username: username });
-                if (res && res.status === 'SUCCESS') {
-                    showToast(`Pengguna ${username} dihapus dari server!`, 'error');
-                }
+                sendToGAS({ action: 'DELETE_USER', username: username });
+                showToast(`Pengguna ${username} berhasil dihapus!`, 'info');
             }
         }
 
+        /* =========================================================================
+           IMAGE CROPPING & CUSTOM THEMES
+           ========================================================================= */
         function triggerImageCrop(event, targetType) {
             const file = event.target.files[0];
             if (!file) return;
@@ -2043,7 +2247,7 @@
                     targetType === 'logo' ? "Potong Logo Kustom (Free Aspect Ratio)" :
                     targetType === 'login_card_bg' ? "Potong Wallpaper Kartu Login" : "Potong Wallpaper Background Utama";
                 document.getElementById('crop-modal-desc').textContent = "Aspect Ratio Bebas - Sesuaikan area pemotongan secara presisi.";
-                document.getElementById('crop-modal').classList.remove('hidden');
+                openModal('crop-modal');
 
                 if (activeCropper) activeCropper.destroy();
 
@@ -2095,24 +2299,30 @@
 
         function handleGlobalFontColorChange(hex) {
             systemSettings.globalFontColor = hex;
-            document.getElementById('setting-global-font-color').value = hex;
-            document.getElementById('setting-global-font-hex').value = hex;
+            const colInput = document.getElementById('setting-global-font-color');
+            const hexInput = document.getElementById('setting-global-font-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             document.documentElement.style.setProperty('--app-global-text-color', hex);
             triggerDebouncedSettingsSave();
         }
 
         function handleCustomSidebarBgChange(hex) {
             systemSettings.customSidebarBg = hex;
-            document.getElementById('setting-sidebar-bg-color').value = hex;
-            document.getElementById('setting-sidebar-bg-hex').value = hex;
+            const colInput = document.getElementById('setting-sidebar-bg-color');
+            const hexInput = document.getElementById('setting-sidebar-bg-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             applyCustomSidebarColors();
             triggerDebouncedSettingsSave();
         }
 
         function handleCustomSidebarTextChange(hex) {
             systemSettings.customSidebarText = hex;
-            document.getElementById('setting-sidebar-text-color').value = hex;
-            document.getElementById('setting-sidebar-text-hex').value = hex;
+            const colInput = document.getElementById('setting-sidebar-text-color');
+            const hexInput = document.getElementById('setting-sidebar-text-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             applyCustomSidebarColors();
             triggerDebouncedSettingsSave();
         }
@@ -2242,24 +2452,30 @@
 
         function handleCustomLoginCardBg(hex) {
             systemSettings.loginCardBg = hex;
-            document.getElementById('setting-login-bg-color').value = hex;
-            document.getElementById('setting-login-bg-hex').value = hex;
+            const colInput = document.getElementById('setting-login-bg-color');
+            const hexInput = document.getElementById('setting-login-bg-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             applyLoginCardCustomStyles();
             triggerDebouncedSettingsSave();
         }
 
         function handleCustomLoginCardText(hex) {
             systemSettings.loginCardText = hex;
-            document.getElementById('setting-login-text-color').value = hex;
-            document.getElementById('setting-login-text-hex').value = hex;
+            const colInput = document.getElementById('setting-login-text-color');
+            const hexInput = document.getElementById('setting-login-text-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             applyLoginCardCustomStyles();
             triggerDebouncedSettingsSave();
         }
 
         function handleCustomLoginCardBorder(hex) {
             systemSettings.loginCardBorder = hex;
-            document.getElementById('setting-login-border-color').value = hex;
-            document.getElementById('setting-login-border-hex').value = hex;
+            const colInput = document.getElementById('setting-login-border-color');
+            const hexInput = document.getElementById('setting-login-border-hex');
+            if (colInput) colInput.value = hex;
+            if (hexInput) hexInput.value = hex;
             applyLoginCardCustomStyles();
             triggerDebouncedSettingsSave();
         }
@@ -2283,16 +2499,20 @@
 
         function handleAppNameChange(val) {
             systemSettings.appTitle = val;
-            document.getElementById('sidebar-app-title').textContent = val;
-            document.getElementById('login-app-title').textContent = val;
-            document.title = val + " v3.8";
+            const sTitle = document.getElementById('sidebar-app-title');
+            const lTitle = document.getElementById('login-app-title');
+            if (sTitle) sTitle.textContent = val;
+            if (lTitle) lTitle.textContent = val;
+            document.title = val + " v3.9";
             triggerDebouncedSettingsSave();
         }
 
         function handleAppSubtitleChange(val) {
             systemSettings.appSubtitle = val;
-            document.getElementById('sidebar-app-subtitle').textContent = val;
-            document.getElementById('login-app-subtitle').textContent = val;
+            const sSub = document.getElementById('sidebar-app-subtitle');
+            const lSub = document.getElementById('login-app-subtitle');
+            if (sSub) sSub.textContent = val;
+            if (lSub) lSub.textContent = val;
             triggerDebouncedSettingsSave();
         }
 
@@ -2310,14 +2530,16 @@
 
         function handleBgOpacityChange(val) {
             systemSettings.bgOpacity = val;
-            document.getElementById('bg-opacity-text').textContent = `${val}%`;
+            const textElem = document.getElementById('bg-opacity-text');
+            if (textElem) textElem.textContent = `${val}%`;
             applyBgImageAndOpacity();
             triggerDebouncedSettingsSave();
         }
 
         function handleBgBlurChange(val) {
             systemSettings.bgBlur = val;
-            document.getElementById('bg-blur-text').textContent = val == 0 ? '0 px (Tanpa Blur)' : `${val} px Blur`;
+            const textElem = document.getElementById('bg-blur-text');
+            if (textElem) textElem.textContent = val == 0 ? '0 px (Tanpa Blur)' : `${val} px Blur`;
             applyBgImageAndOpacity();
             triggerDebouncedSettingsSave();
         }
@@ -2390,6 +2612,13 @@
             showToast('Preset avatar profil berhasil diperbarui!', 'success');
         }
 
+        function updateUploadGuidance() {
+            const extElem = document.getElementById('guidance-allowed-ext');
+            const sizeElem = document.getElementById('guidance-max-size');
+            if (extElem) extElem.textContent = systemSettings.allowedExtensions || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
+            if (sizeElem) sizeElem.textContent = (systemSettings.maxFileSizeMB || 25).toString();
+        }
+
         function applyAllSettingsToUI() {
             if (systemSettings.appTitle) {
                 const sTitle = document.getElementById('sidebar-app-title');
@@ -2398,7 +2627,7 @@
                 if (sTitle) sTitle.textContent = systemSettings.appTitle;
                 if (lTitle) lTitle.textContent = systemSettings.appTitle;
                 if (sInput) sInput.value = systemSettings.appTitle;
-                document.title = systemSettings.appTitle + " v3.8";
+                document.title = systemSettings.appTitle + " v3.9";
             }
             if (systemSettings.appSubtitle) {
                 const sSub = document.getElementById('sidebar-app-subtitle');
@@ -2439,7 +2668,7 @@
                 systemSettings.appTitle = titleInput;
                 document.getElementById('sidebar-app-title').textContent = titleInput;
                 document.getElementById('login-app-title').textContent = titleInput;
-                document.title = titleInput + " v3.8";
+                document.title = titleInput + " v3.9";
             }
 
             if (subtitleInput) {
@@ -2452,17 +2681,20 @@
             systemSettings.allowedExtensions = allowedExt;
 
             updateUploadGuidance();
-            recordAuditLog('SAVE_SETTINGS', 'Memperbarui konfigurasi sistem v3.8 Production');
+            recordAuditLog('SAVE_SETTINGS', 'Memperbarui konfigurasi sistem v3.9 Production');
             saveLocalState();
 
             const res = await sendToGAS({ action: 'SAVE_SETTINGS', data: systemSettings });
             if (res && res.status === 'SUCCESS') {
                 showToast('Pengaturan tersimpan permanen di server Google!', 'success');
             } else {
-                showToast('Pengaturan tersimpan pada kondisi terakhir di browser.', 'info');
+                showToast('Pengaturan tersimpan pada browser.', 'info');
             }
         }
 
+        /* =========================================================================
+           EXPORTERS: EXCEL & PDF
+           ========================================================================= */
         function exportToExcel() {
             try {
                 if (typeof XLSX === 'undefined') {
@@ -2497,7 +2729,7 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 doc.setFontSize(16);
-                doc.text("Laporan Rekapitulasi Data Arsip v3.8", 14, 20);
+                doc.text("Laporan Rekapitulasi Data Arsip v3.9", 14, 20);
                 doc.setFontSize(10);
                 doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 28);
                 
@@ -2541,7 +2773,8 @@
             renderAvatarPresets();
             applyAllSettingsToUI();
             fetchInitialSettingsFromGAS();
-            console.log("ArsipCloud Enterprise v3.8 Production Engine Initialized Successfully.");
+            renderAllTables();
+            console.log("ArsipCloud Enterprise v3.9 Production Engine Initialized Successfully.");
         };
     </script>
 </body>
