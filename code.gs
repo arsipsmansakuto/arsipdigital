@@ -1,7 +1,7 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.8 - Centralized Drive Folder ID & Synchronized Trash
+ * ArsipCloud Enterprise v3.9 - Centralized Drive Folder ID & Synchronized Trash
  * ============================================================================
  */
 
@@ -106,7 +106,7 @@ function doGet(e) {
   const settingsObj = getSettingsData().settings || {};
   return createJsonResponse({ 
     status: 'ACTIVE', 
-    version: 'ArsipCloud Enterprise v3.8 Production Engine',
+    version: 'ArsipCloud Enterprise v3.9 Production Engine',
     root_folder_id: ROOT_DRIVE_FOLDER_ID,
     settings: settingsObj
   });
@@ -296,7 +296,7 @@ function saveArchive(data) {
   const rows = sheet.getDataRange().getValues();
   let foundIndex = -1;
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]) === String(data.id)) {
+    if (String(rows[i][0]).toLowerCase() === String(data.id).toLowerCase()) {
       foundIndex = i + 1;
       break;
     }
@@ -319,6 +319,7 @@ function saveArchive(data) {
   if (foundIndex > 0) {
     sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
   } else {
+    // Append baris baru di akhir sheet tanpa menimpa data yang telah ada
     sheet.appendRow(rowData);
   }
 
@@ -391,7 +392,7 @@ function saveCategory(data) {
 
   let folderId = data.folder_id ? String(data.folder_id).trim() : "";
 
-  // Buat folder baru di dalam folder Google Drive root utama jika ID kosong/otomatis
+  // Buat folder baru di dalam folder Google Drive root utama jika ID kosong atau otomatis
   if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO" || folderId.startsWith("AUTO_")) {
     try {
       const rootFolder = getRootDriveFolder();
