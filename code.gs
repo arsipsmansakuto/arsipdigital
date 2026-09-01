@@ -1,9 +1,11 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.8 - Full Persistence & Cross-Browser Sync
+ * ArsipCloud Enterprise v3.8 - Centralized Drive Folder ID & Synchronized Trash
  * ============================================================================
  */
+
+const ROOT_DRIVE_FOLDER_ID = "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r";
 
 const SHEET_NAMES = {
   ARCHIVE: 'Data_Arsip',
@@ -63,7 +65,7 @@ function doPost(e) {
         break;
 
       case 'DELETE_CATEGORY':
-        deleteCategory(contents.id, contents.folder_id);
+        result = deleteCategory(contents.id, contents.folder_id);
         break;
 
       case 'SAVE_USER':
@@ -105,6 +107,7 @@ function doGet(e) {
   return createJsonResponse({ 
     status: 'ACTIVE', 
     version: 'ArsipCloud Enterprise v3.8 Production Engine',
+    root_folder_id: ROOT_DRIVE_FOLDER_ID,
     settings: settingsObj
   });
 }
@@ -112,6 +115,26 @@ function doGet(e) {
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function getRootDriveFolder() {
+  try {
+    return DriveApp.getFolderById(ROOT_DRIVE_FOLDER_ID);
+  } catch (e) {
+    Logger.log("Gagal mengakses ROOT_DRIVE_FOLDER_ID (" + ROOT_DRIVE_FOLDER_ID + "): " + e.toString());
+    return getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+  }
+}
+
+function getOrCreateDriveFolder(folderName, parentFolder = null) {
+  const targetParent = parentFolder || getRootDriveFolder();
+  const folders = targetParent.getFoldersByName(folderName);
+  if (folders.hasNext()) {
+    return folders.next();
+  }
+  const newFld = targetParent.createFolder(folderName);
+  newFld.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return newFld;
 }
 
 function setupDatabase() {
@@ -224,25 +247,13 @@ function getAllData() {
 
   const usersSheet = ss.getSheetByName(SHEET_NAMES.USERS);
   const users = usersSheet && usersSheet.getLastRow() > 1 
-    ? usersSheet.getDataRange().getValues().slice(1).map(r => {
-        if (r.length >= 5) {
-          return {
-            username: String(r[0]),
-            password: String(r[1] || 'admin123'),
-            name: String(r[2]),
-            role: String(r[3]),
-            status: String(r[4])
-          };
-        } else {
-          return {
-            username: String(r[0]),
-            password: 'admin123',
-            name: String(r[1]),
-            role: String(r[2]),
-            status: String(r[3])
-          };
-        }
-      }) 
+    ? usersSheet.getDataRange().getValues().slice(1).map(r => ({
+        username: String(r[0]),
+        password: String(r[1] || 'admin123'),
+        name: String(r[2]),
+        role: String(r[3]),
+        status: String(r[4])
+      })) 
     : [];
 
   const logsSheet = ss.getSheetByName(SHEET_NAMES.LOGS);
@@ -323,12 +334,12 @@ function uploadBase64ToDrive(base64Data, fileName, categoryName, targetFolderId)
       try {
         parentFolder = DriveApp.getFolderById(String(targetFolderId).trim());
       } catch (fErr) {
-        Logger.log("Folder ID Kategori tidak ditemukan, menggunakan folder default: " + fErr.toString());
+        Logger.log("Folder ID Kategori tidak ditemukan, mengalihkan ke root parent: " + fErr.toString());
       }
     }
 
     if (!parentFolder) {
-      parentFolder = getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+      parentFolder = getRootDriveFolder();
     }
 
     const splitData = base64Data.split(',');
@@ -365,43 +376,6 @@ function getCategoryFolderId(categoryName) {
   return "";
 }
 
-function getOrCreateDriveFolder(folderName) {
-  const folders = DriveApp.getFoldersByName(folderName);
-  if (folders.hasNext()) {
-    return folders.next();
-  }
-  return DriveApp.createFolder(folderName);
-}
-
-function deleteArchive(id, driveFileId) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName(SHEET_NAMES.ARCHIVE);
-  if (!sheet || sheet.getLastRow() <= 1) return;
-  const rows = sheet.getDataRange().getValues();
-
-  let targetDriveId = driveFileId || "";
-
-  for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]).toLowerCase() === String(id).toLowerCase()) {
-      if (!targetDriveId && rows[i][10]) {
-        targetDriveId = String(rows[i][10]);
-      }
-      sheet.deleteRow(i + 1);
-      break;
-    }
-  }
-
-  if (targetDriveId && String(targetDriveId).trim() !== "") {
-    try {
-      const file = DriveApp.getFileById(String(targetDriveId).trim());
-      file.setTrashed(true);
-      Logger.log("Berkas Google Drive berhasil dipindahkan ke sampah: " + targetDriveId);
-    } catch (err) {
-      Logger.log("Gagal menghapus berkas di Google Drive: " + err.toString());
-    }
-  }
-}
-
 function saveCategory(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
@@ -417,26 +391,24 @@ function saveCategory(data) {
 
   let folderId = data.folder_id ? String(data.folder_id).trim() : "";
 
-  // Otomatis membuat folder baru di Google Drive jika folderId kosong, bertanda AUTO, atau berupa ID generator lokal
-  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO") {
+  // Buat folder baru di dalam folder Google Drive root utama jika ID kosong/otomatis
+  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO" || folderId.startsWith("AUTO_")) {
     try {
-      const rootFolder = getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+      const rootFolder = getRootDriveFolder();
       const newFolder = rootFolder.createFolder(data.nama);
       newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       folderId = newFolder.getId();
-      Logger.log("Folder Google Drive baru berhasil dibuat: " + data.nama + " (ID: " + folderId + ")");
+      Logger.log("Folder Google Drive baru berhasil dibuat di root folder (" + ROOT_DRIVE_FOLDER_ID + "): " + data.nama + " (ID: " + folderId + ")");
     } catch (e) {
-      Logger.log("Gagal membuat folder Google Drive: " + e.toString());
+      Logger.log("Gagal membuat folder di root Google Drive: " + e.toString());
       folderId = getOrCreateDriveFolder(data.nama).getId();
     }
   } else {
-    // Validasi apakah folder ID yang dimasukkan valid di Google Drive
     try {
       const existingFolder = DriveApp.getFolderById(folderId);
-      // Folder valid dan ditemukan
     } catch (err) {
-      Logger.log("Folder ID kustom tidak ditemukan, membuat folder baru: " + err.toString());
-      const rootFolder = getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
+      Logger.log("Folder ID kustom tidak ditemukan, membuat folder baru di root: " + err.toString());
+      const rootFolder = getRootDriveFolder();
       const fallbackFolder = rootFolder.createFolder(data.nama);
       fallbackFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       folderId = fallbackFolder.getId();
@@ -466,12 +438,12 @@ function saveCategory(data) {
 function deleteCategory(id, folderId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
-  if (!sheet || sheet.getLastRow() <= 1) return;
+  if (!sheet || sheet.getLastRow() <= 1) return { status: 'SUCCESS' };
   const rows = sheet.getDataRange().getValues();
   let targetFolderId = folderId || "";
 
   for (let i = 1; i < rows.length; i++) {
-    if (String(rows[i][0]) === String(id)) {
+    if (String(rows[i][0]).toLowerCase() === String(id).toLowerCase()) {
       if (!targetFolderId && rows[i][2]) {
         targetFolderId = String(rows[i][2]);
       }
@@ -480,13 +452,45 @@ function deleteCategory(id, folderId) {
     }
   }
 
-  if (targetFolderId && String(targetFolderId).trim() !== "") {
+  if (targetFolderId && String(targetFolderId).trim() !== "" && !targetFolderId.startsWith("FLD_") && !targetFolderId.startsWith("AUTO_")) {
     try {
       const folder = DriveApp.getFolderById(String(targetFolderId).trim());
       folder.setTrashed(true);
       Logger.log("Folder Google Drive kategori berhasil dipindahkan ke sampah: " + targetFolderId);
     } catch (fErr) {
       Logger.log("Gagal memindahkan folder Google Drive ke sampah: " + fErr.toString());
+    }
+  }
+
+  logAction('admin', 'DELETE_CATEGORY', `Kategori ID ${id} dan folder Google Drive (${targetFolderId}) berhasil dihapus`);
+  return { status: 'SUCCESS', message: 'Kategori dan folder Drive berhasil dihapus' };
+}
+
+function deleteArchive(id, driveFileId) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_NAMES.ARCHIVE);
+  if (!sheet || sheet.getLastRow() <= 1) return;
+  const rows = sheet.getDataRange().getValues();
+
+  let targetDriveId = driveFileId || "";
+
+  for (let i = 1; i < rows.length; i++) {
+    if (String(rows[i][0]).toLowerCase() === String(id).toLowerCase()) {
+      if (!targetDriveId && rows[i][10]) {
+        targetDriveId = String(rows[i][10]);
+      }
+      sheet.deleteRow(i + 1);
+      break;
+    }
+  }
+
+  if (targetDriveId && String(targetDriveId).trim() !== "") {
+    try {
+      const file = DriveApp.getFileById(String(targetDriveId).trim());
+      file.setTrashed(true);
+      Logger.log("Berkas Google Drive berhasil dipindahkan ke sampah: " + targetDriveId);
+    } catch (err) {
+      Logger.log("Gagal menghapus berkas di Google Drive: " + err.toString());
     }
   }
 }
@@ -567,7 +571,7 @@ function saveSettings(data) {
     });
   }
 
-  logAction('system', 'SAVE_SETTINGS', 'Konfigurasi merek, tema visual, dan preferensi sistem v3.8 diperbarui');
+  logAction('system', 'SAVE_SETTINGS', 'Konfigurasi sistem & tema visual diperbarui');
   return { status: 'SUCCESS', settings: sanitizedSettings };
 }
 
