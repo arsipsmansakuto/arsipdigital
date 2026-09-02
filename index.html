@@ -235,17 +235,6 @@
 
             <div class="flex-1 overflow-y-auto p-4 md:p-8" id="content-area">
 
-                <!-- SMART GAS URL WARNING BANNER -->
-                <div id="gas-warning-banner" class="hidden bg-amber-50/90 border border-amber-200/80 p-4 rounded-2xl mb-6 flex items-start space-x-3.5 shadow-xs">
-                    <div class="p-2 bg-amber-100 text-amber-700 rounded-xl flex-shrink-0">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    </div>
-                    <div class="flex-1 text-xs text-amber-900 leading-relaxed">
-                        <strong class="font-bold block text-sm mb-0.5">Mode Produksi Aktif - URL Backend Google Apps Script Belum Dikonfigurasi</strong>
-                        <span>Silakan masukkan Web App URL dari Google Apps Script ke variabel <code class="bg-amber-100 font-mono px-1.5 py-0.5 rounded text-amber-950 font-bold">GAS_API_URL</code> pada baris kode JavaScript untuk mengaktifkan sinkronisasi real-time Google Sheets & Drive.</span>
-                    </div>
-                </div>
-
                 <!-- TAB DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
@@ -387,7 +376,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-sm font-bold text-slate-800">Manajemen Kategori & Folder Drive</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder otomatis Google Drive (ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder Google Drive terpusat (ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
                         </div>
                         <button type="button" onclick="openKategoriModal()" class="role-admin-only px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -854,147 +843,203 @@
     </div>
 
     <!-- PREVIEW MODAL -->
-    <div id="preview-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-[28px] max-w-4xl w-full h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
-            <div class="p-4 px-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/90">
-                <div class="flex items-center space-x-2.5 min-w-0 flex-1 mr-2">
-                    <div class="w-8 h-8 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+    <div id="preview-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-3 sm:p-4 hidden">
+        <div class="bg-white rounded-[28px] max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+            <!-- Modal Header -->
+            <div class="p-3.5 sm:p-4 px-4 sm:px-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/90 gap-3">
+                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                    <div id="preview-ext-badge" class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 shadow-xs uppercase">
+                        DOC
                     </div>
-                    <h3 class="text-xs font-bold text-slate-900 truncate" id="preview-title">Pratinjau Dokumen</h3>
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-xs sm:text-sm font-extrabold text-slate-900 truncate" id="preview-title">Pratinjau Dokumen</h3>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate" id="preview-subtitle">Memuat data dokumen...</p>
+                    </div>
                 </div>
-                <button type="button" onclick="closeModal('preview-modal')" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <a id="preview-direct-drive-btn" href="#" target="_blank" class="hidden px-3 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-xl text-xs border border-brand-200 sm:flex items-center space-x-1.5 transition-colors">
+                        <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        <span>Buka di Google Drive</span>
+                    </a>
+                    <button type="button" id="preview-download-btn" onclick="" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center space-x-1.5 transition-colors cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="hidden sm:inline">Unduh</span>
+                    </button>
+                    <button type="button" onclick="closeModal('preview-modal')" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
             </div>
-            <div class="flex-1 bg-slate-100/60 p-4 flex items-center justify-center overflow-auto relative" id="preview-content-box"></div>
+            <!-- Modal Body Container -->
+            <div class="flex-1 bg-slate-900/5 p-2 sm:p-4 flex items-center justify-center overflow-auto relative" id="preview-content-box"></div>
         </div>
     </div>
 
     <!-- JAVASCRIPT PRODUCTION ENGINE -->
     <script>
-        /* =========================================================================
-           CONFIG: TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT DI VARIABEL INI
-           ========================================================================= */
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbywgWWePsjA7Np7cVavJfHPgkBT5dpppcMXcaI4WOPK4SWGLh-WtGFkAHFIp8EevSfB/exec"; 
+        // Google Apps Script Web App URL
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwy3k3pNME3znmnB1gGn17o42TnDShK9nTCx3daT7OlOgk-6vlMCZ1X3_KgWT43STG3/exec";
 
+        // Application State
         let currentUser = null;
-        let categoryChartInstance = null;
-        let activeCropper = null;
-        let cropTargetType = 'logo';
-        let detectedUploadedFileType = '';
-        let uploadedMultipleFiles = [];
-        let uploadedFolderFiles = [];
-        let isManualFolderIdEdited = false;
-        let searchDebounceTimer = null;
-        let settingsAutoSaveTimer = null;
-
-        const sidebarThemePresets = [
-            { id: 'white', title: 'Clean White', bg: '#ffffff', text: '#0f172a', dot: '#2563eb', desc: 'Putih Klasik' },
-            { id: 'slate', title: 'Slate Dark', bg: '#0f172a', text: '#f8fafc', dot: '#38bdf8', desc: 'Gelap Korporat' },
-            { id: 'indigo', title: 'Royal Indigo', bg: '#1e1b4b', text: '#e0e7ff', dot: '#818cf8', desc: 'Indigo Deep' },
-            { id: 'emerald', title: 'Emerald Exec', bg: '#064e3b', text: '#ecfdf5', dot: '#34d399', desc: 'Hijau Keuangan' },
-            { id: 'onyx', title: 'Onyx Black', bg: '#18181b', text: '#f4f4f5', dot: '#a1a1aa', desc: 'Hitam Modern' },
-            { id: 'navy', title: 'Deep Navy', bg: '#0b192c', text: '#e2e8f0', dot: '#60a5fa', desc: 'Biru Samudra' },
-            { id: 'crimson', title: 'Crimson Exec', bg: '#4c0519', text: '#ffe4e6', dot: '#fb7185', desc: 'Merah Marun' },
-            { id: 'purple', title: 'Purple Velvet', bg: '#3b0764', text: '#fae8ff', dot: '#c084fc', desc: 'Ungu Mewah' },
-            { id: 'amber', title: 'Amber Warmth', bg: '#451a03', text: '#fef3c7', dot: '#fbbf24', desc: 'Cokelat Klasik' },
-            { id: 'teal', title: 'Teal Modern', bg: '#134e4a', text: '#ccfbf1', dot: '#2dd4bf', desc: 'Toska Elegan' },
-            { id: 'cyan', title: 'Cyber Cyan', bg: '#083344', text: '#cffaff', dot: '#22d3ee', desc: 'Biru Futuristik' },
-            { id: 'blue', title: 'Executive Blue', bg: '#1e3a8a', text: '#dbeafe', dot: '#60a5fa', desc: 'Biru Kantor' },
-            { id: 'charcoal', title: 'Charcoal Gray', bg: '#1c1917', text: '#f5f5f4', dot: '#a8a29e', desc: 'Abu Arang' },
-            { id: 'rose', title: 'Rosewood Gold', bg: '#831843', text: '#fce7f3', dot: '#f472b6', desc: 'Merah Muda' },
-            { id: 'violet', title: 'Violet Night', bg: '#2e1065', text: '#ede9fe', dot: '#a78bfa', desc: 'Violet Gelap' },
-            { id: 'forest', title: 'Forest Pine', bg: '#14532d', text: '#dcfce7', dot: '#4ade80', desc: 'Hijau Hutan' },
-            { id: 'bronze', title: 'Bronze Luxury', bg: '#271c19', text: '#fef3c7', dot: '#f59e0b', desc: 'Perunggu' },
-            { id: 'fuchsia', title: 'Fuchsia Modern', bg: '#701a75', text: '#fdf4ff', dot: '#e879f9', desc: 'Fuchsia Gelap' },
-            { id: 'sunset', title: 'Sunset Orange', bg: '#7c2d12', text: '#ffedd5', dot: '#fb923c', desc: 'Oranye Senja' },
-            { id: 'midnight', title: 'Obsidian Night', bg: '#030712', text: '#f9fafb', dot: '#38bdf8', desc: 'Hitam Pekat' }
-        ];
-
-        const loginCardPresets = [
-            { id: 'white', title: 'Classic White', bg: '#ffffff', text: '#0f172a', border: '#f1f5f9' },
-            { id: 'glass', title: 'Glassmorphism', bg: 'rgba(255, 255, 255, 0.85)', text: '#0f172a', border: 'rgba(255, 255, 255, 0.4)' },
-            { id: 'slate', title: 'Slate Dark', bg: '#0f172a', text: '#f8fafc', border: '#334155' },
-            { id: 'indigo', title: 'Royal Indigo', bg: '#1e1b4b', text: '#e0e7ff', border: '#3730a3' },
-            { id: 'emerald', title: 'Emerald Exec', bg: '#064e3b', text: '#ecfdf5', border: '#047857' },
-            { id: 'onyx', title: 'Onyx Black', bg: '#18181b', text: '#f4f4f5', border: '#27272a' },
-            { id: 'navy', title: 'Deep Navy', bg: '#0b192c', text: '#e2e8f0', border: '#1e293b' },
-            { id: 'crimson', title: 'Crimson Luxury', bg: '#4c0519', text: '#ffe4e6', border: '#881337' },
-            { id: 'gold', title: 'Sunset Gold', bg: '#271c19', text: '#fef3c7', border: '#78350f' },
-            { id: 'purple', title: 'Purple Velvet', bg: '#3b0764', text: '#fae8ff', border: '#581c87' },
-            { id: 'amber', title: 'Amber Warmth', bg: '#451a03', text: '#fef3c7', border: '#78350f' },
-            { id: 'teal', title: 'Teal Modern', bg: '#134e4a', text: '#ccfbf1', border: '#0f766e' },
-            { id: 'cyan', title: 'Cyber Cyan', bg: '#083344', text: '#cffaff', border: '#0e7490' },
-            { id: 'blue', title: 'Executive Blue', bg: '#1e3a8a', text: '#dbeafe', border: '#1d4ed8' },
-            { id: 'charcoal', title: 'Charcoal Gray', bg: '#1c1917', text: '#f5f5f4', border: '#44403c' },
-            { id: 'rose', title: 'Rosewood Gold', bg: '#831843', text: '#fce7f3', border: '#be185d' },
-            { id: 'violet', title: 'Violet Night', bg: '#2e1065', text: '#ede9fe', border: '#6d28d9' },
-            { id: 'forest', title: 'Forest Pine', bg: '#14532d', text: '#dcfce7', border: '#15803d' },
-            { id: 'bronze', title: 'Bronze Luxury', bg: '#271c19', text: '#fef3c7', border: '#b45309' },
-            { id: 'midnight', title: 'Obsidian Night', bg: '#030712', text: '#f9fafb', border: '#1f2937' }
-        ];
+        let archiveData = [];
+        let categories = [];
+        let usersList = [];
+        let auditLogs = [];
 
         let systemSettings = {
             appTitle: "ArsipCloud Enterprise",
             appSubtitle: "Sistem Manajemen Arsip Terintegrasi Google Drive",
+            maxFileSizeMB: 25,
+            allowedExtensions: "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP",
             sidebarTheme: "white",
             customSidebarBg: "",
             customSidebarText: "",
-            globalFontColor: "#0f172a",
             loginCardPreset: "white",
             loginCardBg: "",
             loginCardText: "",
             loginCardBorder: "",
             loginCardCustomBgImg: "",
-            maxFileSizeMB: 25,
-            allowedExtensions: "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP",
+            globalFontColor: "#0f172a",
             bgImage: "",
-            bgOpacity: 80,
-            bgBlur: 0,
+            bgOpacity: "80",
+            bgBlur: "0",
             customLogo: "",
             avatarInitial: "A",
             avatarBgClass: "bg-brand-600",
             avatarTextClass: "text-white"
         };
 
-        let archiveData = [
-            { id: "ARS-001", no: "001/SK-DIR/2026", nama: "Surat Keputusan Direksi Pembentukan Tim Kerja", deskripsi: "SK pengangkatan tim audit operasional 2026", kategori: "Surat Masuk / Keluar", tanggal: "2026-03-15 08:30:00", size: 450, file_type: "PDF", uploader: "admin" },
-            { id: "ARS-002", no: "INV-2026-098", nama: "Invoice Pengadaan Server Cloud Q1", deskripsi: "Faktur tagihan lisensi infrastruktur cloud Google", kategori: "Invoice & Tagihan", tanggal: "2026-03-20 14:15:22", size: 120, file_type: "PDF", uploader: "admin" },
-            { id: "ARS-003", no: "HRD-KTR-042", nama: "Kontrak Kerja Tim Engineering Enterprise", deskripsi: "Dokumen perjanjian kerja staf divisi IT", kategori: "Dokumen Kepegawaian", tanggal: "2026-03-22 10:00:11", size: 780, file_type: "DOCX", uploader: "operator" }
+        // Theme Presets Catalog
+        const sidebarThemePresets = [
+            { id: 'white', title: 'Modern Clean', bg: '#ffffff', text: '#334155', dot: '#3b82f6', desc: 'Bawaan Standar' },
+            { id: 'dark-navy', title: 'Deep Navy', bg: '#0f172a', text: '#f8fafc', dot: '#38bdf8', desc: 'Corporate Dark' },
+            { id: 'midnight-slate', title: 'Midnight Slate', bg: '#1e293b', text: '#f1f5f9', dot: '#818cf8', desc: 'Slate Gelap' },
+            { id: 'emerald-luxury', title: 'Emerald Forest', bg: '#064e3b', text: '#ecfdf5', dot: '#34d399', desc: 'Hijau Elegan' },
+            { id: 'royal-indigo', title: 'Royal Indigo', bg: '#312e81', text: '#e0e7ff', dot: '#a5b4fc', desc: 'Ungu Royal' },
+            { id: 'crimson-ruby', title: 'Crimson Wine', bg: '#881337', text: '#ffe4e6', dot: '#fb7185', desc: 'Merah Ruby' },
+            { id: 'charcoal-matte', title: 'Charcoal Black', bg: '#18181b', text: '#fafafa', dot: '#a1a1aa', desc: 'Hitam Matte' },
+            { id: 'ocean-cyan', title: 'Oceanic Blue', bg: '#164e63', text: '#cffafe', dot: '#22d3ee', desc: 'Biru Samudra' },
+            { id: 'golden-amber', title: 'Espresso Bronze', bg: '#451a03', text: '#fef3c7', dot: '#fbbf24', desc: 'Cokelat Kayu' },
+            { id: 'velvet-purple', title: 'Velvet Plum', bg: '#581c87', text: '#f3e8ff', dot: '#c084fc', desc: 'Ungu Velvet' },
+            { id: 'soft-ice', title: 'Soft Arctic', bg: '#f0f9ff', text: '#0369a1', dot: '#0284c7', desc: 'Biru Es Cerah' },
+            { id: 'mint-frost', title: 'Mint Breeze', bg: '#f0fdf4', text: '#15803d', dot: '#16a34a', desc: 'Hijau Mint' },
+            { id: 'sand-warm', title: 'Warm Sandstone', bg: '#fffbeb', text: '#b45309', dot: '#d97706', desc: 'Kuning Pasir' },
+            { id: 'lavender-mist', title: 'Lavender Cream', bg: '#faf5ff', text: '#7e22ce', dot: '#9333ea', desc: 'Lavender Muda' },
+            { id: 'rose-blush', title: 'Rose Quartz', bg: '#fff1f2', text: '#be123c', dot: '#e11d48', desc: 'Merah Muda' },
+            { id: 'carbon-titanium', title: 'Titanium Grey', bg: '#27272a', text: '#e4e4e7', dot: '#71717a', desc: 'Abu Metalik' },
+            { id: 'cyber-dark', title: 'Cyber Matrix', bg: '#022c22', text: '#6ee7b7', dot: '#10b981', desc: 'Matrix Gelap' },
+            { id: 'neon-violet', title: 'Deep Obsidian', bg: '#2e1065', text: '#d8b4fe', dot: '#c084fc', desc: 'Obsidian Ungu' },
+            { id: 'steel-blue', title: 'Steel Horizon', bg: '#1e3a5f', text: '#e2e8f0', dot: '#60a5fa', desc: 'Baja Dingin' },
+            { id: 'graphite-pro', title: 'Graphite Studio', bg: '#111827', text: '#f9fafb', dot: '#6366f1', desc: 'Studio Profesional' }
         ];
 
-        let categories = [
-            { id: "CAT-101", nama: "Surat Masuk / Keluar", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" },
-            { id: "CAT-102", nama: "Invoice & Tagihan", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" },
-            { id: "CAT-103", nama: "Dokumen Kepegawaian", folder_id: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", status: "ACTIVE" }
+        const loginCardPresets = [
+            { id: 'white', title: 'Putih Bersih Glass', bg: 'rgba(255, 255, 255, 0.95)', text: '#0f172a', border: '#f1f5f9' },
+            { id: 'dark-navy', title: 'Navy Akrilik Dark', bg: 'rgba(15, 23, 42, 0.95)', text: '#f8fafc', border: '#334155' },
+            { id: 'midnight', title: 'Midnight Slate', bg: 'rgba(30, 41, 59, 0.95)', text: '#ffffff', border: '#475569' },
+            { id: 'emerald', title: 'Emerald Glow', bg: 'rgba(6, 78, 59, 0.95)', text: '#ecfdf5', border: '#047857' },
+            { id: 'indigo', title: 'Royal Indigo', bg: 'rgba(49, 46, 129, 0.95)', text: '#e0e7ff', border: '#4338ca' },
+            { id: 'ruby', title: 'Ruby Velvet', bg: 'rgba(136, 19, 55, 0.95)', text: '#ffe4e6', border: '#be123c' },
+            { id: 'charcoal', title: 'Charcoal Black', bg: 'rgba(24, 24, 27, 0.95)', text: '#fafafa', border: '#3f3f46' },
+            { id: 'ocean', title: 'Ocean Deep', bg: 'rgba(22, 78, 99, 0.95)', text: '#cffafe', border: '#0e7490' },
+            { id: 'bronze', title: 'Bronze Gold', bg: 'rgba(69, 26, 3, 0.95)', text: '#fef3c7', border: '#b45309' },
+            { id: 'purple', title: 'Purple Mist', bg: 'rgba(88, 28, 135, 0.95)', text: '#f3e8ff', border: '#7e22ce' },
+            { id: 'soft-blue', title: 'Soft Blue Frost', bg: 'rgba(240, 249, 255, 0.95)', text: '#0369a1', border: '#bae6fd' },
+            { id: 'soft-mint', title: 'Soft Mint Green', bg: 'rgba(240, 253, 244, 0.95)', text: '#15803d', border: '#bbf7d0' },
+            { id: 'soft-amber', title: 'Soft Amber Sun', bg: 'rgba(255, 251, 235, 0.95)', text: '#b45309', border: '#fde68a' },
+            { id: 'soft-purple', title: 'Soft Lavender', bg: 'rgba(250, 245, 255, 0.95)', text: '#7e22ce', border: '#e9d5ff' },
+            { id: 'soft-rose', title: 'Soft Rose Petal', bg: 'rgba(255, 241, 242, 0.95)', text: '#be123c', border: '#fecdd3' },
+            { id: 'titanium', title: 'Titanium Frosted', bg: 'rgba(39, 39, 42, 0.95)', text: '#e4e4e7', border: '#52525b' },
+            { id: 'matrix', title: 'Cyber Emerald', bg: 'rgba(2, 44, 34, 0.95)', text: '#6ee7b7', border: '#059669' },
+            { id: 'obsidian', title: 'Obsidian Glow', bg: 'rgba(46, 16, 101, 0.95)', text: '#d8b4fe', border: '#7c3aed' },
+            { id: 'steel', title: 'Steel Horizon', bg: 'rgba(30, 58, 95, 0.95)', text: '#e2e8f0', border: '#3b82f6' },
+            { id: 'graphite', title: 'Graphite Glass', bg: 'rgba(17, 24, 39, 0.95)', text: '#f9fafb', border: '#374151' }
         ];
 
-        let usersList = [
-            { username: "admin", password: "admin123", name: "Administrator System", role: "ADMINISTRATOR", status: "ACTIVE" },
-            { username: "operator", password: "operator123", name: "Staf Operator Arsip", role: "OPERATOR", status: "ACTIVE" },
-            { username: "viewer", password: "viewer123", name: "Auditor External", role: "VIEWER", status: "ACTIVE" }
-        ];
+        let activeCropper = null;
+        let cropTargetType = 'logo';
+        let isManualFolderIdEdited = false;
+        let categoryChartInstance = null;
+        let searchDebounceTimer = null;
+        let settingsDebounceTimer = null;
 
-        let auditLogs = [
-            { time: "2026-03-22 10:00", user: "system", action: "INITIALIZE", detail: "Sistem ArsipCloud Enterprise v3.9 Aktif" }
-        ];
+        function loadLocalState() {
+            try {
+                const sAuth = sessionStorage.getItem('arsip_auth_user');
+                if (sAuth) currentUser = JSON.parse(sAuth);
 
-        /* =========================================================================
-           CORE UTILITY & NOTIFICATION FUNCTIONS
-           ========================================================================= */
+                const sArchives = localStorage.getItem('arsip_data');
+                if (sArchives) archiveData = JSON.parse(sArchives);
+
+                const sCats = localStorage.getItem('arsip_categories');
+                if (sCats) categories = JSON.parse(sCats);
+
+                const sUsers = localStorage.getItem('arsip_users');
+                if (sUsers) usersList = JSON.parse(sUsers);
+
+                const sLogs = localStorage.getItem('arsip_logs');
+                if (sLogs) auditLogs = JSON.parse(sLogs);
+
+                const sSettings = localStorage.getItem('arsip_settings');
+                if (sSettings) systemSettings = { ...systemSettings, ...JSON.parse(sSettings) };
+            } catch (e) {
+                console.warn("Local state load note:", e);
+            }
+
+            // Seed default records if empty
+            if (!categories || categories.length === 0) {
+                categories = [
+                    { id: 'CAT-101', nama: 'Surat Masuk & Keluar', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' },
+                    { id: 'CAT-102', nama: 'Invoice & Perpajakan', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' },
+                    { id: 'CAT-103', nama: 'Dokumen Kepegawaian', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' }
+                ];
+            }
+
+            if (!usersList || usersList.length === 0) {
+                usersList = [
+                    { username: 'admin', password: 'admin123', name: 'Administrator System', role: 'ADMINISTRATOR', status: 'ACTIVE' },
+                    { username: 'operator', password: 'operator123', name: 'Staf Operator Arsip', role: 'OPERATOR', status: 'ACTIVE' },
+                    { username: 'viewer', password: 'viewer123', name: 'Auditor External', role: 'VIEWER', status: 'ACTIVE' }
+                ];
+            }
+        }
+
+        function saveLocalState() {
+            try {
+                localStorage.setItem('arsip_data', JSON.stringify(archiveData));
+                localStorage.setItem('arsip_categories', JSON.stringify(categories));
+                localStorage.setItem('arsip_users', JSON.stringify(usersList));
+                localStorage.setItem('arsip_logs', JSON.stringify(auditLogs));
+                localStorage.setItem('arsip_settings', JSON.stringify(systemSettings));
+            } catch (e) {
+                console.warn("Local state save note:", e);
+            }
+        }
+
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             if (!container) return;
 
             const toast = document.createElement('div');
-            const bgClass = type === 'success' ? 'bg-emerald-600' :
-                            type === 'error' ? 'bg-rose-600' : 'bg-slate-900';
+            const colorMap = {
+                success: 'bg-emerald-600 text-white shadow-emerald-500/20',
+                error: 'bg-rose-600 text-white shadow-rose-500/20',
+                info: 'bg-brand-600 text-white shadow-brand-500/20',
+                warning: 'bg-amber-600 text-white shadow-amber-500/20'
+            };
 
-            toast.className = `${bgClass} text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs font-semibold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0`;
+            const iconMap = {
+                success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>',
+                error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>',
+                info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>',
+                warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>'
+            };
+
+            toast.className = `p-3.5 rounded-2xl shadow-xl border border-white/20 flex items-center space-x-3 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${colorMap[type] || colorMap.info}`;
             toast.innerHTML = `
-                <span class="w-2 h-2 rounded-full bg-white flex-shrink-0 animate-ping"></span>
-                <span class="flex-1 leading-snug">${message}</span>
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">${iconMap[type] || iconMap.info}</svg>
+                <span class="text-xs font-bold leading-snug flex-1">${message}</span>
             `;
 
             container.appendChild(toast);
@@ -1005,279 +1050,129 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-x-full');
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
-        }
-
-        function closeModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.add('hidden');
+            }, 3200);
         }
 
         function openModal(id) {
-            const el = document.getElementById(id);
-            if (el) el.classList.remove('hidden');
+            const m = document.getElementById(id);
+            if (m) m.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const m = document.getElementById(id);
+            if (m) m.classList.add('hidden');
         }
 
         function toggleMobileSidebar(show) {
-            const sidebar = document.getElementById('main-sidebar');
+            const sb = document.getElementById('main-sidebar');
             const backdrop = document.getElementById('mobile-sidebar-backdrop');
-            if (!sidebar || !backdrop) return;
-
+            if (!sb || !backdrop) return;
             if (show) {
-                sidebar.classList.remove('-translate-x-full');
+                sb.classList.remove('-translate-x-full');
                 backdrop.classList.remove('hidden');
             } else {
-                sidebar.classList.add('-translate-x-full');
+                sb.classList.add('-translate-x-full');
                 backdrop.classList.add('hidden');
             }
         }
 
-        function formatDateTimeDisplay(dateStr) {
-            if (!dateStr) return '-';
-            try {
-                const d = new Date(dateStr);
-                if (isNaN(d.getTime())) return dateStr;
-                const pad = (n) => String(n).padStart(2, '0');
-                return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} WIB`;
-            } catch(e) {
-                return dateStr;
-            }
-        }
-
-        function recordAuditLog(action, detail) {
-            const now = new Date();
-            const pad = (n) => String(n).padStart(2, '0');
-            const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-            
-            auditLogs.unshift({
-                time: timeStr,
-                user: currentUser ? currentUser.username : 'system',
-                action: action,
-                detail: detail
-            });
-            if (auditLogs.length > 50) auditLogs.pop();
-            renderAuditLogTable();
-        }
-
-        /* =========================================================================
-           LOCAL STATE & PERSISTENCE
-           ========================================================================= */
-        function saveLocalState() {
-            try {
-                localStorage.setItem('arsipcloud_settings_v39', JSON.stringify(systemSettings));
-                localStorage.setItem('arsipcloud_archives_v39', JSON.stringify(archiveData));
-                localStorage.setItem('arsipcloud_categories_v39', JSON.stringify(categories));
-                localStorage.setItem('arsipcloud_users_v39', JSON.stringify(usersList));
-                localStorage.setItem('arsipcloud_logs_v39', JSON.stringify(auditLogs));
-            } catch(e) {
-                console.warn("Storage warning:", e);
-            }
-        }
-
-        function loadLocalState() {
-            try {
-                const s = localStorage.getItem('arsipcloud_settings_v39');
-                const a = localStorage.getItem('arsipcloud_archives_v39');
-                const c = localStorage.getItem('arsipcloud_categories_v39');
-                const u = localStorage.getItem('arsipcloud_users_v39');
-                const l = localStorage.getItem('arsipcloud_logs_v39');
-
-                if (s) systemSettings = { ...systemSettings, ...JSON.parse(s) };
-                if (a) archiveData = JSON.parse(a);
-                if (c) categories = JSON.parse(c);
-                if (u) usersList = JSON.parse(u);
-                if (l) auditLogs = JSON.parse(l);
-            } catch(e) {
-                console.warn("Error loading local state:", e);
-            }
-        }
-
-        function triggerDebouncedSettingsSave() {
-            saveLocalState();
-            clearTimeout(settingsAutoSaveTimer);
-            settingsAutoSaveTimer = setTimeout(async () => {
-                if (GAS_API_URL && GAS_API_URL.trim() !== "") {
-                    try {
-                        const res = await sendToGAS({ action: 'SAVE_SETTINGS', data: systemSettings });
-                        if (res && res.status === 'SUCCESS' && res.settings) {
-                            systemSettings = { ...systemSettings, ...res.settings };
-                            saveLocalState();
-                        }
-                    } catch(err) {
-                        console.warn("Auto-sync settings warning:", err);
-                    }
-                }
-            }, 800);
-        }
-
-        async function sendToGAS(payload) {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") return null;
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    redirect: 'follow',
-                    body: JSON.stringify(payload)
-                });
-                return await response.json();
-            } catch (err) {
-                console.error("GAS Fetch Error:", err);
-                return null;
-            }
-        }
-
-        async function fetchInitialSettingsFromGAS() {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
-                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
-                return;
-            } else {
-                document.getElementById('gas-warning-banner')?.classList.add('hidden');
-            }
-
-            try {
-                const res = await sendToGAS({ action: 'GET_SETTINGS' });
-                if (res && res.status === 'SUCCESS' && res.settings && Object.keys(res.settings).length > 0) {
-                    systemSettings = { ...systemSettings, ...res.settings };
-                    saveLocalState();
-                    applyAllSettingsToUI();
-                }
-            } catch (err) {
-                console.warn("Gagal memuat setting awal:", err);
-            }
-        }
-
-        async function loadAllDataFromGAS() {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
-                document.getElementById('gas-warning-banner')?.classList.remove('hidden');
-                showToast("URL Backend GAS belum dikonfigurasi", "info");
-                return;
-            } else {
-                document.getElementById('gas-warning-banner')?.classList.add('hidden');
-            }
-
-            try {
-                const res = await sendToGAS({ action: 'GET_ALL_DATA' });
-                if (res && res.status === 'SUCCESS') {
-                    if (Array.isArray(res.archives)) archiveData = res.archives;
-                    if (Array.isArray(res.categories) && res.categories.length > 0) categories = res.categories;
-                    if (Array.isArray(res.users) && res.users.length > 0) usersList = res.users;
-                    if (Array.isArray(res.logs) && res.logs.length > 0) auditLogs = res.logs;
-                    if (res.settings && Object.keys(res.settings).length > 0) systemSettings = { ...systemSettings, ...res.settings };
-                    
-                    saveLocalState();
-                    applyAllSettingsToUI();
-                    renderAllTables();
-                    initCategoryChart();
-                    showToast("Data produksi tersinkronisasi!", "success");
-                }
-            } catch(err) {
-                showToast("Gagal sinkronisasi data cloud: " + err.message, "error");
-            }
-        }
-
-        /* =========================================================================
-           AUTHENTICATION & ROLE-BASED ACCESS CONTROL
-           ========================================================================= */
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-username')?.value.trim();
             const passwordInput = document.getElementById('login-password')?.value.trim();
 
-            const user = usersList.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
+            const foundUser = usersList.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
 
-            if (!user) {
-                showToast('Akun username tidak terdaftar di sistem!', 'error');
+            if (!foundUser) {
+                showToast('Username tidak terdaftar!', 'error');
                 return;
             }
 
-            if (user.status !== 'ACTIVE') {
-                showToast('Akun Anda saat ini diblokir. Hubungi administrator!', 'error');
+            if (foundUser.status !== 'ACTIVE') {
+                showToast('Akun Anda dinonaktifkan (BLOCKED). Hubungi administrator!', 'error');
                 return;
             }
 
-            if (user.password && user.password !== passwordInput) {
+            if (foundUser.password && foundUser.password !== passwordInput) {
                 showToast('Password yang Anda masukkan salah!', 'error');
                 return;
             }
 
-            currentUser = user;
-            document.getElementById('auth-modal')?.classList.add('hidden');
-            document.getElementById('main-app')?.classList.remove('hidden');
+            currentUser = foundUser;
+            sessionStorage.setItem('arsip_auth_user', JSON.stringify(currentUser));
 
-            const nameElem = document.getElementById('current-user-fullname');
-            const roleElem = document.getElementById('current-user-role');
-            const roleSwitch = document.getElementById('role-quick-switch');
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
 
-            if (nameElem) nameElem.textContent = user.name;
-            if (roleElem) roleElem.textContent = user.role;
-            if (roleSwitch) roleSwitch.value = user.role;
+            applyUserPermissions();
+            recordAuditLog('LOGIN', `Pengguna ${currentUser.username} masuk ke sistem`);
+            showToast(`Selamat datang kembali, ${currentUser.name}!`, 'success');
 
-            applyRolePermissions(user.role);
-            renderAllTables();
-            initCategoryChart();
-            recordAuditLog('LOGIN', `Pengguna ${user.username} berhasil login`);
-            showToast(`Selamat datang kembali, ${user.name}!`, 'success');
+            loadAllDataFromGAS();
+            switchTab('dashboard');
         }
 
         function handleLogout() {
-            if (currentUser) {
-                recordAuditLog('LOGOUT', `Pengguna ${currentUser.username} logout`);
-            }
+            recordAuditLog('LOGOUT', `Pengguna ${currentUser ? currentUser.username : 'User'} keluar`);
             currentUser = null;
-            document.getElementById('main-app')?.classList.add('hidden');
-            document.getElementById('auth-modal')?.classList.remove('hidden');
-            const userInp = document.getElementById('login-username');
-            const passInp = document.getElementById('login-password');
-            if (userInp) userInp.value = '';
-            if (passInp) passInp.value = '';
-            showToast('Anda telah berhasil keluar dari sistem.', 'info');
+            sessionStorage.removeItem('arsip_auth_user');
+
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('login-password').value = '';
+            showToast('Anda telah keluar dari sistem.', 'info');
         }
 
         function switchRoleDemo(role) {
-            if (currentUser) currentUser.role = role;
-            const roleElem = document.getElementById('current-user-role');
-            if (roleElem) roleElem.textContent = role;
-            applyRolePermissions(role);
-            showToast(`Hak akses diubah ke role ${role}`, 'info');
+            if (!currentUser) return;
+            currentUser.role = role;
+            sessionStorage.setItem('arsip_auth_user', JSON.stringify(currentUser));
+            applyUserPermissions();
+            showToast(`Role beralih ke mode ${role}`, 'info');
         }
 
-        function applyRolePermissions(role) {
-            const adminElements = document.querySelectorAll('.role-admin-only');
-            const operatorElements = document.querySelectorAll('.role-operator-allow');
+        function applyUserPermissions() {
+            if (!currentUser) return;
 
-            if (role === 'ADMINISTRATOR') {
-                adminElements.forEach(el => el.classList.remove('hidden'));
-                operatorElements.forEach(el => el.classList.remove('hidden'));
-            } else if (role === 'OPERATOR') {
-                adminElements.forEach(el => el.classList.add('hidden'));
-                operatorElements.forEach(el => el.classList.remove('hidden'));
-            } else {
-                // VIEWER
-                adminElements.forEach(el => el.classList.add('hidden'));
-                operatorElements.forEach(el => el.classList.add('hidden'));
-            }
+            document.getElementById('current-user-fullname').textContent = currentUser.name || currentUser.username;
+            document.getElementById('current-user-role').textContent = currentUser.role;
+            const roleSelect = document.getElementById('role-quick-switch');
+            if (roleSelect) roleSelect.value = currentUser.role;
+
+            const isAdmin = currentUser.role === 'ADMINISTRATOR';
+            const isOperator = currentUser.role === 'OPERATOR' || isAdmin;
+
+            document.querySelectorAll('.role-admin-only').forEach(el => {
+                el.style.display = isAdmin ? '' : 'none';
+            });
+
+            document.querySelectorAll('.role-operator-allow').forEach(el => {
+                el.style.display = isOperator ? '' : 'none';
+            });
         }
 
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            const targetTab = document.getElementById(`tab-${tabId}`);
-            if (targetTab) targetTab.classList.remove('hidden');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
 
-            const pageTitle = document.getElementById('page-title');
-            if (pageTitle) {
-                pageTitle.textContent = 
-                    tabId === 'dashboard' ? 'Dashboard Overview' :
-                    tabId === 'arsip' ? 'Kelola Berkas Arsip' :
-                    tabId === 'kategori' ? 'Kategori & Google Drive' :
-                    tabId === 'users' ? 'Kelola Pengguna' :
-                    tabId === 'laporan' ? 'Laporan & Rekapitulasi' :
-                    tabId === 'pengaturan' ? 'Pengaturan Sistem' : 'Audit Trail Log';
-            }
+            const pageTitleMap = {
+                dashboard: 'Dashboard Overview',
+                arsip: 'Kelola Arsip Dokumen',
+                kategori: 'Kategori & Google Drive',
+                users: 'Kelola Pengguna Sistem',
+                laporan: 'Rekapitulasi Laporan Arsip',
+                pengaturan: 'Pengaturan & Visual Customizer',
+                log: 'Audit Trail Log Akses'
+            };
+
+            const titleElem = document.getElementById('page-title');
+            if (titleElem) titleElem.textContent = pageTitleMap[tabId] || 'Dashboard Overview';
 
             applySidebarNavStyles(tabId);
             toggleMobileSidebar(false);
 
-            if (tabId === 'dashboard') initCategoryChart();
+            if (tabId === 'dashboard') renderDashboard();
             if (tabId === 'arsip') renderArsipTable();
             if (tabId === 'kategori') renderKategoriTable();
             if (tabId === 'users') renderUsersTable();
@@ -1285,110 +1180,72 @@
             if (tabId === 'log') renderAuditLogTable();
         }
 
-        /* =========================================================================
-           DATA RENDERING & CHART CONTROLLERS
-           ========================================================================= */
         function renderAllTables() {
-            populateCategorySelects();
+            renderDashboard();
             renderArsipTable();
             renderKategoriTable();
             renderUsersTable();
             renderLaporanTable();
             renderAuditLogTable();
-            updateDashboardStats();
+            populateCategoryDropdowns();
         }
 
-        function populateCategorySelects() {
-            const filterKat = document.getElementById('filter-kategori');
-            const lapKat = document.getElementById('lap-kategori');
-            const arsipKat = document.getElementById('arsip-kategori-input');
-
-            const activeCats = categories.filter(c => c.status === 'ACTIVE');
-
-            if (filterKat) {
-                const currentVal = filterKat.value;
-                filterKat.innerHTML = '<option value="">Semua Kategori</option>' + 
-                    categories.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
-            }
-
-            if (lapKat) {
-                const currentVal = lapKat.value;
-                lapKat.innerHTML = '<option value="">Semua Kategori</option>' + 
-                    categories.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
-            }
-
-            if (arsipKat) {
-                const currentVal = arsipKat.value;
-                arsipKat.innerHTML = activeCats.map(c => `<option value="${c.nama}" ${currentVal === c.nama ? 'selected' : ''}>${c.nama}</option>`).join('');
-            }
-        }
-
-        function updateDashboardStats() {
+        function renderDashboard() {
             const totalDocs = archiveData.length;
             const totalCats = categories.length;
             const totalUsers = usersList.length;
-            const totalStorage = archiveData.reduce((acc, curr) => acc + (parseInt(curr.size, 10) || 0), 0);
+            const totalSizeKB = archiveData.reduce((acc, curr) => acc + (parseInt(curr.size, 10) || 0), 0);
 
-            const totalDocElem = document.getElementById('dash-stat-total');
-            const totalCatElem = document.getElementById('dash-stat-kategori');
-            const totalUserElem = document.getElementById('dash-stat-users');
-            const totalStorElem = document.getElementById('dash-stat-storage');
+            document.getElementById('dash-stat-total').textContent = totalDocs.toLocaleString('id-ID');
+            document.getElementById('dash-stat-kategori').textContent = totalCats.toLocaleString('id-ID');
+            document.getElementById('dash-stat-storage').textContent = totalSizeKB > 1024 ? `${(totalSizeKB / 1024).toFixed(2)} MB` : `${totalSizeKB} KB`;
+            document.getElementById('dash-stat-users').textContent = totalUsers.toLocaleString('id-ID');
 
-            if (totalDocElem) totalDocElem.textContent = totalDocs.toString();
-            if (totalCatElem) totalCatElem.textContent = totalCats.toString();
-            if (totalUserElem) totalUserElem.textContent = totalUsers.toString();
-            if (totalStorElem) totalStorElem.textContent = `${totalStorage.toLocaleString('id-ID')} KB`;
+            const tbody = document.getElementById('dash-recent-table');
+            if (!tbody) return;
 
-            // Recent Table
-            const recentTable = document.getElementById('dash-recent-table');
-            if (recentTable) {
-                if (archiveData.length === 0) {
-                    recentTable.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-400">Belum ada dokumen tersimpan.</td></tr>';
-                } else {
-                    recentTable.innerHTML = archiveData.slice(0, 5).map(item => `
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="py-3 px-3 font-mono font-bold text-brand-600">${item.no}</td>
-                            <td class="py-3 px-3 font-semibold text-slate-800">${item.nama}</td>
-                            <td class="py-3 px-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 font-semibold text-[10px]">${item.kategori}</span></td>
-                            <td class="py-3 px-3 text-right font-mono text-slate-500">${item.size || 0} KB</td>
-                        </tr>
-                    `).join('');
-                }
+            if (archiveData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">Belum ada dokumen yang diunggah.</td></tr>`;
+                return;
             }
+
+            tbody.innerHTML = archiveData.slice(0, 5).map(item => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-2.5 px-3 font-mono font-bold text-brand-600">${item.no}</td>
+                    <td class="py-2.5 px-3 font-semibold text-slate-800 truncate max-w-[200px]">${item.nama}</td>
+                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">${item.kategori}</span></td>
+                    <td class="py-2.5 px-3 text-right font-mono text-slate-500">${item.size || 0} KB</td>
+                </tr>
+            `).join('');
+
+            initCategoryChart();
         }
 
         function initCategoryChart() {
-            const canvas = document.getElementById('categoryChart');
-            if (!canvas || typeof Chart === 'undefined') return;
+            const ctx = document.getElementById('categoryChart');
+            if (!ctx) return;
 
-            const categoryCounts = {};
-            categories.forEach(c => categoryCounts[c.nama] = 0);
+            const catCounts = {};
+            categories.forEach(c => catCounts[c.nama] = 0);
             archiveData.forEach(a => {
-                if (categoryCounts[a.kategori] !== undefined) {
-                    categoryCounts[a.kategori]++;
-                } else {
-                    categoryCounts[a.kategori] = 1;
-                }
+                if (catCounts[a.kategori] !== undefined) catCounts[a.kategori]++;
+                else catCounts[a.kategori] = 1;
             });
 
-            const labels = Object.keys(categoryCounts);
-            const dataValues = Object.values(categoryCounts);
+            const labels = Object.keys(catCounts);
+            const data = Object.values(catCounts);
 
             if (categoryChartInstance) {
                 categoryChartInstance.destroy();
             }
 
-            const ctx = canvas.getContext('2d');
             categoryChartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: labels.length > 0 ? labels : ['Belum Ada Kategori'],
+                    labels: labels,
                     datasets: [{
-                        data: dataValues.length > 0 && dataValues.some(v => v > 0) ? dataValues : [1],
-                        backgroundColor: [
-                            '#3b82f6', '#6366f1', '#10b981', '#f59e0b', '#ec4899', 
-                            '#8b5cf6', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
-                        ],
+                        data: data.length > 0 && data.some(v => v > 0) ? data : [1],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'],
                         borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
@@ -1397,101 +1254,120 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                font: { family: 'Plus Jakarta Sans', size: 10 }
-                            }
-                        }
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Plus Jakarta Sans', size: 10 } } }
                     },
                     cutout: '65%'
                 }
             });
         }
 
+        function handleSearchDebounce() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(renderArsipTable, 250);
+        }
+
+        function formatDateTimeDisplay(dateStr) {
+            if (!dateStr) return "-";
+            try {
+                const d = new Date(dateStr);
+                if (isNaN(d.getTime())) return dateStr;
+                const dd = String(d.getDate()).padStart(2, '0');
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const yyyy = d.getFullYear();
+                const hh = String(d.getHours()).padStart(2, '0');
+                const ii = String(d.getMinutes()).padStart(2, '0');
+                const ss = String(d.getSeconds()).padStart(2, '0');
+                return `${dd}/${mm}/${yyyy} • ${hh}:${ii}:${ss} WIB`;
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
         function renderArsipTable() {
             const tbody = document.getElementById('arsip-table-body');
+            const search = document.getElementById('search-arsip')?.value.toLowerCase() || '';
+            const filterCat = document.getElementById('filter-kategori')?.value || '';
+
             if (!tbody) return;
 
-            const searchVal = document.getElementById('search-arsip')?.value.toLowerCase().trim() || '';
-            const katFilter = document.getElementById('filter-kategori')?.value || '';
-
             const filtered = archiveData.filter(item => {
-                const matchSearch = item.no.toLowerCase().includes(searchVal) || 
-                                    item.nama.toLowerCase().includes(searchVal) || 
-                                    (item.deskripsi && item.deskripsi.toLowerCase().includes(searchVal));
-                const matchKat = katFilter === '' || item.kategori === katFilter;
-                return matchSearch && matchKat;
+                const matchSearch = item.nama.toLowerCase().includes(search) || item.no.toLowerCase().includes(search) || (item.deskripsi && item.deskripsi.toLowerCase().includes(search));
+                const matchCat = filterCat === '' || item.kategori === filterCat;
+                return matchSearch && matchCat;
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Tidak ada data arsip yang ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 text-xs italic">Tidak ada dokumen arsip yang sesuai.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-mono font-bold text-brand-600">${item.no}</td>
+                    <td class="py-3 px-4 font-mono font-bold text-brand-600 text-xs">${item.no}</td>
                     <td class="py-3 px-4">
-                        <div class="font-bold text-slate-900">${item.nama}</div>
-                        <div class="text-[11px] text-slate-400 line-clamp-1">${item.deskripsi || '-'}</div>
+                        <div class="font-bold text-slate-900 text-xs">${item.nama}</div>
+                        ${item.deskripsi ? `<p class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5">${item.deskripsi}</p>` : ''}
                     </td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 font-semibold rounded-lg text-xs">${item.kategori}</span></td>
-                    <td class="py-3 px-4 font-mono text-xs text-slate-600">${formatDateTimeDisplay(item.tanggal)}</td>
-                    <td class="py-3 px-4 font-mono text-xs text-slate-600">${item.size || 0} KB</td>
-                    <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
-                        <button type="button" onclick="previewFile('${item.id}')" class="p-1.5 text-brand-600 hover:bg-brand-50 rounded-lg transition-colors cursor-pointer" title="Pratinjau">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        </button>
-                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-operator-allow p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">${item.kategori}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center space-x-1.5 font-mono text-xs font-semibold text-slate-600">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>${formatDateTimeDisplay(item.tanggal)}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-slate-600">${item.size || 0} KB</td>
+                    <td class="py-3 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Pratinjau</button>
+                        <button type="button" onclick="openArsipModal('${item.id}')" class="role-operator-allow px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteArsip('${item.id}')" class="role-operator-allow px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Hapus</button>
                     </td>
                 </tr>
             `).join('');
-        }
 
-        function handleSearchDebounce() {
-            clearTimeout(searchDebounceTimer);
-            searchDebounceTimer = setTimeout(() => {
-                renderArsipTable();
-            }, 300);
+            applyUserPermissions();
         }
 
         function renderKategoriTable() {
             const tbody = document.getElementById('kategori-table-body');
             if (!tbody) return;
 
-            tbody.innerHTML = categories.map(cat => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-mono font-bold text-slate-700">${cat.id}</td>
-                    <td class="py-3 px-4 font-bold text-slate-900">${cat.nama}</td>
-                    <td class="py-3 px-4">
-                        <div class="flex items-center space-x-2">
-                            <span class="font-mono text-xs text-slate-500 max-w-[140px] truncate">${cat.folder_id}</span>
-                            <a href="https://drive.google.com/drive/folders/${cat.folder_id}" target="_blank" class="px-2 py-1 bg-brand-50 text-brand-600 hover:bg-brand-100 rounded-lg text-[10px] font-bold flex items-center gap-1 transition-colors">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                <span>Buka Drive</span>
-                            </a>
-                        </div>
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">${cat.status}</span>
-                    </td>
-                    <td class="py-3 px-4 text-right space-x-1.5">
-                        <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            if (categories.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-xs italic">Belum ada kategori yang dibuat.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = categories.map(cat => {
+                const count = archiveData.filter(a => a.kategori === cat.nama).length;
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs">${cat.id}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-900 text-xs">${cat.nama}</div>
+                            <span class="text-[10px] text-slate-400">${count} Berkas Terindeks</span>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono text-xs font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 truncate max-w-[180px]">${cat.folder_id || '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r'}</span>
+                                <a href="https://drive.google.com/drive/folders/${cat.folder_id || '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r'}" target="_blank" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-[11px] border border-brand-200 transition-colors flex items-center space-x-1">
+                                    <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    <span>Buka Drive</span>
+                                </a>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${cat.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}">${cat.status}</span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
+                            <button type="button" onclick="openKategoriModal('${cat.id}')" class="role-admin-only px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Edit</button>
+                            <button type="button" onclick="deleteKategori('${cat.id}')" class="role-admin-only px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            applyUserPermissions();
         }
 
         function renderUsersTable() {
@@ -1500,61 +1376,58 @@
 
             tbody.innerHTML = usersList.map(u => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-mono font-bold text-slate-800">${u.username}</td>
-                    <td class="py-3 px-4 font-bold text-slate-900">${u.name}</td>
-                    <td class="py-3 px-4"><span class="px-2.5 py-1 bg-brand-50 text-brand-700 font-bold rounded-lg text-[10px] border border-brand-100">${u.role}</span></td>
-                    <td class="py-3 px-4">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-rose-50 text-rose-600 border border-rose-200'}">${u.status}</span>
+                    <td class="py-3.5 px-4 font-mono font-bold text-brand-600 text-xs">${u.username}</td>
+                    <td class="py-3.5 px-4 font-bold text-slate-900 text-xs">${u.name}</td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${u.role === 'ADMINISTRATOR' ? 'bg-purple-50 text-purple-700 border border-purple-200' : u.role === 'OPERATOR' ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}">${u.role}</span>
                     </td>
-                    <td class="py-3 px-4 text-right space-x-1.5">
-                        <button type="button" onclick="openUserModal('${u.username}')" class="role-admin-only p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors cursor-pointer" title="Edit">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                        <button type="button" onclick="deleteUser('${u.username}')" class="role-admin-only p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer" title="Hapus">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">${u.status}</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
+                        <button type="button" onclick="openUserModal('${u.username}')" class="role-admin-only px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Edit</button>
+                        <button type="button" onclick="deleteUser('${u.username}')" class="role-admin-only px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Hapus</button>
                     </td>
                 </tr>
             `).join('');
+
+            applyUserPermissions();
         }
 
         function renderLaporanTable() {
             const tbody = document.getElementById('laporan-table-body');
-            if (!tbody) return;
+            const dFrom = document.getElementById('lap-date-from')?.value;
+            const dTo = document.getElementById('lap-date-to')?.value;
+            const cat = document.getElementById('lap-kategori')?.value;
 
-            const fromDate = document.getElementById('lap-date-from')?.value;
-            const toDate = document.getElementById('lap-date-to')?.value;
-            const kat = document.getElementById('lap-kategori')?.value;
+            if (!tbody) return;
 
             const filtered = archiveData.filter(item => {
                 let matchDate = true;
-                if (fromDate && item.tanggal < fromDate) matchDate = false;
-                if (toDate && item.tanggal > toDate + " 23:59:59") matchDate = false;
-                let matchKat = kat ? item.kategori === kat : true;
-                return matchDate && matchKat;
+                if (dFrom && item.tanggal) matchDate = matchDate && item.tanggal >= dFrom;
+                if (dTo && item.tanggal) matchDate = matchDate && item.tanggal <= (dTo + " 23:59:59");
+                const matchCat = !cat || item.kategori === cat;
+                return matchDate && matchCat;
             });
 
-            const countElem = document.getElementById('lap-count-text');
-            const sizeElem = document.getElementById('lap-size-text');
-            const totalSize = filtered.reduce((acc, curr) => acc + (parseInt(curr.size, 10) || 0), 0);
-
-            if (countElem) countElem.textContent = `${filtered.length} Berkas`;
-            if (sizeElem) sizeElem.textContent = `${totalSize.toLocaleString('id-ID')} KB`;
+            document.getElementById('lap-count-text').textContent = `${filtered.length} Berkas`;
+            const totalSize = filtered.reduce((acc, c) => acc + (parseInt(c.size, 10) || 0), 0);
+            document.getElementById('lap-size-text').textContent = totalSize > 1024 ? `${(totalSize / 1024).toFixed(2)} MB` : `${totalSize} KB`;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400 text-xs">Tidak ada rekapitulasi data arsip sesuai filter.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 text-xs italic">Tidak ada berkas yang memenuhi kriteria filter.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtered.map(item => `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="py-3 px-4 font-mono font-bold text-brand-600">${item.no}</td>
-                    <td class="py-3 px-4 font-bold text-slate-900">${item.nama}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 bg-slate-100 font-semibold rounded text-xs">${item.kategori}</span></td>
-                    <td class="py-3 px-4 text-slate-600 text-xs">${item.uploader || 'admin'}</td>
-                    <td class="py-3 px-4 font-mono text-xs">${item.size || 0} KB</td>
+                    <td class="py-3 px-4 font-mono font-bold text-brand-600 text-xs">${item.no}</td>
+                    <td class="py-3 px-4 font-bold text-slate-900 text-xs">${item.nama}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-bold text-slate-700">${item.kategori}</span></td>
+                    <td class="py-3 px-4 text-xs font-semibold text-slate-600">${item.uploader || 'admin'}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-slate-700">${item.size || 0} KB</td>
                     <td class="py-3 px-4 text-right">
-                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-600 font-bold rounded-lg text-xs cursor-pointer">Lihat</button>
+                        <button type="button" onclick="previewFile('${item.id}')" class="px-2.5 py-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold rounded-lg text-xs transition-colors cursor-pointer">Lihat</button>
                     </td>
                 </tr>
             `).join('');
@@ -1564,1218 +1437,284 @@
             const tbody = document.getElementById('log-table-body');
             if (!tbody) return;
 
-            tbody.innerHTML = auditLogs.map(log => `
-                <tr class="hover:bg-slate-50 transition-colors text-xs">
-                    <td class="py-3 px-4 font-mono text-slate-500">${log.time}</td>
-                    <td class="py-3 px-4 font-bold text-slate-800">${log.user}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-bold text-[10px]">${log.action}</span></td>
-                    <td class="py-3 px-4 text-slate-600">${log.detail}</td>
+            if (auditLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400 text-xs italic">Belum ada rekaman audit log.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = auditLogs.slice(0, 50).map(l => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-3 px-4 font-mono text-xs text-slate-500">${l.time}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800 text-xs">${l.user}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 font-bold text-[10px]">${l.action}</span></td>
+                    <td class="py-3 px-4 text-xs text-slate-600 font-medium">${l.detail}</td>
                 </tr>
             `).join('');
         }
 
-        /* =========================================================================
-           CRUD: ARSIP / DOKUMEN (DRAG & DROP + MULTI-FILE)
-           ========================================================================= */
+        function populateCategoryDropdowns() {
+            const catInputs = ['filter-kategori', 'arsip-kategori-input', 'lap-kategori'];
+            catInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isFilter = id !== 'arsip-kategori-input';
+                const currentVal = el.value;
+                el.innerHTML = (isFilter ? `<option value="">Semua Kategori</option>` : '') +
+                    categories.filter(c => c.status === 'ACTIVE').map(c => `<option value="${c.nama}">${c.nama}</option>`).join('');
+                if (currentVal) el.value = currentVal;
+            });
+        }
+
+        function recordAuditLog(action, detail) {
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+            const logItem = {
+                time: timeStr,
+                user: currentUser ? currentUser.username : 'system',
+                action: action,
+                detail: detail
+            };
+            auditLogs.unshift(logItem);
+            saveLocalState();
+        }
+
+        let uploadedFilesBuffer = [];
+
         function openArsipModal(id = null) {
-            populateCategorySelects();
-            const modal = document.getElementById('arsip-modal');
-            if (!modal) return;
-
-            const arsipIdElem = document.getElementById('arsip-id');
-            const arsipNoElem = document.getElementById('arsip-no');
-            const arsipNamaElem = document.getElementById('arsip-nama');
-            const arsipDeskElem = document.getElementById('arsip-deskripsi');
-            const arsipKatElem = document.getElementById('arsip-kategori-input');
-            const arsipTglElem = document.getElementById('arsip-tanggal');
-            const fileInput = document.getElementById('arsip-file-input');
+            uploadedFilesBuffer = [];
+            document.getElementById('arsip-id').value = id || '';
             const detectedBadge = document.getElementById('detected-file-badge');
-
-            if (arsipIdElem) arsipIdElem.value = id || '';
             if (detectedBadge) detectedBadge.classList.add('hidden');
-            detectedUploadedFileType = '';
-            uploadedMultipleFiles = [];
-            uploadedFolderFiles = [];
-            if (fileInput) fileInput.value = '';
 
             if (id) {
                 const item = archiveData.find(x => x.id === id);
                 if (!item) return;
-                const titleElem = document.getElementById('arsip-modal-title');
-                if (titleElem) titleElem.textContent = "Edit Berkas Arsip";
-                if (arsipNoElem) arsipNoElem.value = item.no || '';
-                if (arsipNamaElem) arsipNamaElem.value = item.nama || '';
-                if (arsipDeskElem) arsipDeskElem.value = item.deskripsi || '';
-                if (arsipKatElem) arsipKatElem.value = item.kategori || '';
-                if (arsipTglElem) arsipTglElem.value = item.tanggal || '';
+                document.getElementById('arsip-modal-title').textContent = "Edit Dokumen Arsip";
+                document.getElementById('arsip-no').value = item.no;
+                document.getElementById('arsip-nama').value = item.nama;
+                document.getElementById('arsip-deskripsi').value = item.deskripsi || '';
+                document.getElementById('arsip-kategori-input').value = item.kategori;
+                document.getElementById('arsip-tanggal').value = item.tanggal;
             } else {
-                const titleElem = document.getElementById('arsip-modal-title');
-                if (titleElem) titleElem.textContent = "Tambah Berkas Arsip Baru";
-                const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-                if (arsipNoElem) arsipNoElem.value = `ARS-${new Date().getFullYear()}-${randomSuffix}`;
-                if (arsipNamaElem) arsipNamaElem.value = '';
-                if (arsipDeskElem) arsipDeskElem.value = '';
-                if (arsipTglElem) arsipTglElem.value = '';
+                document.getElementById('arsip-modal-title').textContent = "Tambah Berkas Arsip";
+                document.getElementById('arsip-no').value = `ARS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+                document.getElementById('arsip-nama').value = '';
+                document.getElementById('arsip-deskripsi').value = '';
+                document.getElementById('arsip-tanggal').value = '';
+                if (categories.length > 0) document.getElementById('arsip-kategori-input').value = categories[0].nama;
             }
-
-            updateUploadGuidance();
-            modal.classList.remove('hidden');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            document.getElementById('dropzone-area')?.classList.add('border-brand-500', 'bg-brand-50/50');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            document.getElementById('dropzone-area')?.classList.remove('border-brand-500', 'bg-brand-50/50');
-        }
-
-        function handleFileDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            handleDragLeave(e);
-
-            const files = e.dataTransfer.files;
-            if (files && files.length > 0) {
-                if (files.length === 1) {
-                    processSingleFileSelection(files[0]);
-                } else {
-                    processMultipleFilesSelection(Array.from(files));
-                }
-            }
+            openModal('arsip-modal');
         }
 
         function validateFileInput(input) {
-            if (input.files && input.files.length > 0) {
-                if (input.files.length === 1) {
-                    processSingleFileSelection(input.files[0]);
-                } else {
-                    processMultipleFilesSelection(Array.from(input.files));
-                }
-            }
+            if (!input.files || input.files.length === 0) return;
+            processSelectedFiles(Array.from(input.files));
         }
 
         function validateFolderInput(input) {
-            if (input.files && input.files.length > 0) {
-                uploadedFolderFiles = Array.from(input.files);
-                uploadedMultipleFiles = Array.from(input.files);
-                const firstFile = uploadedFolderFiles[0];
-                const folderPath = firstFile.webkitRelativePath || '';
-                const folderName = folderPath.split('/')[0] || 'Folder Terpilih';
-                
-                const totalBytes = uploadedFolderFiles.reduce((acc, f) => acc + f.size, 0);
-                const totalKB = (totalBytes / 1024).toFixed(1);
+            if (!input.files || input.files.length === 0) return;
+            processSelectedFiles(Array.from(input.files));
+        }
 
-                const namaInput = document.getElementById('arsip-nama');
-                if (namaInput && !namaInput.value.trim()) {
-                    namaInput.value = folderName;
-                }
-
-                const detectedBadge = document.getElementById('detected-file-badge');
-                if (detectedBadge) {
-                    detectedBadge.textContent = `Terdeteksi Folder: "${folderName}" (${uploadedFolderFiles.length} berkas) | Total: ${totalKB} KB`;
-                    detectedBadge.classList.remove('hidden');
-                }
-
-                detectedUploadedFileType = 'FOLDER';
-                showToast(`Folder "${folderName}" (${uploadedFolderFiles.length} berkas) berhasil dimuat!`, 'success');
+        function handleDragOver(e) { e.preventDefault(); e.stopPropagation(); }
+        function handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); }
+        function handleFileDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                processSelectedFiles(Array.from(e.dataTransfer.files));
             }
         }
 
-        function processSingleFileSelection(file) {
-            const detectedBadge = document.getElementById('detected-file-badge');
-            if (!file) return;
+        function processSelectedFiles(files) {
+            uploadedFilesBuffer = [];
+            const maxSize = (systemSettings.maxFileSizeMB || 25) * 1024 * 1024;
+            const badge = document.getElementById('detected-file-badge');
 
-            const maxBytes = systemSettings.maxFileSizeMB * 1024 * 1024;
-            if (file.size > maxBytes) {
-                showToast(`Ukuran berkas (${(file.size / (1024*1024)).toFixed(1)} MB) melebihi batas maksimal ${systemSettings.maxFileSizeMB} MB!`, 'error');
-                return;
-            }
-
-            const ext = file.name.split('.').pop().toUpperCase();
-            const allowed = systemSettings.allowedExtensions.split(',').map(s => s.trim().toUpperCase());
-            if (!allowed.includes(ext)) {
-                showToast(`Ekstensi berkas .${ext} tidak diperbolehkan!`, 'error');
-                return;
-            }
-
-            uploadedMultipleFiles = [file];
-            detectedUploadedFileType = ext;
-
-            const namaInput = document.getElementById('arsip-nama');
-            if (namaInput && !namaInput.value.trim()) {
-                const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                namaInput.value = nameWithoutExt.replace(/[-_]/g, ' ');
-            }
-
-            const fileSizeKB = (file.size / 1024).toFixed(1);
-            if (detectedBadge) {
-                detectedBadge.textContent = `Terdeteksi: Format .${ext} | Ukuran: ${fileSizeKB} KB`;
-                detectedBadge.classList.remove('hidden');
-            }
-
-            showToast(`Dokumen .${ext} berhasil terbaca (${fileSizeKB} KB)!`, 'success');
-        }
-
-        function processMultipleFilesSelection(files) {
-            const detectedBadge = document.getElementById('detected-file-badge');
-            const allowed = systemSettings.allowedExtensions.split(',').map(s => s.trim().toUpperCase());
-            const maxBytes = systemSettings.maxFileSizeMB * 1024 * 1024;
-            
-            uploadedMultipleFiles = [];
-            let validCount = 0;
-            let totalBytes = 0;
-
-            for (let f of files) {
-                const ext = f.name.split('.').pop().toUpperCase();
-                if (f.size <= maxBytes && allowed.includes(ext)) {
-                    uploadedMultipleFiles.push(f);
-                    totalBytes += f.size;
-                    validCount++;
+            files.forEach(f => {
+                if (f.size > maxSize) {
+                    showToast(`Ukuran berkas ${f.name} melebihi batas (${systemSettings.maxFileSizeMB} MB)!`, 'error');
+                    return;
                 }
-            }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedFilesBuffer.push({
+                        name: f.name,
+                        size: Math.max(1, Math.round(f.size / 1024)),
+                        type: f.name.split('.').pop().toUpperCase(),
+                        dataUrl: e.target.result
+                    });
+                    if (badge) {
+                        badge.textContent = `Terdeteksi: ${uploadedFilesBuffer.length} berkas siap disimpan`;
+                        badge.classList.remove('hidden');
+                    }
+                };
+                reader.readAsDataURL(f);
+            });
 
-            if (validCount === 0) {
-                showToast('Tidak ada berkas yang valid sesuai ekstensi atau ukuran yang diizinkan!', 'error');
-                return;
+            if (files.length === 1 && (!document.getElementById('arsip-nama').value || document.getElementById('arsip-nama').value === '')) {
+                document.getElementById('arsip-nama').value = files[0].name.replace(/\.[^/.]+$/, "");
             }
-
-            const totalKB = (totalBytes / 1024).toFixed(1);
-            const namaInput = document.getElementById('arsip-nama');
-            if (namaInput && !namaInput.value.trim()) {
-                namaInput.value = `Batch Upload (${validCount} Dokumen)`;
-            }
-
-            if (detectedBadge) {
-                detectedBadge.textContent = `Terdeteksi ${validCount} Berkas Terpilih | Total: ${totalKB} KB`;
-                detectedBadge.classList.remove('hidden');
-            }
-
-            detectedUploadedFileType = 'MULTIPLE';
-            showToast(`${validCount} berkas berhasil dipilih untuk diunggah!`, 'success');
         }
 
         async function handleSaveArsip(e) {
             e.preventDefault();
-            
             const id = document.getElementById('arsip-id').value;
-            const baseNo = document.getElementById('arsip-no').value.trim();
-            const baseNama = document.getElementById('arsip-nama').value.trim();
+            const no = document.getElementById('arsip-no').value.trim();
+            const nama = document.getElementById('arsip-nama').value.trim();
             const deskripsi = document.getElementById('arsip-deskripsi').value.trim();
             const kategori = document.getElementById('arsip-kategori-input').value;
-            let tanggal = document.getElementById('arsip-tanggal').value;
-
-            if (!baseNo || !baseNama || !kategori) {
-                showToast('Mohon lengkapi Nomor, Nama Arsip, dan Kategori!', 'error');
-                return;
-            }
 
             const now = new Date();
-            const pad = (n) => String(n).padStart(2, '0');
-            const currentTimestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            const timeStamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
 
-            if (!tanggal || !id) {
-                tanggal = currentTimestamp;
-            }
-
-            if (!id && uploadedMultipleFiles && uploadedMultipleFiles.length > 1) {
-                showToast(`Menyimpan ${uploadedMultipleFiles.length} berkas arsip secara batch...`, 'info');
-                const totalFiles = uploadedMultipleFiles.length;
-
-                for (let i = 0; i < totalFiles; i++) {
-                    const file = uploadedMultipleFiles[i];
-                    const ext = file.name.split('.').pop().toUpperCase();
-                    const cleanNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                    const docName = baseNama.includes('Batch Upload') ? cleanNameWithoutExt.replace(/[-_]/g, ' ') : `${baseNama} - ${cleanNameWithoutExt}`;
-                    const docNo = totalFiles > 1 ? `${baseNo}/${i + 1}` : baseNo;
-                    const uniqueId = `ARS-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-
-                    const readFileBase64 = (fileObj) => {
-                        return new Promise((resolve) => {
-                            const reader = new FileReader();
-                            reader.onload = (evt) => resolve(evt.target.result);
-                            reader.onerror = () => resolve('');
-                            reader.readAsDataURL(fileObj);
-                        });
-                    };
-
-                    const fileDataUrl = await readFileBase64(file);
-                    const computedSize = Math.round(file.size / 1024) || 1;
-
-                    const archiveItem = {
-                        id: uniqueId,
-                        no: docNo,
-                        nama: docName,
-                        deskripsi: deskripsi || `Berkas ${i + 1} dari batch upload ${file.name}`,
-                        kategori: kategori,
-                        tanggal: tanggal,
-                        size: computedSize,
-                        file_name: file.name,
-                        file_url: fileDataUrl,
-                        file_type: ext,
-                        uploader: currentUser ? currentUser.username : 'admin'
-                    };
-
-                    archiveData.unshift(archiveItem);
-                    recordAuditLog('ADD_ARCHIVE', `Batch upload dokumen ${docNo} - ${docName}`);
-                    sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
-                }
-
-                saveLocalState();
-                renderAllTables();
-                initCategoryChart();
-                closeModal('arsip-modal');
-                showToast(`Berhasil menyimpan ${totalFiles} berkas arsip!`, 'success');
-                return;
-            }
-
-            const executeSaveSingle = async (fileDataUrl = '', fileName = '') => {
-                const isNew = !id;
-                const uniqueId = isNew ? `ARS-${Date.now().toString(36).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}` : id;
-                const fileObj = uploadedMultipleFiles && uploadedMultipleFiles.length === 1 ? uploadedMultipleFiles[0] : null;
-                const computedSize = fileObj ? Math.round(fileObj.size / 1024) : (isNew ? 120 : 0);
-
-                const archiveItem = {
-                    id: uniqueId,
-                    no: baseNo,
-                    nama: baseNama,
-                    deskripsi: deskripsi,
-                    kategori: kategori,
-                    tanggal: tanggal,
-                    size: computedSize,
-                    file_name: fileName || (isNew ? 'Dokumen_Baru' : ''),
-                    file_url: fileDataUrl,
-                    file_type: detectedUploadedFileType || (fileName ? fileName.split('.').pop().toUpperCase() : 'PDF'),
-                    uploader: currentUser ? currentUser.username : 'admin'
-                };
-
-                if (isNew) {
-                    archiveData.unshift(archiveItem);
-                    recordAuditLog('ADD_ARCHIVE', `Menambahkan arsip baru ${baseNo} - ${baseNama}`);
-                } else {
-                    const idx = archiveData.findIndex(x => x.id === id);
-                    if (idx !== -1) {
-                        archiveItem.file_url = fileDataUrl || archiveData[idx].file_url;
-                        archiveItem.size = computedSize || archiveData[idx].size;
-                        archiveData[idx] = { ...archiveData[idx], ...archiveItem };
+            if (id) {
+                // Edit existing single item
+                const idx = archiveData.findIndex(x => x.id === id);
+                if (idx !== -1) {
+                    archiveData[idx].no = no;
+                    archiveData[idx].nama = nama;
+                    archiveData[idx].deskripsi = deskripsi;
+                    archiveData[idx].kategori = kategori;
+                    if (uploadedFilesBuffer.length > 0) {
+                        archiveData[idx].file_name = uploadedFilesBuffer[0].name;
+                        archiveData[idx].file_type = uploadedFilesBuffer[0].type;
+                        archiveData[idx].size = uploadedFilesBuffer[0].size;
+                        archiveData[idx].file_url = uploadedFilesBuffer[0].dataUrl;
                     }
-                    recordAuditLog('EDIT_ARCHIVE', `Memperbarui arsip ${baseNo}`);
+                    recordAuditLog('EDIT_ARCHIVE', `Memperbarui dokumen ${no} - ${nama}`);
+                    sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveData[idx] });
+                    showToast(`Dokumen "${nama}" berhasil diperbarui!`, 'success');
                 }
-
-                saveLocalState();
-                renderAllTables();
-                initCategoryChart();
-
-                sendToGAS({ action: 'SAVE_ARCHIVE', data: archiveItem });
-                showToast(`Dokumen ${baseNo} berhasil disimpan!`, 'success');
-                closeModal('arsip-modal');
-            };
-
-            if (uploadedMultipleFiles && uploadedMultipleFiles.length === 1) {
-                const file = uploadedMultipleFiles[0];
-                const reader = new FileReader();
-                reader.onload = async function(evt) {
-                    await executeSaveSingle(evt.target.result, file.name);
-                };
-                reader.readAsDataURL(file);
             } else {
-                await executeSaveSingle();
+                // Add one or multiple new items
+                if (uploadedFilesBuffer.length > 1) {
+                    uploadedFilesBuffer.forEach((f, index) => {
+                        const uniqueId = `ARS-${Date.now()}-${Math.floor(Math.random() * 10000) + index}`;
+                        const docNo = `${no}-${index + 1}`;
+                        const payload = {
+                            id: uniqueId,
+                            no: docNo,
+                            nama: f.name.replace(/\.[^/.]+$/, ""),
+                            deskripsi: deskripsi,
+                            kategori: kategori,
+                            tanggal: timeStamp,
+                            size: f.size,
+                            file_name: f.name,
+                            file_type: f.type,
+                            file_url: f.dataUrl,
+                            uploader: currentUser ? currentUser.username : 'admin',
+                            drive_file_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r'
+                        };
+                        archiveData.unshift(payload);
+                        sendToGAS({ action: 'SAVE_ARCHIVE', data: payload });
+                    });
+                    recordAuditLog('ADD_BATCH_ARCHIVE', `Mengunggah ${uploadedFilesBuffer.length} berkas ke kategori ${kategori}`);
+                    showToast(`Berhasil menambahkan ${uploadedFilesBuffer.length} berkas arsip!`, 'success');
+                } else {
+                    const uniqueId = `ARS-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+                    const singleFile = uploadedFilesBuffer[0];
+                    const payload = {
+                        id: uniqueId,
+                        no: no,
+                        nama: nama,
+                        deskripsi: deskripsi,
+                        kategori: kategori,
+                        tanggal: timeStamp,
+                        size: singleFile ? singleFile.size : 120,
+                        file_name: singleFile ? singleFile.name : `${nama}.pdf`,
+                        file_type: singleFile ? singleFile.type : 'PDF',
+                        file_url: singleFile ? singleFile.dataUrl : '',
+                        uploader: currentUser ? currentUser.username : 'admin',
+                        drive_file_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r'
+                    };
+                    archiveData.unshift(payload);
+                    recordAuditLog('ADD_ARCHIVE', `Menambahkan dokumen baru ${no} - ${nama}`);
+                    sendToGAS({ action: 'SAVE_ARCHIVE', data: payload });
+                    showToast(`Dokumen "${nama}" berhasil disimpan!`, 'success');
+                }
             }
+
+            saveLocalState();
+            renderAllTables();
+            closeModal('arsip-modal');
         }
 
         async function deleteArsip(id) {
-            const index = archiveData.findIndex(x => x.id === id);
-            if (index !== -1) {
-                const deleted = archiveData[index];
-                archiveData.splice(index, 1);
-                recordAuditLog('DELETE_ARCHIVE', `Menghapus dokumen ${deleted.no}`);
+            const idx = archiveData.findIndex(x => x.id === id);
+            if (idx !== -1) {
+                const deleted = archiveData[idx];
+                archiveData.splice(idx, 1);
+                recordAuditLog('DELETE_ARCHIVE', `Menghapus dokumen ${deleted.no} - ${deleted.nama}`);
                 saveLocalState();
                 renderAllTables();
-                initCategoryChart();
 
                 sendToGAS({ action: 'DELETE_ARCHIVE', id: id, drive_file_id: deleted.drive_file_id || '' });
-                showToast(`Dokumen ${deleted.no} berhasil dihapus!`, 'info');
+                showToast(`Dokumen "${deleted.nama}" berhasil dihapus!`, 'info');
             }
         }
 
-        /* =========================================================================
-           DOCUMENT PREVIEW & DOWNLOAD CONTROLLER
-           ========================================================================= */
-        function previewFile(idOrName) {
-            const item = archiveData.find(x => x.id === idOrName || x.nama === idOrName) || archiveData[0];
-            document.getElementById('preview-title').textContent = `Pratinjau Dokumen: ${item ? item.nama : idOrName}`;
-            const box = document.getElementById('preview-content-box');
-            if (!box) return;
-
-            let fileId = item ? (item.drive_file_id || extractDriveFileId(item.file_url)) : '';
-            const isBase64Pdf = item && item.file_url && item.file_url.startsWith('data:application/pdf');
-            const isBase64Image = item && item.file_url && item.file_url.startsWith('data:image');
-            const fileExt = item ? (item.file_type || (item.nama ? item.nama.split('.').pop().toUpperCase() : '')).toUpperCase() : '';
-
-            if (fileId) {
-                box.innerHTML = `
-                    <div class="w-full h-full flex flex-col items-center">
-                        <iframe src="https://drive.google.com/file/d/${fileId}/preview" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-sm" allow="autoplay"></iframe>
-                        <div class="mt-3.5 flex justify-between items-center w-full px-2">
-                            <span class="text-xs font-bold text-slate-500">Google Drive Cloud Viewer Active</span>
-                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Berkas</button>
-                        </div>
-                    </div>
-                `;
-            } else if (isBase64Pdf || fileExt === 'PDF') {
-                if (item && item.file_url && item.file_url.startsWith('data:')) {
-                    box.innerHTML = `
-                        <div class="w-full h-full flex flex-col items-center">
-                            <object data="${item.file_url}" type="application/pdf" class="w-full flex-1 rounded-2xl border border-slate-200 shadow-xs">
-                                <iframe src="${item.file_url}" class="w-full h-full rounded-2xl border-0">
-                                    <p class="text-xs text-slate-500 p-4 text-center">Browser tidak mendukung preview PDF langsung.</p>
-                                </iframe>
-                            </object>
-                            <div class="mt-3.5 flex justify-between items-center w-full px-2">
-                                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">Pratinjau PDF Interaktif</span>
-                                <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh PDF</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    renderDocumentMetadataCard(box, item);
-                }
-            } else if (isBase64Image || ['JPG', 'JPEG', 'PNG', 'WEBP', 'SVG'].includes(fileExt)) {
-                box.innerHTML = `
-                    <div class="w-full h-full flex flex-col items-center justify-center p-2">
-                        <div class="flex-1 max-h-[68vh] overflow-hidden rounded-2xl border border-slate-200 flex justify-center bg-slate-950 p-3 shadow-inner w-full">
-                            <img src="${item.file_url}" class="max-h-full object-contain rounded-xl" alt="Preview Gambar">
-                        </div>
-                        <div class="mt-3.5 flex justify-between items-center w-full px-2">
-                            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-200">Pratinjau Gambar</span>
-                            <button type="button" onclick="downloadDocumentFile('${item.id}')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md cursor-pointer">Unduh Gambar</button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                renderDocumentMetadataCard(box, item);
+        async function sendToGAS(payload) {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
+                return { status: 'OFFLINE' };
             }
-            openModal('preview-modal');
-        }
-
-        function renderDocumentMetadataCard(box, item) {
-            const ext = item ? (item.file_type || 'DOC').toUpperCase() : 'DOC';
-            box.innerHTML = `
-                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 max-w-lg w-full text-center space-y-4 my-auto">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto mb-2 shadow-sm font-bold text-lg font-mono">
-                        ${ext}
-                    </div>
-                    <div>
-                        <h4 class="font-extrabold text-slate-900 text-base tracking-tight">${item ? item.nama : 'Dokumen'}</h4>
-                        <p class="text-xs text-slate-500 mt-1">No. Dokumen: <span class="font-mono font-bold text-brand-600">${item ? item.no : '-'}</span></p>
-                        <p class="text-xs text-slate-400 mt-0.5">Kategori: <span class="font-semibold text-slate-700">${item ? item.kategori : '-'}</span></p>
-                    </div>
-                    <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-100 text-left text-xs space-y-2">
-                        <div class="flex justify-between"><span class="text-slate-500">Format Dokumen:</span><span class="font-bold text-brand-600 font-mono">.${ext}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Waktu Unggah:</span><span class="font-bold text-slate-700 font-mono">${formatDateTimeDisplay(item ? item.tanggal : '')}</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Ukuran Berkas:</span><span class="font-bold text-slate-700 font-mono">${item ? item.size : '0'} KB</span></div>
-                        <div class="flex justify-between"><span class="text-slate-500">Pengunggah:</span><span class="font-semibold text-slate-700">${item ? item.uploader : '-'}</span></div>
-                        <div class="pt-2 border-t border-slate-200/60"><span class="text-slate-500 block mb-1">Keterangan:</span><span class="font-normal text-slate-700 block italic bg-white p-2.5 rounded-xl border border-slate-200/80">${item && item.deskripsi ? item.deskripsi : 'Tidak ada catatan tambahan.'}</span></div>
-                    </div>
-                    <div class="pt-2">
-                        <button type="button" onclick="downloadDocumentFile('${item ? item.id : ''}')" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md transition-all active:scale-95 flex items-center justify-center space-x-2 cursor-pointer">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            <span>Unduh Berkas .${ext}</span>
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function extractDriveFileId(url) {
-            if (!url || typeof url !== 'string' || url.startsWith('data:')) return '';
-            const match = url.match(/[-\w]{25,}/);
-            return match ? match[0] : '';
-        }
-
-        function downloadDocumentFile(id) {
-            const item = archiveData.find(x => x.id === id) || archiveData[0];
-            if (!item) return;
-
-            const ext = (item.file_type || 'txt').toLowerCase();
-
-            if (item.file_url && item.file_url.startsWith('data:')) {
-                const a = document.createElement('a');
-                a.href = item.file_url;
-                a.download = `${item.nama.replace(/[^a-z0-9]/gi, '_')}_${item.no.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                showToast(`Mengunduh berkas ${item.nama}.${ext}...`, 'success');
-            } else {
-                const content = `==================================================\nARSIP CLOUD ENTERPRISE v3.9 - SALINAN DOKUMEN RESMI\n==================================================\n\nNomor Dokumen : ${item.no}\nNama Dokumen  : ${item.nama}\nKategori      : ${item.kategori}\nJenis Berkas  : ${item.file_type || 'N/A'}\nTanggal Arsip : ${item.tanggal}\nPengunggah    : ${item.uploader}\nUkuran Berkas : ${item.size} KB\n\nKETERANGAN / CATATAN:\n${item.deskripsi || 'Tidak ada catatan'}\n\n==================================================\nDownloaded on: ${new Date().toLocaleString('id-ID')}\n`;
-                const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${item.no.replace(/[^a-z0-9]/gi, '_')}_${item.nama.replace(/[^a-z0-9]/gi, '_')}.${ext}`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                showToast(`File dokumen ${item.no} berhasil diunduh!`, 'success');
-            }
-        }
-
-        /* =========================================================================
-           CRUD: KATEGORI & GOOGLE DRIVE INTEGRATION
-           ========================================================================= */
-        function generateAutoFolderId(name = '') {
-            if (name && name.trim()) {
-                const cleanName = name.trim().replace(/[^a-zA-Z0-9]/g, '_').toUpperCase().slice(0, 12);
-                return `AUTO_${cleanName}`;
-            }
-            return `AUTO_GOOGLE_DRIVE`;
-        }
-
-        function handleCategoryNameInput(val) {
-            const folderIdInput = document.getElementById('kategori-folder-id');
-            const kategoriId = document.getElementById('kategori-id')?.value;
-            if (!kategoriId && !isManualFolderIdEdited && folderIdInput) {
-                folderIdInput.value = generateAutoFolderId(val);
-            }
-        }
-
-        function refreshAutoFolderId() {
-            const catName = document.getElementById('kategori-nama')?.value || '';
-            const folderIdInput = document.getElementById('kategori-folder-id');
-            if (folderIdInput) {
-                folderIdInput.value = generateAutoFolderId(catName);
-                isManualFolderIdEdited = false;
-                showToast('Folder ID diset untuk pembuatan otomatis di Google Drive', 'info');
-            }
-        }
-
-        function openKategoriModal(id = null) {
-            document.getElementById('kategori-id').value = id || '';
-            isManualFolderIdEdited = false;
-
-            if (id) {
-                const cat = categories.find(x => x.id === id);
-                if (!cat) return;
-                document.getElementById('kategori-modal-title').textContent = "Edit Kategori & Drive";
-                document.getElementById('kategori-nama').value = cat.nama;
-                document.getElementById('kategori-folder-id').value = cat.folder_id;
-                document.getElementById('kategori-status').value = cat.status;
-                isManualFolderIdEdited = true;
-            } else {
-                document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Hubungkan Drive";
-                document.getElementById('kategori-nama').value = '';
-                document.getElementById('kategori-folder-id').value = generateAutoFolderId();
-                document.getElementById('kategori-status').value = 'ACTIVE';
-            }
-            openModal('kategori-modal');
-        }
-
-        async function handleSaveKategori(e) {
-            e.preventDefault();
-            const id = document.getElementById('kategori-id').value;
-            const nama = document.getElementById('kategori-nama').value.trim();
-            let folder_id = document.getElementById('kategori-folder-id').value.trim();
-            const status = document.getElementById('kategori-status').value;
-
-            if (!nama) {
-                showToast('Nama kategori tidak boleh kosong!', 'error');
-                return;
-            }
-
-            if (!folder_id) {
-                folder_id = generateAutoFolderId(nama);
-            }
-
-            let payload;
-
-            if (id) {
-                const catIndex = categories.findIndex(x => x.id === id);
-                if (catIndex !== -1) {
-                    categories[catIndex] = { ...categories[catIndex], nama, folder_id, status };
-                    payload = categories[catIndex];
-                }
-                recordAuditLog('EDIT_CATEGORY', `Mengubah kategori ${nama}`);
-                showToast(`Kategori "${nama}" berhasil diperbarui!`, 'success');
-            } else {
-                const maxNum = categories.reduce((max, c) => {
-                    const num = parseInt(String(c.id).replace(/\D/g, ''), 10);
-                    return !isNaN(num) && num > max ? num : max;
-                }, 100);
-
-                payload = {
-                    id: `CAT-${maxNum + 1}`,
-                    nama,
-                    folder_id,
-                    status: status || 'ACTIVE',
-                    uploader: currentUser ? currentUser.username : 'admin'
-                };
-                categories.push(payload);
-                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru "${nama}"`);
-                showToast(`Kategori "${nama}" berhasil dibuat!`, 'success');
-            }
-
-            saveLocalState();
-            renderAllTables();
-            initCategoryChart();
-            closeModal('kategori-modal');
-
-            if (GAS_API_URL && GAS_API_URL.trim() !== "") {
-                try {
-                    const res = await sendToGAS({ action: 'SAVE_CATEGORY', data: payload });
-                    if (res && res.status === 'SUCCESS' && res.category) {
-                        const targetIdx = categories.findIndex(c => c.id === payload.id);
-                        if (targetIdx !== -1) {
-                            categories[targetIdx].folder_id = res.category.folder_id;
-                            saveLocalState();
-                            renderKategoriTable();
-                        }
-                    }
-                } catch (err) {
-                    console.warn("GAS Save Category Sync Error:", err);
-                }
-            }
-        }
-
-        async function deleteKategori(id) {
-            const index = categories.findIndex(x => x.id === id);
-            if (index !== -1) {
-                const deleted = categories[index];
-                categories.splice(index, 1);
-                recordAuditLog('DELETE_CATEGORY', `Menghapus kategori ${deleted.nama}`);
-                saveLocalState();
-                renderAllTables();
-                initCategoryChart();
-
-                sendToGAS({ action: 'DELETE_CATEGORY', id: id, folder_id: deleted.folder_id || '' });
-                showToast(`Kategori "${deleted.nama}" berhasil dihapus!`, 'info');
-            }
-        }
-
-        /* =========================================================================
-           CRUD: PENGGUNA (USERS & ROLES)
-           ========================================================================= */
-        function openUserModal(username = null) {
-            document.getElementById('user-original-username').value = username || '';
-            if (username) {
-                const u = usersList.find(x => x.username === username);
-                if (!u) return;
-                document.getElementById('user-modal-title').textContent = "Edit User & Hak Akses";
-                document.getElementById('user-username').value = u.username;
-                document.getElementById('user-password').value = '';
-                document.getElementById('user-fullname').value = u.name;
-                document.getElementById('user-role').value = u.role;
-                document.getElementById('user-status').value = u.status;
-            } else {
-                document.getElementById('user-modal-title').textContent = "Tambah Pengguna Baru";
-                document.getElementById('user-username').value = '';
-                document.getElementById('user-password').value = '';
-                document.getElementById('user-fullname').value = '';
-                document.getElementById('user-role').value = 'OPERATOR';
-                document.getElementById('user-status').value = 'ACTIVE';
-            }
-            openModal('user-modal');
-        }
-
-        async function handleSaveUser(e) {
-            e.preventDefault();
-            const origUsername = document.getElementById('user-original-username').value;
-            const username = document.getElementById('user-username').value.trim();
-            const password = document.getElementById('user-password').value.trim();
-            const name = document.getElementById('user-fullname').value.trim();
-            const role = document.getElementById('user-role').value;
-            const status = document.getElementById('user-status').value;
-
-            const existingUser = usersList.find(x => x.username === (origUsername || username));
-            const finalPassword = password || (existingUser ? existingUser.password : 'admin123');
-
-            const payload = { username, password: finalPassword, name, role, status };
-
-            if (origUsername) {
-                const u = usersList.find(x => x.username === origUsername);
-                if (u) { u.username = username; u.password = finalPassword; u.name = name; u.role = role; u.status = status; }
-                recordAuditLog('EDIT_USER', `Mengubah pengguna ${username}`);
-            } else {
-                usersList.push(payload);
-                recordAuditLog('ADD_USER', `Menambahkan pengguna baru ${username}`);
-            }
-
-            saveLocalState();
-            renderAllTables();
-            sendToGAS({ action: 'SAVE_USER', data: payload });
-            showToast(`Data user ${username} berhasil disimpan!`, 'success');
-            closeModal('user-modal');
-        }
-
-        async function deleteUser(username) {
-            if (currentUser && currentUser.username === username) {
-                showToast('Anda tidak dapat menghapus akun Anda sendiri!', 'error');
-                return;
-            }
-            const idx = usersList.findIndex(x => x.username === username);
-            if (idx !== -1) {
-                usersList.splice(idx, 1);
-                recordAuditLog('DELETE_USER', `Menghapus akun ${username}`);
-                saveLocalState();
-                renderAllTables();
-
-                sendToGAS({ action: 'DELETE_USER', username: username });
-                showToast(`Pengguna ${username} berhasil dihapus!`, 'info');
-            }
-        }
-
-        /* =========================================================================
-           IMAGE CROPPING & CUSTOM THEMES
-           ========================================================================= */
-        function triggerImageCrop(event, targetType) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            cropTargetType = targetType;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imgTarget = document.getElementById('crop-image-target');
-                if (!imgTarget) return;
-                imgTarget.src = e.target.result;
-
-                document.getElementById('crop-modal-title').textContent = 
-                    targetType === 'logo' ? "Potong Logo Kustom (Free Aspect Ratio)" :
-                    targetType === 'login_card_bg' ? "Potong Wallpaper Kartu Login" : "Potong Wallpaper Background Utama";
-                document.getElementById('crop-modal-desc').textContent = "Aspect Ratio Bebas - Sesuaikan area pemotongan secara presisi.";
-                openModal('crop-modal');
-
-                if (activeCropper) activeCropper.destroy();
-
-                if (typeof Cropper !== 'undefined') {
-                    activeCropper = new Cropper(imgTarget, {
-                        aspectRatio: NaN,
-                        viewMode: 1,
-                        autoCropArea: 0.9,
-                        responsive: true,
-                        background: false
-                    });
-                }
-            };
-            reader.readAsDataURL(file);
-            event.target.value = '';
-        }
-
-        function applyImageCrop() {
-            if (!activeCropper) return;
-            const canvas = activeCropper.getCroppedCanvas({
-                maxWidth: cropTargetType === 'logo' ? 800 : 1600,
-                maxHeight: cropTargetType === 'logo' ? 800 : 1000
-            });
-
-            if (!canvas) {
-                showToast('Gagal memotong gambar!', 'error');
-                return;
-            }
-
-            const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.80);
-
-            if (cropTargetType === 'logo') {
-                systemSettings.customLogo = croppedDataUrl;
-                applyLogoToUI(croppedDataUrl);
-                showToast('Logo kustom berhasil dipotong!', 'success');
-            } else if (cropTargetType === 'background') {
-                systemSettings.bgImage = croppedDataUrl;
-                applyBgImageAndOpacity();
-                showToast('Wallpaper kustom berhasil diterapkan!', 'success');
-            } else if (cropTargetType === 'login_card_bg') {
-                systemSettings.loginCardCustomBgImg = croppedDataUrl;
-                applyLoginCardCustomStyles();
-                showToast('Wallpaper kartu login berhasil diterapkan!', 'success');
-            }
-
-            triggerDebouncedSettingsSave();
-            closeModal('crop-modal');
-        }
-
-        function handleGlobalFontColorChange(hex) {
-            systemSettings.globalFontColor = hex;
-            const colInput = document.getElementById('setting-global-font-color');
-            const hexInput = document.getElementById('setting-global-font-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            document.documentElement.style.setProperty('--app-global-text-color', hex);
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleCustomSidebarBgChange(hex) {
-            systemSettings.customSidebarBg = hex;
-            const colInput = document.getElementById('setting-sidebar-bg-color');
-            const hexInput = document.getElementById('setting-sidebar-bg-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            applyCustomSidebarColors();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleCustomSidebarTextChange(hex) {
-            systemSettings.customSidebarText = hex;
-            const colInput = document.getElementById('setting-sidebar-text-color');
-            const hexInput = document.getElementById('setting-sidebar-text-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            applyCustomSidebarColors();
-            triggerDebouncedSettingsSave();
-        }
-
-        function applyCustomSidebarColors() {
-            const sidebar = document.getElementById('main-sidebar');
-            const appTitle = document.getElementById('sidebar-app-title');
-            const appSubtitle = document.getElementById('sidebar-app-subtitle');
-
-            if (sidebar) {
-                if (systemSettings.customSidebarBg) sidebar.style.backgroundColor = systemSettings.customSidebarBg;
-                if (systemSettings.customSidebarText) {
-                    sidebar.style.color = systemSettings.customSidebarText;
-                    if (appTitle) appTitle.style.color = systemSettings.customSidebarText;
-                    if (appSubtitle) appSubtitle.style.color = systemSettings.customSidebarText;
-                }
-            }
-        }
-
-        function render20SidebarThemePresets() {
-            const container = document.getElementById('sidebar-theme-presets-grid');
-            if (!container) return;
-
-            container.innerHTML = sidebarThemePresets.map(preset => `
-                <button type="button" onclick="selectSidebarTheme('${preset.id}')" class="p-2.5 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-2.5 hover:bg-slate-50 transition-all group cursor-pointer">
-                    <div class="w-5 h-5 rounded-full border border-slate-300 flex-shrink-0 flex items-center justify-center shadow-xs" style="background-color: ${preset.bg}">
-                        <div class="w-1.5 h-1.5 rounded-full" style="background-color: ${preset.dot}"></div>
-                    </div>
-                    <div class="truncate">
-                        <p class="text-xs font-bold text-slate-800 truncate group-hover:text-brand-600">${preset.title}</p>
-                        <span class="text-[9px] text-slate-400 block truncate">${preset.desc}</span>
-                    </div>
-                </button>
-            `).join('');
-        }
-
-        function selectSidebarTheme(themeId) {
-            systemSettings.sidebarTheme = themeId;
-            systemSettings.customSidebarBg = "";
-            systemSettings.customSidebarText = "";
-            
-            const sidebar = document.getElementById('main-sidebar');
-            const appTitle = document.getElementById('sidebar-app-title');
-            const appSubtitle = document.getElementById('sidebar-app-subtitle');
-
-            if (sidebar) { sidebar.style.backgroundColor = ""; sidebar.style.color = ""; }
-            if (appTitle) appTitle.style.color = "";
-            if (appSubtitle) appSubtitle.style.color = "";
-
-            applySidebarStyles(themeId);
-            triggerDebouncedSettingsSave();
-            showToast(`Tema navigasi disesuaikan ke ${themeId.toUpperCase()}`, 'success');
-        }
-
-        function applySidebarStyles(themeId) {
-            const sidebar = document.getElementById('main-sidebar');
-            const appTitle = document.getElementById('sidebar-app-title');
-            const appSubtitle = document.getElementById('sidebar-app-subtitle');
-            if (!sidebar) return;
-
-            const preset = sidebarThemePresets.find(p => p.id === themeId);
-            if (preset && preset.id !== 'white') {
-                sidebar.className = "fixed md:static inset-y-0 left-0 w-60 border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none overflow-hidden";
-                sidebar.style.backgroundColor = preset.bg;
-                sidebar.style.color = preset.text;
-                if (appTitle) appTitle.style.color = preset.text;
-                if (appSubtitle) appSubtitle.style.color = preset.text;
-            } else {
-                sidebar.className = "fixed md:static inset-y-0 left-0 w-60 bg-white text-slate-800 border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none overflow-hidden";
-                sidebar.style.backgroundColor = "";
-                sidebar.style.color = "";
-                if (appTitle) appTitle.style.color = "";
-                if (appSubtitle) appSubtitle.style.color = "";
-            }
-
-            const activeTabId = document.querySelector('.tab-content:not(.hidden)')?.id?.replace('tab-', '') || 'dashboard';
-            applySidebarNavStyles(activeTabId);
-        }
-
-        function applySidebarNavStyles(activeTabId) {
-            const theme = systemSettings.sidebarTheme || 'white';
-            document.querySelectorAll('.nav-item').forEach(el => {
-                const isCurrent = el.id === `nav-${activeTabId}`;
-                if (theme === 'white' && !systemSettings.customSidebarBg) {
-                    el.className = isCurrent 
-                        ? "nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-50 text-brand-600 shadow-xs"
-                        : "nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all";
-                } else {
-                    el.className = isCurrent 
-                        ? "nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-white/15 text-white shadow-xs"
-                        : "nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/5 hover:text-white transition-all";
-                }
-            });
-        }
-
-        function renderLoginCardPresets() {
-            const container = document.getElementById('login-card-presets-grid');
-            if (!container) return;
-
-            container.innerHTML = loginCardPresets.map(preset => `
-                <button type="button" onclick="selectLoginCardPreset('${preset.id}')" class="p-2.5 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-2 hover:bg-slate-50 transition-all group cursor-pointer">
-                    <div class="w-5 h-5 rounded-full border border-slate-300 flex-shrink-0 shadow-xs" style="background-color: ${preset.bg}"></div>
-                    <div class="truncate">
-                        <p class="text-xs font-bold text-slate-800 truncate group-hover:text-brand-600">${preset.title}</p>
-                    </div>
-                </button>
-            `).join('');
-        }
-
-        function selectLoginCardPreset(presetId) {
-            systemSettings.loginCardPreset = presetId;
-            systemSettings.loginCardBg = ""; systemSettings.loginCardText = ""; systemSettings.loginCardBorder = ""; systemSettings.loginCardCustomBgImg = "";
-            applyLoginCardPresetStyles(presetId);
-            triggerDebouncedSettingsSave();
-            showToast(`Preset kartu login diubah ke ${presetId.toUpperCase()}`, 'success');
-        }
-
-        function applyLoginCardPresetStyles(presetId) {
-            const card = document.getElementById('login-card-box');
-            if (!card) return;
-            const preset = loginCardPresets.find(p => p.id === presetId) || loginCardPresets[0];
-            card.style.backgroundImage = "";
-            card.style.backgroundColor = preset.bg;
-            card.style.color = preset.text;
-            card.style.borderColor = preset.border;
-        }
-
-        function handleCustomLoginCardBg(hex) {
-            systemSettings.loginCardBg = hex;
-            const colInput = document.getElementById('setting-login-bg-color');
-            const hexInput = document.getElementById('setting-login-bg-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            applyLoginCardCustomStyles();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleCustomLoginCardText(hex) {
-            systemSettings.loginCardText = hex;
-            const colInput = document.getElementById('setting-login-text-color');
-            const hexInput = document.getElementById('setting-login-text-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            applyLoginCardCustomStyles();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleCustomLoginCardBorder(hex) {
-            systemSettings.loginCardBorder = hex;
-            const colInput = document.getElementById('setting-login-border-color');
-            const hexInput = document.getElementById('setting-login-border-hex');
-            if (colInput) colInput.value = hex;
-            if (hexInput) hexInput.value = hex;
-            applyLoginCardCustomStyles();
-            triggerDebouncedSettingsSave();
-        }
-
-        function applyLoginCardCustomStyles() {
-            const card = document.getElementById('login-card-box');
-            if (!card) return;
-
-            if (systemSettings.loginCardCustomBgImg) {
-                card.style.backgroundImage = `url('${systemSettings.loginCardCustomBgImg}')`;
-                card.style.backgroundSize = "cover";
-                card.style.backgroundPosition = "center";
-            } else if (systemSettings.loginCardBg) {
-                card.style.backgroundImage = "";
-                card.style.backgroundColor = systemSettings.loginCardBg;
-            }
-
-            if (systemSettings.loginCardText) card.style.color = systemSettings.loginCardText;
-            if (systemSettings.loginCardBorder) card.style.borderColor = systemSettings.loginCardBorder;
-        }
-
-        function handleAppNameChange(val) {
-            systemSettings.appTitle = val;
-            const sTitle = document.getElementById('sidebar-app-title');
-            const lTitle = document.getElementById('login-app-title');
-            if (sTitle) sTitle.textContent = val;
-            if (lTitle) lTitle.textContent = val;
-            document.title = val + " v3.9";
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleAppSubtitleChange(val) {
-            systemSettings.appSubtitle = val;
-            const sSub = document.getElementById('sidebar-app-subtitle');
-            const lSub = document.getElementById('login-app-subtitle');
-            if (sSub) sSub.textContent = val;
-            if (lSub) lSub.textContent = val;
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleMaxFileSizeChange(val) {
-            systemSettings.maxFileSizeMB = parseInt(val, 10) || 25;
-            updateUploadGuidance();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleAllowedExtChange(val) {
-            systemSettings.allowedExtensions = val;
-            updateUploadGuidance();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleBgOpacityChange(val) {
-            systemSettings.bgOpacity = val;
-            const textElem = document.getElementById('bg-opacity-text');
-            if (textElem) textElem.textContent = `${val}%`;
-            applyBgImageAndOpacity();
-            triggerDebouncedSettingsSave();
-        }
-
-        function handleBgBlurChange(val) {
-            systemSettings.bgBlur = val;
-            const textElem = document.getElementById('bg-blur-text');
-            if (textElem) textElem.textContent = val == 0 ? '0 px (Tanpa Blur)' : `${val} px Blur`;
-            applyBgImageAndOpacity();
-            triggerDebouncedSettingsSave();
-        }
-
-        function applyBgImageAndOpacity() {
-            const bgLayer = document.getElementById('custom-bg-layer');
-            if (bgLayer) {
-                if (systemSettings.bgImage) {
-                    bgLayer.style.backgroundImage = `url('${systemSettings.bgImage}')`;
-                } else {
-                    bgLayer.style.backgroundImage = "none";
-                }
-                bgLayer.style.opacity = (parseInt(systemSettings.bgOpacity, 10) / 100).toString();
-                bgLayer.style.filter = `blur(${systemSettings.bgBlur || 0}px)`;
-            }
-        }
-
-        function applyLogoToUI(src) {
-            const sbImg = document.getElementById('sidebar-logo-img');
-            const sbSvg = document.getElementById('sidebar-logo-svg');
-            if (sbImg && sbSvg) {
-                sbImg.src = src;
-                sbImg.classList.remove('hidden');
-                sbSvg.classList.add('hidden');
-            }
-            const lgImg = document.getElementById('login-logo-img');
-            const lgSvg = document.getElementById('login-logo-svg');
-            if (lgImg && lgSvg) {
-                lgImg.src = src;
-                lgImg.classList.remove('hidden');
-                lgSvg.classList.add('hidden');
-            }
-        }
-
-        function renderAvatarPresets() {
-            const container = document.getElementById('avatar-presets-grid');
-            if (!container) return;
-            const presets = [
-                { title: 'Eksekutif / Admin', initial: 'A', bg: 'bg-brand-600', text: 'text-white' },
-                { title: 'Surat & Operasional', initial: 'O', bg: 'bg-blue-600', text: 'text-white' },
-                { title: 'Keuangan & Finance', initial: 'F', bg: 'bg-emerald-600', text: 'text-white' },
-                { title: 'Kepegawaian / HRD', initial: 'H', bg: 'bg-indigo-600', text: 'text-white' }
-            ];
-
-            container.innerHTML = presets.map(p => `
-                <button type="button" onclick="selectAvatarPreset('${p.initial}', '${p.bg}', '${p.text}')" class="p-3 border border-slate-200 rounded-xl text-left hover:border-brand-500 flex items-center space-x-3 hover:bg-slate-50 transition-colors cursor-pointer">
-                    <div class="w-8 h-8 rounded-full ${p.bg} ${p.text} flex items-center justify-center font-bold text-xs shadow-xs">${p.initial}</div>
-                    <div>
-                        <p class="text-xs font-bold text-slate-800">${p.title}</p>
-                        <span class="text-[10px] text-slate-500 font-medium">Avatar Preset</span>
-                    </div>
-                </button>
-            `).join('');
-        }
-
-        function selectAvatarPreset(initial, bgClass, textClass) {
-            systemSettings.avatarInitial = initial;
-            systemSettings.avatarBgClass = bgClass;
-            systemSettings.avatarTextClass = textClass;
-
-            const avatarBox = document.getElementById('user-avatar-box');
-            const avatarInitial = document.getElementById('user-avatar-initial');
-            const avatarImg = document.getElementById('user-avatar-img');
-
-            if (avatarBox) avatarBox.className = `w-9 h-9 rounded-full ${bgClass} ${textClass} flex items-center justify-center font-bold text-xs uppercase overflow-hidden border border-slate-200`;
-            if (avatarInitial) avatarInitial.textContent = initial;
-            if (avatarImg) avatarImg.classList.add('hidden');
-
-            triggerDebouncedSettingsSave();
-            showToast('Preset avatar profil berhasil diperbarui!', 'success');
-        }
-
-        function updateUploadGuidance() {
-            const extElem = document.getElementById('guidance-allowed-ext');
-            const sizeElem = document.getElementById('guidance-max-size');
-            if (extElem) extElem.textContent = systemSettings.allowedExtensions || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
-            if (sizeElem) sizeElem.textContent = (systemSettings.maxFileSizeMB || 25).toString();
-        }
-
-        function applyAllSettingsToUI() {
-            if (systemSettings.appTitle) {
-                const sTitle = document.getElementById('sidebar-app-title');
-                const lTitle = document.getElementById('login-app-title');
-                const sInput = document.getElementById('setting-app-title');
-                if (sTitle) sTitle.textContent = systemSettings.appTitle;
-                if (lTitle) lTitle.textContent = systemSettings.appTitle;
-                if (sInput) sInput.value = systemSettings.appTitle;
-                document.title = systemSettings.appTitle + " v3.9";
-            }
-            if (systemSettings.appSubtitle) {
-                const sSub = document.getElementById('sidebar-app-subtitle');
-                const lSub = document.getElementById('login-app-subtitle');
-                const sInputSub = document.getElementById('setting-app-subtitle');
-                if (sSub) sSub.textContent = systemSettings.appSubtitle;
-                if (lSub) lSub.textContent = systemSettings.appSubtitle;
-                if (sInputSub) sInputSub.value = systemSettings.appSubtitle;
-            }
-            if (systemSettings.maxFileSizeMB) {
-                const sMax = document.getElementById('setting-max-filesize');
-                if (sMax) sMax.value = systemSettings.maxFileSizeMB;
-            }
-            if (systemSettings.allowedExtensions) {
-                const sExt = document.getElementById('setting-allowed-ext');
-                if (sExt) sExt.value = systemSettings.allowedExtensions;
-            }
-
-            applySidebarStyles(systemSettings.sidebarTheme || 'white');
-            applyLoginCardPresetStyles(systemSettings.loginCardPreset || 'white');
-            applyCustomSidebarColors();
-            applyLoginCardCustomStyles();
-            applyBgImageAndOpacity();
-
-            if (systemSettings.customLogo) applyLogoToUI(systemSettings.customLogo);
-            if (systemSettings.globalFontColor) handleGlobalFontColorChange(systemSettings.globalFontColor);
-            if (systemSettings.avatarInitial) selectAvatarPreset(systemSettings.avatarInitial, systemSettings.avatarBgClass || 'bg-brand-600', systemSettings.avatarTextClass || 'text-white');
-            updateUploadGuidance();
-        }
-
-        async function saveSettings() {
-            const titleInput = document.getElementById('setting-app-title')?.value.trim();
-            const subtitleInput = document.getElementById('setting-app-subtitle')?.value.trim();
-            const maxFileSize = parseInt(document.getElementById('setting-max-filesize')?.value, 10) || 25;
-            const allowedExt = document.getElementById('setting-allowed-ext')?.value.trim() || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
-
-            if (titleInput) {
-                systemSettings.appTitle = titleInput;
-                document.getElementById('sidebar-app-title').textContent = titleInput;
-                document.getElementById('login-app-title').textContent = titleInput;
-                document.title = titleInput + " v3.9";
-            }
-
-            if (subtitleInput) {
-                systemSettings.appSubtitle = subtitleInput;
-                document.getElementById('sidebar-app-subtitle').textContent = subtitleInput;
-                document.getElementById('login-app-subtitle').textContent = subtitleInput;
-            }
-
-            systemSettings.maxFileSizeMB = maxFileSize;
-            systemSettings.allowedExtensions = allowedExt;
-
-            updateUploadGuidance();
-            recordAuditLog('SAVE_SETTINGS', 'Memperbarui konfigurasi sistem v3.9 Production');
-            saveLocalState();
-
-            const res = await sendToGAS({ action: 'SAVE_SETTINGS', data: systemSettings });
-            if (res && res.status === 'SUCCESS') {
-                showToast('Pengaturan tersimpan permanen di server Google!', 'success');
-            } else {
-                showToast('Pengaturan tersimpan pada browser.', 'info');
-            }
-        }
-
-        /* =========================================================================
-           EXPORTERS: EXCEL & PDF
-           ========================================================================= */
-        function exportToExcel() {
             try {
-                if (typeof XLSX === 'undefined') {
-                    showToast('Library SheetJS belum siap', 'error');
-                    return;
-                }
-                const dataToExport = archiveData.map(a => ({
-                    'No. Dokumen': a.no,
-                    'Nama Arsip': a.nama,
-                    'Kategori': a.kategori,
-                    'Waktu Unggah': formatDateTimeDisplay(a.tanggal),
-                    'Ukuran (KB)': a.size,
-                    'Pengunggah': a.uploader,
-                    'Keterangan': a.deskripsi || '-'
-                }));
-                const ws = XLSX.utils.json_to_sheet(dataToExport);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Data Arsip");
-                XLSX.writeFile(wb, `Rekap_Arsip_${new Date().toISOString().slice(0,10)}.xlsx`);
-                showToast('Berhasil mengekspor data ke Excel!', 'success');
-            } catch(err) {
-                showToast('Gagal mengekspor Excel: ' + err.message, 'error');
-            }
-        }
-
-        function exportToPDF() {
-            try {
-                if (!window.jspdf || !window.jspdf.jsPDF) {
-                    showToast('Library jsPDF belum siap', 'error');
-                    return;
-                }
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                doc.setFontSize(16);
-                doc.text("Laporan Rekapitulasi Data Arsip v3.9", 14, 20);
-                doc.setFontSize(10);
-                doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 28);
-                
-                let y = 38;
-                doc.setFontSize(9);
-                doc.setFont(undefined, 'bold');
-                doc.text("No. Dokumen", 14, y);
-                doc.text("Nama Arsip", 60, y);
-                doc.text("Kategori", 130, y);
-                doc.text("Pengunggah", 170, y);
-                
-                doc.setFont(undefined, 'normal');
-                archiveData.forEach((item) => {
-                    y += 8;
-                    if (y > 280) { doc.addPage(); y = 20; }
-                    doc.text(String(item.no).substring(0, 20), 14, y);
-                    doc.text(String(item.nama).substring(0, 32), 60, y);
-                    doc.text(String(item.kategori).substring(0, 20), 130, y);
-                    doc.text(String(item.uploader || '-').substring(0, 15), 170, y);
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    redirect: 'follow'
                 });
-
-                doc.save(`Laporan_Arsip_${new Date().toISOString().slice(0,10)}.pdf`);
-                showToast('Berhasil mengekspor Laporan PDF!', 'success');
-            } catch(err) {
-                showToast('Gagal mencetak PDF: ' + err.message, 'error');
+                return await response.json();
+            } catch (err) {
+                console.warn("GAS Connection Exception:", err);
+                return { status: 'ERROR', message: err.toString() };
             }
         }
 
-        function exportLaporanExcel() { exportToExcel(); }
-        function exportLaporanPDF() { exportToPDF(); }
+        async function loadAllDataFromGAS() {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
+                return;
+            }
+            try {
+                const res = await sendToGAS({ action: 'GET_ALL_DATA' });
+                if (res && res.status === 'SUCCESS') {
+                    if (res.archives && Array.isArray(res.archives)) archiveData = res.archives;
+                    if (res.categories && Array.isArray(res.categories)) categories = res.categories;
+                    if (res.users && Array.isArray(res.users)) usersList = res.users;
+                    if (res.logs && Array.isArray(res.logs)) auditLogs = res.logs;
+                    if (res.settings && typeof res.settings === 'object') {
+                        systemSettings = { ...systemSettings, ...res.settings };
+                        applyAllSettingsToUI();
+                    }
+                    saveLocalState();
+                    renderAllTables();
+                    showToast('Data berhasil disinkronkan dengan Google Cloud!', 'success');
+                }
+            } catch (err) {
+                console.warn("Sync error:", err);
+            }
+        }
 
-        window.addEventListener('resize', () => {
-            if (categoryChartInstance) categoryChartInstance.resize();
-            if (window.innerWidth >= 768) toggleMobileSidebar(false);
-        });
+        async function fetchInitialSettingsFromGAS() {
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") return;
+            try {
+                const res = await sendToGAS({ action: 'GET_SETTINGS' });
+                if (res && res.status === 'SUCCESS' && res.settings) {
+                    systemSettings = { ...systemSettings, ...res.settings };
+                    applyAllSettingsToUI();
+                }
+            } catch (e) {
+                console.warn("Initial settings fetch:", e);
+            }
+        }
 
-        window.onload = function() {
-            loadLocalState();
-            render20SidebarThemePresets();
-            renderLoginCardPresets();
-            renderAvatarPresets();
-            applyAllSettingsToUI();
-            fetchInitialSettingsFromGAS();
-            renderAllTables();
-            console.log("ArsipCloud Enterprise v3.9 Production Engine Initialized Successfully.");
-        };
+        function triggerDebouncedSettingsSave() {
+            clearTimeout(settingsDebounceTimer);
+            settingsDebounceTimer = setTimeout(() => {
+                saveSettings();
+            }, 800);
+        }
     </script>
 </body>
 </html>
