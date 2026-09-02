@@ -89,31 +89,55 @@
     <div id="toast-container" class="fixed top-5 right-5 z-[2000] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none"></div>
 
     <!-- AUTH / LOGIN MODAL (z-[1000]) -->
-    <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4 transition-all duration-300">
-        <div id="login-card-box" class="bg-white/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-100/80 max-w-md w-full overflow-hidden p-8 sm:p-10 transition-all relative">
-            <div class="text-center mb-8">
-                <div id="login-logo-container" class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 text-white mx-auto flex items-center justify-center shadow-xl shadow-brand-500/25 mb-4 overflow-hidden border border-white/20">
+    <div id="auth-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[1000] flex items-center justify-center p-4 transition-all duration-300">
+        <div id="login-card-box" class="bg-white/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-100/80 max-w-md w-full overflow-hidden p-7 sm:p-9 transition-all relative">
+            <div class="text-center mb-6">
+                <div id="login-logo-container" class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-indigo-600 text-white mx-auto flex items-center justify-center shadow-xl shadow-brand-500/25 mb-3.5 overflow-hidden border border-white/20">
                     <svg id="login-logo-svg" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-1.5V9a3 3 0 00-3-3h-3a3 3 0 00-3 3v1.5H7.5A3 3 0 004.5 13.5V18a3 3 0 003 3h12z"></path></svg>
                     <img id="login-logo-img" class="w-full h-full object-contain rounded-2xl hidden" alt="Logo">
                 </div>
                 <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 truncate" id="login-app-title">ArsipCloud Enterprise</h2>
-                <p class="text-xs text-slate-500 mt-1.5 font-medium leading-relaxed break-words" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold tracking-wider mt-3 border border-brand-100">
+                <p class="text-xs text-slate-500 mt-1 font-medium leading-relaxed break-words" id="login-app-subtitle">Sistem Manajemen Arsip Terintegrasi Google Drive</p>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-bold tracking-wider mt-2.5 border border-brand-100">
                     <span class="w-1.5 h-1.5 rounded-full bg-brand-500 animate-ping"></span>
                     PRODUCTION SUITE v3.9
                 </div>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+            <!-- Fast Quick-Fill Preset Buttons -->
+            <div class="mb-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Pilih Akun Demo (1-Klik Isi)</span>
+                    <span class="text-[10px] text-brand-600 font-bold">Auto-Fill</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button type="button" onclick="quickFillCredentials('admin', 'admin123')" class="py-1.5 px-2 bg-white hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl border border-slate-200 text-[11px] font-bold transition-all shadow-2xs text-center cursor-pointer">
+                        Admin
+                    </button>
+                    <button type="button" onclick="quickFillCredentials('operator', 'operator123')" class="py-1.5 px-2 bg-white hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl border border-slate-200 text-[11px] font-bold transition-all shadow-2xs text-center cursor-pointer">
+                        Operator
+                    </button>
+                    <button type="button" onclick="quickFillCredentials('viewer', 'viewer123')" class="py-1.5 px-2 bg-white hover:bg-brand-50 hover:text-brand-700 text-slate-700 rounded-xl border border-slate-200 text-[11px] font-bold transition-all shadow-2xs text-center cursor-pointer">
+                        Viewer
+                    </button>
+                </div>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-3.5">
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-600">Username</label>
-                    <input type="text" id="login-username" required placeholder="Contoh: admin" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all shadow-xs bg-white text-slate-900 placeholder:text-slate-400">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-600">Username</label>
+                    <input type="text" id="login-username" value="admin" required placeholder="Contoh: admin" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs transition-all shadow-2xs bg-white text-slate-900 placeholder:text-slate-400">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider mb-1.5 text-slate-600">Password</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm transition-all shadow-xs bg-white text-slate-900 placeholder:text-slate-400">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider mb-1 text-slate-600">Password</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" value="admin123" required placeholder="••••••••" class="w-full px-4 py-2.5 pr-10 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-xs transition-all shadow-2xs bg-white text-slate-900 placeholder:text-slate-400">
+                        <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-brand-500/25 transition-all transform active:scale-98 cursor-pointer mt-2">
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md shadow-brand-500/25 transition-all transform active:scale-98 cursor-pointer mt-1">
                     Masuk ke Sistem
                 </button>
             </form>
@@ -124,7 +148,7 @@
     <div id="main-app" class="flex-1 flex overflow-hidden hidden z-10 relative bg-slate-50">
 
         <!-- Mobile Drawer Backdrop -->
-        <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden hidden transition-opacity"></div>
+        <div id="mobile-sidebar-backdrop" onclick="toggleMobileSidebar(false)" class="fixed inset-0 bg-slate-950/60 backdrop-blur-2xs z-40 md:hidden hidden transition-opacity"></div>
 
         <!-- Sidebar Navigation -->
         <aside id="main-sidebar" class="fixed md:static inset-y-0 left-0 w-60 bg-white border-r border-slate-200/80 z-50 flex flex-col transition-all duration-300 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none overflow-hidden">
@@ -140,14 +164,14 @@
                         <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block truncate w-full" id="sidebar-app-subtitle">Enterprise v3.9</span>
                     </div>
                 </div>
-                <button type="button" onclick="toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0">
+                <button type="button" onclick="toggleMobileSidebar(false)" class="md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0 cursor-pointer">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
 
             <!-- Navigation Links (7 Core Menus) -->
             <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto" id="sidebar-nav-container">
-                <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-50 text-brand-600 shadow-xs">
+                <button type="button" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all bg-brand-50 text-brand-600 shadow-2xs">
                     <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span>Dashboard Overview</span>
                 </button>
@@ -187,7 +211,7 @@
             <div class="p-3.5 border-t border-slate-100 bg-slate-50/70 min-w-0">
                 <div class="flex items-center justify-between space-x-2">
                     <div class="flex items-center space-x-2.5 min-w-0 flex-1">
-                        <div id="user-avatar-box" class="w-9 h-9 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden border border-brand-200 shadow-xs flex-shrink-0">
+                        <div id="user-avatar-box" class="w-9 h-9 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs uppercase overflow-hidden border border-brand-200 shadow-2xs flex-shrink-0">
                             <span id="user-avatar-initial">A</span>
                             <img id="user-avatar-img" class="w-full h-full object-cover hidden" alt="Avatar">
                         </div>
@@ -208,7 +232,7 @@
             <!-- Topbar Header -->
             <header class="h-18 px-5 md:px-8 bg-white/85 border-b border-slate-200/80 flex items-center justify-between z-10 backdrop-blur-md">
                 <div class="flex items-center space-x-3.5 min-w-0">
-                    <button type="button" onclick="toggleMobileSidebar(true)" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer flex-shrink-0">
+                    <button type="button" onclick="toggleMobileSidebar(true)" class="md:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer flex-shrink-0">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
                     <div class="min-w-0">
@@ -218,13 +242,13 @@
                 </div>
 
                 <div class="flex items-center space-x-3 flex-shrink-0">
-                    <button type="button" onclick="loadAllDataFromGAS()" title="Sinkronisasi Data Real-time" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-xs transition-all cursor-pointer">
+                    <button type="button" onclick="loadAllDataFromGAS()" title="Sinkronisasi Data Real-time" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs transition-all cursor-pointer">
                         <svg class="w-3.5 h-3.5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         <span class="hidden sm:inline">Sync Cloud</span>
                     </button>
-                    <div class="flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 text-xs shadow-xs">
+                    <div class="flex items-center space-x-2 bg-slate-100/80 p-1 rounded-xl border border-slate-200/80 text-xs shadow-2xs">
                         <span class="px-2 text-slate-500 font-semibold text-[11px]">Role:</span>
-                        <select id="role-quick-switch" onchange="switchRoleDemo(this.value)" class="bg-white border-0 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-xs focus:ring-0 cursor-pointer">
+                        <select id="role-quick-switch" onchange="switchRoleDemo(this.value)" class="bg-white border-0 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-800 shadow-2xs focus:ring-0 cursor-pointer">
                             <option value="ADMINISTRATOR">ADMINISTRATOR</option>
                             <option value="OPERATOR">OPERATOR</option>
                             <option value="VIEWER">VIEWER</option>
@@ -238,10 +262,10 @@
                 <!-- TAB DASHBOARD -->
                 <div id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all duration-200 group">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Berkas Arsip</span>
-                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-colors shadow-xs">
+                                <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center group-hover:bg-brand-600 group-hover:text-white transition-colors shadow-2xs">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
                             </div>
@@ -253,10 +277,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all duration-200 group">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Kategori & Folder Drive</span>
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-xs">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-2xs">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                                 </div>
                             </div>
@@ -266,10 +290,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all duration-200 group">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Estimasi Storage</span>
-                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-xs">
+                                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors shadow-2xs">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s-8 1.79-8-4"></path></svg>
                                 </div>
                             </div>
@@ -279,10 +303,10 @@
                             </div>
                         </div>
 
-                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md transition-all duration-200 group">
+                        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-2xs hover:shadow-md transition-all duration-200 group">
                             <div class="flex items-center justify-between mb-3">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Pengguna Terdaftar</span>
-                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-xs">
+                                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-2xs">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                 </div>
                             </div>
@@ -294,14 +318,14 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                        <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
+                        <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
                             <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-4">Distribusi Berkas per Kategori</h4>
                             <div class="relative flex-1 min-h-[220px] flex items-center justify-center">
                                 <canvas id="categoryChart"></canvas>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col">
                             <div class="flex items-center justify-between mb-4">
                                 <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Arsip Dokumen Terbaru</h4>
                                 <span class="text-[11px] font-medium text-slate-400">Monitoring Realtime</span>
@@ -329,19 +353,19 @@
                         <div class="flex flex-1 items-center space-x-2">
                             <div class="relative flex-1 max-w-xs">
                                 <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                                <input type="text" id="search-arsip" oninput="handleSearchDebounce()" placeholder="Ketik sebagian nama / no dokumen..." class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-xs">
+                                <input type="text" id="search-arsip" oninput="handleSearchDebounce()" placeholder="Ketik sebagian nama / no dokumen..." class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-2xs">
                             </div>
-                            <select id="filter-kategori" onchange="renderArsipTable()" class="px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-700 font-semibold shadow-xs">
+                            <select id="filter-kategori" onchange="renderArsipTable()" class="px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white text-slate-700 font-semibold shadow-2xs">
                                 <option value="">Semua Kategori</option>
                             </select>
                         </div>
 
                         <div class="flex items-center space-x-2">
-                            <button type="button" onclick="exportToExcel()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-xs border border-emerald-200 flex items-center space-x-1.5 transition-colors shadow-xs cursor-pointer">
+                            <button type="button" onclick="exportToExcel()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl text-xs border border-emerald-200 flex items-center space-x-1.5 transition-colors shadow-2xs cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 <span>Export Excel</span>
                             </button>
-                            <button type="button" onclick="exportToPDF()" class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs border border-rose-200 flex items-center space-x-1.5 transition-colors shadow-xs cursor-pointer">
+                            <button type="button" onclick="exportToPDF()" class="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl text-xs border border-rose-200 flex items-center space-x-1.5 transition-colors shadow-2xs cursor-pointer">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H7a2 2 0 00-2 2v4h10z"></path></svg>
                                 <span>Cetak PDF</span>
                             </button>
@@ -352,7 +376,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-50/90 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-100">
@@ -376,7 +400,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <h3 class="text-sm font-bold text-slate-800">Manajemen Kategori & Folder Drive</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori folder Google Drive terpusat (ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
+                            <p class="text-xs text-slate-400 mt-0.5">Pemetaan kategori dokumen dengan direktori Google Drive terpusat (ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
                         </div>
                         <button type="button" onclick="openKategoriModal()" class="role-admin-only px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs shadow-md shadow-brand-500/20 flex items-center space-x-1.5 cursor-pointer">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
@@ -384,7 +408,7 @@
                         </button>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-50/90 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-100">
@@ -415,7 +439,7 @@
                         </button>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-50/90 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-100">
@@ -435,7 +459,7 @@
 
                 <!-- TAB LAPORAN -->
                 <div id="tab-laporan" class="tab-content space-y-5 hidden">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-2xs space-y-4">
                         <h3 class="text-sm font-bold text-slate-800">Filter Rekapitulasi Laporan Arsip</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
@@ -454,16 +478,16 @@
                             </div>
                         </div>
                         <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
-                            <button type="button" onclick="exportLaporanExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer">
+                            <button type="button" onclick="exportLaporanExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-xs cursor-pointer">
                                 <span>Download Excel Laporan</span>
                             </button>
-                            <button type="button" onclick="exportLaporanPDF()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer">
+                            <button type="button" onclick="exportLaporanPDF()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-xs cursor-pointer">
                                 <span>Cetak PDF Laporan</span>
                             </button>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500">
                             <span>Hasil Rekapitulasi Terfilter: <strong id="lap-count-text" class="text-slate-800">0 Berkas</strong></span>
                             <span>Estimasi Storage: <strong id="lap-size-text" class="text-slate-800">0 KB</strong></span>
@@ -488,7 +512,7 @@
 
                 <!-- TAB PENGATURAN SYSTEM -->
                 <div id="tab-pengaturan" class="tab-content space-y-6 hidden">
-                    <div class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+                    <div class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200/80 shadow-2xs space-y-6">
                         <div>
                             <h3 class="text-base font-extrabold text-slate-900">Konfigurasi Merek, Kustomisasi Warna, Kartu Login & Batasan System</h3>
                             <p class="text-xs text-slate-400 mt-0.5">Kelola identitas visual, warna typography, tema navigasi, tampilan kartu login, dan batasan dokumen.</p>
@@ -647,7 +671,7 @@
                 <!-- TAB LOG AKSES -->
                 <div id="tab-log" class="tab-content space-y-5 hidden">
                     <h3 class="text-sm font-bold text-slate-800">Audit Trail Aktivitas Sistem</h3>
-                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-2xs overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm">
                                 <thead class="bg-slate-50/90 text-slate-500 text-[11px] uppercase tracking-wider font-bold border-b border-slate-100">
@@ -770,7 +794,7 @@
                     <input type="text" id="kategori-nama" required placeholder="Contoh: Arsip Keuangan 2026" oninput="handleCategoryNameInput(this.value)" class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 font-semibold">
                     <div class="mt-2 p-2.5 bg-brand-50/70 rounded-xl border border-brand-100 flex items-start space-x-2">
                         <svg class="w-4 h-4 text-brand-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        <p class="text-[11px] text-brand-900 leading-snug font-medium">Folder baru dengan nama kategori ini akan <strong>otomatis dibuat di Google Drive</strong> saat disimpan.</p>
+                        <p class="text-[11px] text-brand-900 leading-snug font-medium">Folder baru dengan nama kategori ini akan <strong>otomatis dibuat di Google Drive</strong> (Folder ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r).</p>
                     </div>
                 </div>
                 <div>
@@ -848,7 +872,7 @@
             <!-- Modal Header -->
             <div class="p-3.5 sm:p-4 px-4 sm:px-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/90 gap-3">
                 <div class="flex items-center space-x-3 min-w-0 flex-1">
-                    <div id="preview-ext-badge" class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 shadow-xs uppercase">
+                    <div id="preview-ext-badge" class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 shadow-2xs uppercase">
                         DOC
                     </div>
                     <div class="min-w-0 flex-1">
@@ -878,7 +902,7 @@
     <!-- JAVASCRIPT PRODUCTION ENGINE -->
     <script>
         // Google Apps Script Web App URL
-        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwy3k3pNME3znmnB1gGn17o42TnDShK9nTCx3daT7OlOgk-6vlMCZ1X3_KgWT43STG3/exec";
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyH80igktugapAq2nZvx3P8Vwh4hV-6Wp9Guohqs6HB2TL7v_pV0MBxlmNXzomIHTZX/exec";
 
         // Application State
         let currentUser = null;
@@ -910,7 +934,6 @@
             avatarTextClass: "text-white"
         };
 
-        // Theme Presets Catalog
         const sidebarThemePresets = [
             { id: 'white', title: 'Modern Clean', bg: '#ffffff', text: '#334155', dot: '#3b82f6', desc: 'Bawaan Standar' },
             { id: 'dark-navy', title: 'Deep Navy', bg: '#0f172a', text: '#f8fafc', dot: '#38bdf8', desc: 'Corporate Dark' },
@@ -987,20 +1010,32 @@
                 console.warn("Local state load note:", e);
             }
 
-            // Seed default records if empty
+            // Guaranteed User Accounts with Passwords
+            const defaultUsers = [
+                { username: 'admin', password: 'admin123', name: 'Administrator System', role: 'ADMINISTRATOR', status: 'ACTIVE' },
+                { username: 'operator', password: 'operator123', name: 'Staf Operator Arsip', role: 'OPERATOR', status: 'ACTIVE' },
+                { username: 'viewer', password: 'viewer123', name: 'Auditor External', role: 'VIEWER', status: 'ACTIVE' }
+            ];
+
+            if (!usersList || usersList.length === 0) {
+                usersList = defaultUsers;
+            } else {
+                // Ensure default users exist with proper passwords
+                defaultUsers.forEach(def => {
+                    const found = usersList.find(u => u.username.toLowerCase() === def.username.toLowerCase());
+                    if (!found) {
+                        usersList.push(def);
+                    } else if (!found.password) {
+                        found.password = def.password;
+                    }
+                });
+            }
+
             if (!categories || categories.length === 0) {
                 categories = [
                     { id: 'CAT-101', nama: 'Surat Masuk & Keluar', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' },
                     { id: 'CAT-102', nama: 'Invoice & Perpajakan', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' },
                     { id: 'CAT-103', nama: 'Dokumen Kepegawaian', folder_id: '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r', status: 'ACTIVE' }
-                ];
-            }
-
-            if (!usersList || usersList.length === 0) {
-                usersList = [
-                    { username: 'admin', password: 'admin123', name: 'Administrator System', role: 'ADMINISTRATOR', status: 'ACTIVE' },
-                    { username: 'operator', password: 'operator123', name: 'Staf Operator Arsip', role: 'OPERATOR', status: 'ACTIVE' },
-                    { username: 'viewer', password: 'viewer123', name: 'Auditor External', role: 'VIEWER', status: 'ACTIVE' }
                 ];
             }
         }
@@ -1076,15 +1111,34 @@
             }
         }
 
+        function quickFillCredentials(user, pass) {
+            const uInput = document.getElementById('login-username');
+            const pInput = document.getElementById('login-password');
+            if (uInput) uInput.value = user;
+            if (pInput) pInput.value = pass;
+            showToast(`Kredensial ${user.toUpperCase()} diterapkan`, 'info');
+        }
+
+        function togglePasswordVisibility(fieldId) {
+            const input = document.getElementById(fieldId);
+            if (!input) return;
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
         function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('login-username')?.value.trim();
             const passwordInput = document.getElementById('login-password')?.value.trim();
 
+            if (!usernameInput || !passwordInput) {
+                showToast('Harap masukkan username dan password!', 'warning');
+                return;
+            }
+
             const foundUser = usersList.find(u => u.username.toLowerCase() === usernameInput.toLowerCase());
 
             if (!foundUser) {
-                showToast('Username tidak terdaftar!', 'error');
+                showToast(`Username "${usernameInput}" tidak terdaftar! Gunakan admin / operator / viewer`, 'error');
                 return;
             }
 
@@ -1093,7 +1147,8 @@
                 return;
             }
 
-            if (foundUser.password && foundUser.password !== passwordInput) {
+            const correctPassword = foundUser.password || (foundUser.username === 'admin' ? 'admin123' : foundUser.username + '123');
+            if (correctPassword !== passwordInput) {
                 showToast('Password yang Anda masukkan salah!', 'error');
                 return;
             }
@@ -1105,7 +1160,7 @@
             document.getElementById('main-app').classList.remove('hidden');
 
             applyUserPermissions();
-            recordAuditLog('LOGIN', `Pengguna ${currentUser.username} masuk ke sistem`);
+            recordAuditLog('LOGIN', `Pengguna ${currentUser.username} (${currentUser.role}) berhasil masuk`);
             showToast(`Selamat datang kembali, ${currentUser.name}!`, 'success');
 
             loadAllDataFromGAS();
@@ -1119,7 +1174,8 @@
 
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('auth-modal').classList.remove('hidden');
-            document.getElementById('login-password').value = '';
+            const pInput = document.getElementById('login-password');
+            if (pInput) pInput.value = '';
             showToast('Anda telah keluar dari sistem.', 'info');
         }
 
@@ -1569,7 +1625,6 @@
             const timeStamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
 
             if (id) {
-                // Edit existing single item
                 const idx = archiveData.findIndex(x => x.id === id);
                 if (idx !== -1) {
                     archiveData[idx].no = no;
@@ -1587,7 +1642,6 @@
                     showToast(`Dokumen "${nama}" berhasil diperbarui!`, 'success');
                 }
             } else {
-                // Add one or multiple new items
                 if (uploadedFilesBuffer.length > 1) {
                     uploadedFilesBuffer.forEach((f, index) => {
                         const uniqueId = `ARS-${Date.now()}-${Math.floor(Math.random() * 10000) + index}`;
@@ -1654,6 +1708,587 @@
             }
         }
 
+        function openKategoriModal(id = null) {
+            isManualFolderIdEdited = false;
+            document.getElementById('kategori-id').value = id || '';
+
+            if (id) {
+                const cat = categories.find(c => c.id === id);
+                if (!cat) return;
+                document.getElementById('kategori-modal-title').textContent = "Edit Kategori & Folder Drive";
+                document.getElementById('kategori-nama').value = cat.nama;
+                document.getElementById('kategori-folder-id').value = cat.folder_id || '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r';
+                document.getElementById('kategori-status').value = cat.status || 'ACTIVE';
+            } else {
+                document.getElementById('kategori-modal-title').textContent = "Tambah Kategori & Drive";
+                document.getElementById('kategori-nama').value = '';
+                document.getElementById('kategori-folder-id').value = '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r';
+                document.getElementById('kategori-status').value = 'ACTIVE';
+            }
+            openModal('kategori-modal');
+        }
+
+        function handleCategoryNameInput(val) {
+            if (!isManualFolderIdEdited) {
+                const folderInput = document.getElementById('kategori-folder-id');
+                if (folderInput) {
+                    folderInput.value = val ? `FLD_${val.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_${Math.floor(100 + Math.random()*900)}` : '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r';
+                }
+            }
+        }
+
+        function refreshAutoFolderId() {
+            const nameVal = document.getElementById('kategori-nama').value;
+            const folderInput = document.getElementById('kategori-folder-id');
+            if (folderInput) {
+                folderInput.value = nameVal ? `FLD_${nameVal.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_${Math.floor(100 + Math.random()*900)}` : `FLD_DRIVE_${Math.floor(1000 + Math.random()*9000)}`;
+            }
+            isManualFolderIdEdited = false;
+            showToast('Folder ID otomatis disetel', 'info');
+        }
+
+        async function handleSaveKategori(e) {
+            e.preventDefault();
+            const id = document.getElementById('kategori-id').value;
+            const nama = document.getElementById('kategori-nama').value.trim();
+            const folderId = document.getElementById('kategori-folder-id').value.trim() || '1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r';
+            const status = document.getElementById('kategori-status').value;
+
+            if (id) {
+                const idx = categories.findIndex(c => c.id === id);
+                if (idx !== -1) {
+                    categories[idx].nama = nama;
+                    categories[idx].folder_id = folderId;
+                    categories[idx].status = status;
+                    recordAuditLog('EDIT_CATEGORY', `Memperbarui kategori ${nama}`);
+                    sendToGAS({ action: 'SAVE_CATEGORY', data: categories[idx] });
+                    showToast(`Kategori "${nama}" berhasil diperbarui!`, 'success');
+                }
+            } else {
+                const newId = `CAT-${Math.floor(100 + Math.random() * 900)}`;
+                const newCat = {
+                    id: newId,
+                    nama: nama,
+                    folder_id: folderId,
+                    status: status
+                };
+                categories.push(newCat);
+                recordAuditLog('ADD_CATEGORY', `Menambahkan kategori baru ${nama}`);
+                sendToGAS({ action: 'SAVE_CATEGORY', data: newCat });
+                showToast(`Kategori "${nama}" dan folder Google Drive berhasil dibuat!`, 'success');
+            }
+
+            saveLocalState();
+            renderAllTables();
+            closeModal('kategori-modal');
+        }
+
+        async function deleteKategori(id) {
+            const idx = categories.findIndex(c => c.id === id);
+            if (idx !== -1) {
+                const cat = categories[idx];
+                categories.splice(idx, 1);
+                recordAuditLog('DELETE_CATEGORY', `Menghapus kategori ${cat.nama}`);
+                saveLocalState();
+                renderAllTables();
+
+                sendToGAS({ action: 'DELETE_CATEGORY', id: id, folder_id: cat.folder_id || '' });
+                showToast(`Kategori "${cat.nama}" dan folder Drive berhasil dihapus!`, 'info');
+            }
+        }
+
+        function openUserModal(username = null) {
+            document.getElementById('user-original-username').value = username || '';
+
+            if (username) {
+                const u = usersList.find(x => x.username.toLowerCase() === username.toLowerCase());
+                if (!u) return;
+                document.getElementById('user-modal-title').textContent = "Edit Data Pengguna";
+                document.getElementById('user-username').value = u.username;
+                document.getElementById('user-username').readOnly = true;
+                document.getElementById('user-password').value = '';
+                document.getElementById('user-fullname').value = u.name;
+                document.getElementById('user-role').value = u.role;
+                document.getElementById('user-status').value = u.status;
+            } else {
+                document.getElementById('user-modal-title').textContent = "Tambah Pengguna Baru";
+                document.getElementById('user-username').value = '';
+                document.getElementById('user-username').readOnly = false;
+                document.getElementById('user-password').value = '';
+                document.getElementById('user-fullname').value = '';
+                document.getElementById('user-role').value = 'OPERATOR';
+                document.getElementById('user-status').value = 'ACTIVE';
+            }
+            openModal('user-modal');
+        }
+
+        async function handleSaveUser(e) {
+            e.preventDefault();
+            const origUsername = document.getElementById('user-original-username').value;
+            const username = document.getElementById('user-username').value.trim();
+            const password = document.getElementById('user-password').value.trim();
+            const fullname = document.getElementById('user-fullname').value.trim();
+            const role = document.getElementById('user-role').value;
+            const status = document.getElementById('user-status').value;
+
+            if (origUsername) {
+                const idx = usersList.findIndex(u => u.username.toLowerCase() === origUsername.toLowerCase());
+                if (idx !== -1) {
+                    usersList[idx].name = fullname;
+                    usersList[idx].role = role;
+                    usersList[idx].status = status;
+                    if (password) usersList[idx].password = password;
+
+                    recordAuditLog('EDIT_USER', `Memperbarui profil user ${username}`);
+                    sendToGAS({ action: 'SAVE_USER', data: usersList[idx] });
+                    showToast(`User ${username} berhasil diperbarui!`, 'success');
+                }
+            } else {
+                if (usersList.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                    showToast(`Username ${username} sudah digunakan!`, 'error');
+                    return;
+                }
+                const newUser = {
+                    username: username,
+                    password: password || 'admin123',
+                    name: fullname,
+                    role: role,
+                    status: status
+                };
+                usersList.push(newUser);
+                recordAuditLog('ADD_USER', `Membuat akun user baru ${username}`);
+                sendToGAS({ action: 'SAVE_USER', data: newUser });
+                showToast(`Pengguna baru ${username} berhasil didaftarkan!`, 'success');
+            }
+
+            saveLocalState();
+            renderUsersTable();
+            closeModal('user-modal');
+        }
+
+        async function deleteUser(username) {
+            if (currentUser && currentUser.username.toLowerCase() === username.toLowerCase()) {
+                showToast('Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif!', 'warning');
+                return;
+            }
+
+            const idx = usersList.findIndex(u => u.username.toLowerCase() === username.toLowerCase());
+            if (idx !== -1) {
+                usersList.splice(idx, 1);
+                recordAuditLog('DELETE_USER', `Menghapus user ${username}`);
+                saveLocalState();
+                renderUsersTable();
+
+                sendToGAS({ action: 'DELETE_USER', username: username });
+                showToast(`Akun user ${username} berhasil dihapus!`, 'info');
+            }
+        }
+
+        function previewFile(id) {
+            const item = archiveData.find(x => x.id === id);
+            if (!item) return;
+
+            document.getElementById('preview-title').textContent = item.nama;
+            document.getElementById('preview-subtitle').textContent = `No: ${item.no} • Kategori: ${item.kategori} • Ukuran: ${item.size || 0} KB`;
+
+            const ext = (item.file_type || (item.file_name ? item.file_name.split('.').pop() : 'PDF')).toUpperCase();
+            document.getElementById('preview-ext-badge').textContent = ext.substring(0, 4);
+
+            const driveBtn = document.getElementById('preview-direct-drive-btn');
+            if (item.drive_file_id || (item.file_url && item.file_url.includes('google'))) {
+                driveBtn.classList.remove('hidden');
+                driveBtn.href = item.drive_file_id ? `https://drive.google.com/file/d/${item.drive_file_id}/view` : item.file_url;
+            } else {
+                driveBtn.classList.add('hidden');
+            }
+
+            const downloadBtn = document.getElementById('preview-download-btn');
+            downloadBtn.onclick = () => {
+                if (item.file_url) {
+                    const a = document.createElement('a');
+                    a.href = item.file_url;
+                    a.download = item.file_name || `${item.nama}.${ext.toLowerCase()}`;
+                    a.click();
+                } else {
+                    showToast('URL berkas tidak tersedia untuk diunduh', 'warning');
+                }
+            };
+
+            const contentBox = document.getElementById('preview-content-box');
+            contentBox.innerHTML = '';
+
+            const isGoogleDrive = item.file_url && (item.file_url.includes('drive.google.com') || item.file_url.includes('googleusercontent.com'));
+
+            if (isGoogleDrive && item.drive_file_id) {
+                contentBox.innerHTML = `
+                    <iframe src="https://drive.google.com/file/d/${item.drive_file_id}/preview" class="w-full h-full rounded-xl border-0" allow="autoplay"></iframe>
+                `;
+            } else if (ext === 'PDF') {
+                if (item.file_url) {
+                    contentBox.innerHTML = `<iframe src="${item.file_url}" class="w-full h-full rounded-xl border-0"></iframe>`;
+                } else {
+                    contentBox.innerHTML = renderPlaceholderPreview(item, ext);
+                }
+            } else if (['JPG', 'JPEG', 'PNG', 'WEBP', 'SVG', 'GIF'].includes(ext)) {
+                contentBox.innerHTML = `
+                    <div class="max-w-full max-h-full flex items-center justify-center p-4">
+                        <img src="${item.file_url || 'https://placehold.co/800x600?text=Gambar+Arsip'}" class="max-h-[70vh] rounded-2xl shadow-lg object-contain" alt="${item.nama}">
+                    </div>
+                `;
+            } else {
+                contentBox.innerHTML = renderPlaceholderPreview(item, ext);
+            }
+
+            openModal('preview-modal');
+        }
+
+        function renderPlaceholderPreview(item, ext) {
+            return `
+                <div class="text-center p-8 max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 space-y-4">
+                    <div class="w-20 h-20 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center mx-auto shadow-md font-mono font-bold text-2xl uppercase">
+                        ${ext}
+                    </div>
+                    <div>
+                        <h4 class="text-base font-extrabold text-slate-800">${item.nama}</h4>
+                        <p class="text-xs text-slate-400 mt-1">${item.file_name || `${item.no}.${ext.toLowerCase()}`} (${item.size || 0} KB)</p>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Pratinjau langsung tersedia untuk format berkas ini. Klik tombol unduh di atas atau buka langsung berkas di direktori Google Drive Anda.
+                    </p>
+                </div>
+            `;
+        }
+
+        function exportToExcel() {
+            if (archiveData.length === 0) {
+                showToast('Tidak ada data arsip untuk diekspor!', 'warning');
+                return;
+            }
+            const dataToExport = archiveData.map(item => ({
+                'No. Dokumen': item.no,
+                'Nama Arsip': item.nama,
+                'Keterangan': item.deskripsi || '',
+                'Kategori': item.kategori,
+                'Waktu Unggah': item.tanggal,
+                'Ukuran (KB)': item.size || 0,
+                'Nama Berkas': item.file_name || '',
+                'Pengunggah': item.uploader || 'admin'
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "ArsipDokumen");
+            XLSX.writeFile(wb, `Rekap_Arsip_${new Date().toISOString().slice(0,10)}.xlsx`);
+            showToast('File Excel arsip berhasil diunduh!', 'success');
+        }
+
+        function exportToPDF() {
+            if (archiveData.length === 0) {
+                showToast('Tidak ada data arsip untuk dicetak!', 'warning');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'a4');
+
+            doc.setFontSize(16);
+            doc.text(systemSettings.appTitle || "ArsipCloud Enterprise", 40, 50);
+            doc.setFontSize(10);
+            doc.text("Laporan Rekapitulasi Data Dokumen Arsip", 40, 68);
+            doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 40, 84);
+
+            let y = 115;
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.text("No", 40, y);
+            doc.text("Nomor Dokumen", 70, y);
+            doc.text("Nama Arsip", 180, y);
+            doc.text("Kategori", 380, y);
+            doc.text("Ukuran", 490, y);
+            doc.line(40, y + 5, 550, y + 5);
+
+            y += 20;
+            doc.setFont(undefined, 'normal');
+
+            archiveData.slice(0, 30).forEach((item, idx) => {
+                if (y > 780) {
+                    doc.addPage();
+                    y = 50;
+                }
+                doc.text(String(idx + 1), 40, y);
+                doc.text(item.no || '-', 70, y);
+                doc.text(item.nama ? item.nama.substring(0, 32) : '-', 180, y);
+                doc.text(item.kategori || '-', 380, y);
+                doc.text(`${item.size || 0} KB`, 490, y);
+                y += 18;
+            });
+
+            doc.save(`Laporan_Arsip_${new Date().toISOString().slice(0,10)}.pdf`);
+            showToast('Dokumen PDF berhasil dicetak!', 'success');
+        }
+
+        function exportLaporanExcel() { exportToExcel(); }
+        function exportLaporanPDF() { exportToPDF(); }
+
+        function handleAppNameChange(val) {
+            systemSettings.appTitle = val || "ArsipCloud Enterprise";
+            document.getElementById('sidebar-app-title').textContent = systemSettings.appTitle;
+            document.getElementById('login-app-title').textContent = systemSettings.appTitle;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleAppSubtitleChange(val) {
+            systemSettings.appSubtitle = val || "Sistem Manajemen Arsip Terintegrasi Google Drive";
+            document.getElementById('sidebar-app-subtitle').textContent = systemSettings.appSubtitle;
+            document.getElementById('login-app-subtitle').textContent = systemSettings.appSubtitle;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleGlobalFontColorChange(val) {
+            systemSettings.globalFontColor = val;
+            document.documentElement.style.setProperty('--app-global-text-color', val);
+            const hexEl = document.getElementById('setting-global-font-hex');
+            const picker = document.getElementById('setting-global-font-color');
+            if (hexEl && hexEl.value !== val) hexEl.value = val;
+            if (picker && picker.value !== val) picker.value = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleCustomSidebarBgChange(val) {
+            systemSettings.customSidebarBg = val;
+            const sb = document.getElementById('main-sidebar');
+            if (sb) sb.style.backgroundColor = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleCustomSidebarTextChange(val) {
+            systemSettings.customSidebarText = val;
+            document.querySelectorAll('#sidebar-nav-container .nav-item').forEach(item => {
+                if (!item.classList.contains('bg-brand-50')) {
+                    item.style.color = val;
+                }
+            });
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleCustomLoginCardBg(val) {
+            systemSettings.loginCardBg = val;
+            const c = document.getElementById('login-card-box');
+            if (c) c.style.backgroundColor = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleCustomLoginCardText(val) {
+            systemSettings.loginCardText = val;
+            const c = document.getElementById('login-card-box');
+            if (c) c.style.color = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleCustomLoginCardBorder(val) {
+            systemSettings.loginCardBorder = val;
+            const c = document.getElementById('login-card-box');
+            if (c) c.style.borderColor = val;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleBgOpacityChange(val) {
+            systemSettings.bgOpacity = val;
+            const bgLayer = document.getElementById('custom-bg-layer');
+            const text = document.getElementById('bg-opacity-text');
+            if (bgLayer) bgLayer.style.opacity = (val / 100).toString();
+            if (text) text.textContent = `${val}%`;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleBgBlurChange(val) {
+            systemSettings.bgBlur = val;
+            const bgLayer = document.getElementById('custom-bg-layer');
+            const text = document.getElementById('bg-blur-text');
+            if (bgLayer) bgLayer.style.filter = val > 0 ? `blur(${val}px)` : 'none';
+            if (text) text.textContent = val > 0 ? `${val} px` : '0 px (Tanpa Blur)';
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleMaxFileSizeChange(val) {
+            systemSettings.maxFileSizeMB = parseInt(val, 10) || 25;
+            const guide = document.getElementById('guidance-max-size');
+            if (guide) guide.textContent = systemSettings.maxFileSizeMB;
+            triggerDebouncedSettingsSave();
+        }
+
+        function handleAllowedExtChange(val) {
+            systemSettings.allowedExtensions = val || "PDF, DOCX, XLSX, JPG, PNG, RAR, ZIP";
+            const guide = document.getElementById('guidance-allowed-ext');
+            if (guide) guide.textContent = systemSettings.allowedExtensions;
+            triggerDebouncedSettingsSave();
+        }
+
+        function triggerImageCrop(e, type) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            cropTargetType = type;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const cropImg = document.getElementById('crop-image-target');
+                cropImg.src = evt.target.result;
+                openModal('crop-modal');
+
+                if (activeCropper) activeCropper.destroy();
+                activeCropper = new Cropper(cropImg, {
+                    aspectRatio: type === 'logo' ? 1 : NaN,
+                    viewMode: 1,
+                    autoCropArea: 0.9
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyImageCrop() {
+            if (!activeCropper) return;
+            const canvas = activeCropper.getCroppedCanvas({
+                maxWidth: cropTargetType === 'background' ? 1920 : 512,
+                maxHeight: cropTargetType === 'background' ? 1080 : 512
+            });
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+            if (cropTargetType === 'logo') {
+                systemSettings.customLogo = dataUrl;
+                updateLogoUI(dataUrl);
+            } else if (cropTargetType === 'background') {
+                systemSettings.bgImage = dataUrl;
+                updateBackgroundUI(dataUrl);
+            } else if (cropTargetType === 'login_card_bg') {
+                systemSettings.loginCardCustomBgImg = dataUrl;
+                const c = document.getElementById('login-card-box');
+                if (c) {
+                    c.style.backgroundImage = `url(${dataUrl})`;
+                    c.style.backgroundSize = 'cover';
+                }
+            }
+
+            closeModal('crop-modal');
+            saveSettings();
+            showToast('Hasil crop gambar berhasil diterapkan!', 'success');
+        }
+
+        function updateLogoUI(url) {
+            const sideSvg = document.getElementById('sidebar-logo-svg');
+            const sideImg = document.getElementById('sidebar-logo-img');
+            const logSvg = document.getElementById('login-logo-svg');
+            const logImg = document.getElementById('login-logo-img');
+
+            if (url) {
+                if (sideSvg) sideSvg.classList.add('hidden');
+                if (sideImg) { sideImg.src = url; sideImg.classList.remove('hidden'); }
+                if (logSvg) logSvg.classList.add('hidden');
+                if (logImg) { logImg.src = url; logImg.classList.remove('hidden'); }
+            }
+        }
+
+        function updateBackgroundUI(url) {
+            const bgLayer = document.getElementById('custom-bg-layer');
+            if (bgLayer && url) {
+                bgLayer.style.backgroundImage = `url(${url})`;
+            }
+        }
+
+        function applySidebarNavStyles(activeTabId) {
+            document.querySelectorAll('#sidebar-nav-container .nav-item').forEach(btn => {
+                btn.classList.remove('bg-brand-50', 'text-brand-600', 'font-bold', 'shadow-2xs');
+                btn.classList.add('text-slate-600', 'font-semibold');
+            });
+            const activeBtn = document.getElementById(`nav-${activeTabId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-600', 'font-semibold');
+                activeBtn.classList.add('bg-brand-50', 'text-brand-600', 'font-bold', 'shadow-2xs');
+            }
+        }
+
+        function initThemePresetButtons() {
+            const grid = document.getElementById('sidebar-theme-presets-grid');
+            if (grid) {
+                grid.innerHTML = sidebarThemePresets.map(p => `
+                    <button type="button" onclick="applySidebarPreset('${p.id}')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 bg-white text-left transition-all flex items-center space-x-2 shadow-2xs group cursor-pointer">
+                        <span class="w-4 h-4 rounded-full border border-slate-200 flex-shrink-0" style="background-color: ${p.bg}"></span>
+                        <div class="min-w-0 flex-1 leading-none">
+                            <span class="text-[11px] font-bold text-slate-700 block truncate group-hover:text-brand-600">${p.title}</span>
+                        </div>
+                    </button>
+                `).join('');
+            }
+
+            const loginGrid = document.getElementById('login-card-presets-grid');
+            if (loginGrid) {
+                loginGrid.innerHTML = loginCardPresets.map(p => `
+                    <button type="button" onclick="applyLoginCardPreset('${p.id}')" class="p-2.5 rounded-xl border border-slate-200 hover:border-brand-500 bg-white text-left transition-all flex items-center space-x-2 shadow-2xs group cursor-pointer">
+                        <span class="w-4 h-4 rounded-full border border-slate-200 flex-shrink-0" style="background-color: ${p.bg}"></span>
+                        <div class="min-w-0 flex-1 leading-none">
+                            <span class="text-[11px] font-bold text-slate-700 block truncate group-hover:text-brand-600">${p.title}</span>
+                        </div>
+                    </button>
+                `).join('');
+            }
+        }
+
+        function applySidebarPreset(id) {
+            const p = sidebarThemePresets.find(x => x.id === id);
+            if (!p) return;
+            systemSettings.sidebarTheme = id;
+            systemSettings.customSidebarBg = p.bg;
+            systemSettings.customSidebarText = p.text;
+            handleCustomSidebarBgChange(p.bg);
+            handleCustomSidebarTextChange(p.text);
+            showToast(`Tema sidebar "${p.title}" diterapkan`, 'info');
+        }
+
+        function applyLoginCardPreset(id) {
+            const p = loginCardPresets.find(x => x.id === id);
+            if (!p) return;
+            systemSettings.loginCardPreset = id;
+            systemSettings.loginCardBg = p.bg;
+            systemSettings.loginCardText = p.text;
+            systemSettings.loginCardBorder = p.border;
+            handleCustomLoginCardBg(p.bg);
+            handleCustomLoginCardText(p.text);
+            handleCustomLoginCardBorder(p.border);
+            showToast(`Tema login "${p.title}" diterapkan`, 'info');
+        }
+
+        function applyAllSettingsToUI() {
+            if (systemSettings.appTitle) handleAppNameChange(systemSettings.appTitle);
+            if (systemSettings.appSubtitle) handleAppSubtitleChange(systemSettings.appSubtitle);
+            if (systemSettings.globalFontColor) handleGlobalFontColorChange(systemSettings.globalFontColor);
+            if (systemSettings.customSidebarBg) handleCustomSidebarBgChange(systemSettings.customSidebarBg);
+            if (systemSettings.customSidebarText) handleCustomSidebarTextChange(systemSettings.customSidebarText);
+            if (systemSettings.loginCardBg) handleCustomLoginCardBg(systemSettings.loginCardBg);
+            if (systemSettings.loginCardText) handleCustomLoginCardText(systemSettings.loginCardText);
+            if (systemSettings.loginCardBorder) handleCustomLoginCardBorder(systemSettings.loginCardBorder);
+            if (systemSettings.bgOpacity) handleBgOpacityChange(systemSettings.bgOpacity);
+            if (systemSettings.bgBlur) handleBgBlurChange(systemSettings.bgBlur);
+            if (systemSettings.customLogo) updateLogoUI(systemSettings.customLogo);
+            if (systemSettings.bgImage) updateBackgroundUI(systemSettings.bgImage);
+            if (systemSettings.maxFileSizeMB) handleMaxFileSizeChange(systemSettings.maxFileSizeMB);
+            if (systemSettings.allowedExtensions) handleAllowedExtChange(systemSettings.allowedExtensions);
+        }
+
+        function triggerDebouncedSettingsSave() {
+            clearTimeout(settingsDebounceTimer);
+            settingsDebounceTimer = setTimeout(() => {
+                saveSettings();
+            }, 800);
+        }
+
+        async function saveSettings() {
+            saveLocalState();
+            const res = await sendToGAS({ action: 'SAVE_SETTINGS', data: systemSettings });
+            if (res && res.status === 'SUCCESS' && res.settings) {
+                systemSettings = { ...systemSettings, ...res.settings };
+                saveLocalState();
+            }
+        }
+
         async function sendToGAS(payload) {
             if (!GAS_API_URL || GAS_API_URL.trim() === "") {
                 return { status: 'OFFLINE' };
@@ -1673,9 +2308,7 @@
         }
 
         async function loadAllDataFromGAS() {
-            if (!GAS_API_URL || GAS_API_URL.trim() === "") {
-                return;
-            }
+            if (!GAS_API_URL || GAS_API_URL.trim() === "") return;
             try {
                 const res = await sendToGAS({ action: 'GET_ALL_DATA' });
                 if (res && res.status === 'SUCCESS') {
@@ -1705,16 +2338,27 @@
                     applyAllSettingsToUI();
                 }
             } catch (e) {
-                console.warn("Initial settings fetch:", e);
+                console.warn("Initial settings fetch note:", e);
             }
         }
 
-        function triggerDebouncedSettingsSave() {
-            clearTimeout(settingsDebounceTimer);
-            settingsDebounceTimer = setTimeout(() => {
-                saveSettings();
-            }, 800);
-        }
+        window.onload = async function() {
+            loadLocalState();
+            initThemePresetButtons();
+            applyAllSettingsToUI();
+            renderAllTables();
+
+            await fetchInitialSettingsFromGAS();
+
+            // Check if user is already logged in from previous session
+            if (currentUser && currentUser.username) {
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                applyUserPermissions();
+                switchTab('dashboard');
+                loadAllDataFromGAS();
+            }
+        };
     </script>
 </body>
 </html>
