@@ -162,8 +162,8 @@ function setupDatabase() {
     const invoiceFolder = getOrCreateDriveFolder("Invoice & Perpajakan");
     const hrdFolder = getOrCreateDriveFolder("Dokumen Kepegawaian");
 
-    sheetCategory.appendRow(['CAT-101', 'Surat Masuk / Keluar', suratFolder.getId(), 'ACTIVE']);
-    sheetCategory.appendRow(['CAT-102', 'Invoice & Tagihan', invoiceFolder.getId(), 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-101', 'Surat Masuk & Keluar', suratFolder.getId(), 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-102', 'Invoice & Perpajakan', invoiceFolder.getId(), 'ACTIVE']);
     sheetCategory.appendRow(['CAT-103', 'Dokumen Kepegawaian', hrdFolder.getId(), 'ACTIVE']);
   }
 
@@ -319,7 +319,6 @@ function saveArchive(data) {
   if (foundIndex > 0) {
     sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
   } else {
-    // Append baris baru di akhir sheet tanpa menimpa data yang telah ada
     sheet.appendRow(rowData);
   }
 
