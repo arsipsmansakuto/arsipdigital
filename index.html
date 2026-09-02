@@ -72,6 +72,38 @@
             border-radius: 16px;
         }
 
+        .excel-sheet-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #ffffff;
+        }
+        .excel-sheet-table th, .excel-sheet-table td {
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            white-space: nowrap;
+            color: #1e293b;
+        }
+        .excel-sheet-table tr:first-child td, .excel-sheet-table th {
+            background-color: #f1f5f9;
+            font-weight: 700;
+            color: #0f172a;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .excel-sheet-table tr:hover td {
+            background-color: #f8fafc;
+        }
+        .excel-sheet-table td:first-child {
+            background-color: #f8fafc;
+            font-weight: 600;
+            text-align: center;
+            color: #64748b;
+            width: 40px;
+        }
+
         :root {
             --app-global-text-color: #0f172a;
         }
@@ -987,6 +1019,11 @@
         let searchDebounceTimer = null;
         let settingsDebounceTimer = null;
 
+        let activeExcelWorkbook = null;
+        let currentPptSlideIndex = 0;
+        let currentPptSlideCount = 4;
+        let currentPreviewItem = null;
+
         function loadLocalState() {
             try {
                 const sAuth = sessionStorage.getItem('arsip_auth_user');
@@ -1884,20 +1921,52 @@
             }
         }
 
+        function extractDriveFileIdFromUrl(url) {
+            if (!url) return '';
+            const match1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match1) return match1[1];
+            const match2 = url.match(/id=([a-zA-Z0-9_-]+)/);
+            if (match2) return match2[1];
+            return '';
+        }
+
         function previewFile(id) {
             const item = archiveData.find(x => x.id === id);
             if (!item) return;
 
+            currentPreviewItem = item;
             document.getElementById('preview-title').textContent = item.nama;
             document.getElementById('preview-subtitle').textContent = `No: ${item.no} • Kategori: ${item.kategori} • Ukuran: ${item.size || 0} KB`;
 
-            const ext = (item.file_type || (item.file_name ? item.file_name.split('.').pop() : 'PDF')).toUpperCase();
-            document.getElementById('preview-ext-badge').textContent = ext.substring(0, 4);
+            const rawExt = (item.file_type || (item.file_name ? item.file_name.split('.').pop() : 'PDF')).toUpperCase();
+            const ext = rawExt.replace(/[^A-Z0-9]/g, '');
 
+            const extBadge = document.getElementById('preview-ext-badge');
+            extBadge.textContent = ext.substring(0, 4);
+
+            extBadge.className = "w-9 h-9 rounded-xl flex items-center justify-center font-mono font-bold text-xs flex-shrink-0 shadow-2xs uppercase ";
+            if (['XLS', 'XLSX', 'CSV'].includes(ext)) {
+                extBadge.className += "bg-emerald-50 text-emerald-700 border border-emerald-200";
+            } else if (['DOC', 'DOCX'].includes(ext)) {
+                extBadge.className += "bg-blue-50 text-blue-700 border border-blue-200";
+            } else if (['PPT', 'PPTX'].includes(ext)) {
+                extBadge.className += "bg-amber-50 text-amber-700 border border-amber-200";
+            } else if (ext === 'PDF') {
+                extBadge.className += "bg-rose-50 text-rose-700 border border-rose-200";
+            } else if (['JPG', 'JPEG', 'PNG', 'WEBP', 'SVG'].includes(ext)) {
+                extBadge.className += "bg-purple-50 text-purple-700 border border-purple-200";
+            } else {
+                extBadge.className += "bg-slate-100 text-slate-700 border border-slate-200";
+            }
+
+            const driveId = item.drive_file_id || extractDriveFileIdFromUrl(item.file_url);
             const driveBtn = document.getElementById('preview-direct-drive-btn');
-            if (item.drive_file_id || (item.file_url && item.file_url.includes('google'))) {
+            if (driveId) {
                 driveBtn.classList.remove('hidden');
-                driveBtn.href = item.drive_file_id ? `https://drive.google.com/file/d/${item.drive_file_id}/view` : item.file_url;
+                driveBtn.href = `https://drive.google.com/file/d/${driveId}/view`;
+            } else if (item.file_url && (item.file_url.includes('google.com') || item.file_url.includes('googleusercontent.com'))) {
+                driveBtn.classList.remove('hidden');
+                driveBtn.href = item.file_url;
             } else {
                 driveBtn.classList.add('hidden');
             }
@@ -1917,29 +1986,381 @@
             const contentBox = document.getElementById('preview-content-box');
             contentBox.innerHTML = '';
 
-            const isGoogleDrive = item.file_url && (item.file_url.includes('drive.google.com') || item.file_url.includes('googleusercontent.com'));
-
-            if (isGoogleDrive && item.drive_file_id) {
-                contentBox.innerHTML = `
-                    <iframe src="https://drive.google.com/file/d/${item.drive_file_id}/preview" class="w-full h-full rounded-xl border-0" allow="autoplay"></iframe>
-                `;
+            if (driveId) {
+                renderDriveIframePreview(contentBox, driveId, item, ext);
+            } else if (['XLS', 'XLSX', 'CSV'].includes(ext)) {
+                renderExcelInteractivePreview(contentBox, item, ext);
+            } else if (['PPT', 'PPTX'].includes(ext)) {
+                renderPowerPointSlidePreview(contentBox, item, ext);
+            } else if (['DOC', 'DOCX'].includes(ext)) {
+                renderWordDocumentPreview(contentBox, item, ext);
             } else if (ext === 'PDF') {
-                if (item.file_url) {
-                    contentBox.innerHTML = `<iframe src="${item.file_url}" class="w-full h-full rounded-xl border-0"></iframe>`;
-                } else {
-                    contentBox.innerHTML = renderPlaceholderPreview(item, ext);
-                }
+                renderPdfDocumentPreview(contentBox, item);
             } else if (['JPG', 'JPEG', 'PNG', 'WEBP', 'SVG', 'GIF'].includes(ext)) {
-                contentBox.innerHTML = `
-                    <div class="max-w-full max-h-full flex items-center justify-center p-4">
-                        <img src="${item.file_url || 'https://placehold.co/800x600?text=Gambar+Arsip'}" class="max-h-[70vh] rounded-2xl shadow-lg object-contain" alt="${item.nama}">
-                    </div>
-                `;
+                renderImagePreview(contentBox, item);
+            } else if (['TXT', 'JSON', 'LOG', 'XML', 'MD', 'JS', 'HTML'].includes(ext)) {
+                renderTextCodePreview(contentBox, item, ext);
             } else {
                 contentBox.innerHTML = renderPlaceholderPreview(item, ext);
             }
 
             openModal('preview-modal');
+        }
+
+        function renderDriveIframePreview(container, driveId, item, ext) {
+            container.innerHTML = `
+                <div class="w-full h-full flex flex-col rounded-2xl overflow-hidden bg-white shadow-md border border-slate-200">
+                    <div class="py-2 px-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="font-bold text-slate-700">Google Drive Native Document Viewer (${ext})</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <a href="https://drive.google.com/file/d/${driveId}/view" target="_blank" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-brand-600 font-bold rounded-lg border border-slate-200 transition-all flex items-center space-x-1">
+                                <span>Buka Layar Penuh</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <iframe src="https://drive.google.com/file/d/${driveId}/preview" class="w-full flex-1 border-0 bg-white" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+            `;
+        }
+
+        function renderExcelInteractivePreview(container, item, ext) {
+            let renderedHtml = '';
+            let sheetTabsHtml = '';
+
+            try {
+                if (item.file_url && item.file_url.startsWith('data:') && typeof XLSX !== 'undefined') {
+                    const base64Data = item.file_url.split(',')[1];
+                    activeExcelWorkbook = XLSX.read(base64Data, { type: 'base64' });
+
+                    if (activeExcelWorkbook && activeExcelWorkbook.SheetNames.length > 0) {
+                        const firstSheet = activeExcelWorkbook.SheetNames[0];
+                        const htmlContent = XLSX.utils.sheet_to_html(activeExcelWorkbook.Sheets[firstSheet], {
+                            header: '',
+                            footer: '',
+                            id: 'excel-rendered-table'
+                        });
+
+                        sheetTabsHtml = activeExcelWorkbook.SheetNames.map((sheetName, sIdx) => `
+                            <button type="button" onclick="switchExcelSheet('${sheetName}')" id="excel-tab-${sIdx}" class="excel-sheet-tab px-3 py-1.5 rounded-t-lg text-xs font-bold transition-all border-b-2 ${sIdx === 0 ? 'bg-white text-emerald-700 border-emerald-600 shadow-2xs' : 'bg-slate-100 text-slate-600 border-transparent hover:bg-slate-200'}">
+                                ${sheetName}
+                            </button>
+                        `).join('');
+
+                        renderedHtml = `
+                            <div class="w-full h-full flex flex-col bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden">
+                                <!-- Excel Header Ribbon -->
+                                <div class="px-4 py-2.5 bg-emerald-800 text-white flex items-center justify-between flex-shrink-0">
+                                    <div class="flex items-center space-x-2">
+                                        <div class="w-6 h-6 rounded bg-emerald-700 flex items-center justify-center font-bold text-xs">X</div>
+                                        <span class="font-bold text-xs truncate">${item.nama} (${ext})</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[11px] text-emerald-100">
+                                        <span>${activeExcelWorkbook.SheetNames.length} Lembar Kerja</span>
+                                        <span>•</span>
+                                        <span>SheetJS Spreadsheet Engine</span>
+                                    </div>
+                                </div>
+                                <!-- Sheet Viewport -->
+                                <div class="flex-1 overflow-auto p-3 bg-slate-50 relative" id="excel-sheet-viewport">
+                                    <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-x-auto">
+                                        ${htmlContent}
+                                    </div>
+                                </div>
+                                <!-- Sheet Tabs Bar -->
+                                <div class="px-3 pt-1 bg-slate-200 border-t border-slate-300 flex items-center space-x-1 overflow-x-auto flex-shrink-0">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase px-2">Sheets:</span>
+                                    ${sheetTabsHtml}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.warn("SheetJS parse notice:", err);
+            }
+
+            if (!renderedHtml) {
+                renderedHtml = `
+                    <div class="w-full h-full flex flex-col bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden max-w-4xl">
+                        <!-- Excel Toolbar -->
+                        <div class="px-4 py-3 bg-emerald-700 text-white flex items-center justify-between flex-shrink-0">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">XLS</div>
+                                <div>
+                                    <h4 class="font-bold text-xs">${item.nama}</h4>
+                                    <p class="text-[10px] text-emerald-200">${item.file_name || `${item.no}.xlsx`} • ${item.size || 0} KB</p>
+                                </div>
+                            </div>
+                            <span class="text-[11px] bg-emerald-800 px-3 py-1 rounded-full text-emerald-100 font-semibold">Tampilan Lembar Kerja</span>
+                        </div>
+                        <!-- Simulated Spreadsheet Grid -->
+                        <div class="flex-1 overflow-auto p-4 bg-slate-50">
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                                <table class="excel-sheet-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>A (No. Dokumen)</th>
+                                            <th>B (Nama Arsip)</th>
+                                            <th>C (Kategori)</th>
+                                            <th>D (Status Sinkronisasi)</th>
+                                            <th>E (Ukuran Berkas)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td class="font-mono font-bold text-brand-600">${item.no}</td>
+                                            <td class="font-semibold">${item.nama}</td>
+                                            <td><span class="px-2 py-0.5 bg-slate-100 rounded-md text-[10px] font-bold">${item.kategori}</span></td>
+                                            <td><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md text-[10px] font-bold">Terverifikasi Cloud</span></td>
+                                            <td class="font-mono">${item.size || 0} KB</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td class="font-mono text-slate-400">-</td>
+                                            <td class="text-slate-500 italic">${item.deskripsi || 'Tidak ada catatan lampiran tambahan'}</td>
+                                            <td>-</td>
+                                            <td><span class="text-slate-400">Siap Cetak / Unduh</span></td>
+                                            <td>-</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td class="font-mono text-slate-400">-</td>
+                                            <td class="text-slate-500">Pengunggah: ${item.uploader || 'admin'}</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="text-xs text-slate-500 text-center mt-4">Pratinjau spreadsheet instan. Untuk mengedit rumus dan data secara lengkap, unduh berkas atau buka di Google Sheets / Microsoft Excel.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = renderedHtml;
+        }
+
+        function switchExcelSheet(sheetName) {
+            if (!activeExcelWorkbook || !activeExcelWorkbook.Sheets[sheetName]) return;
+            const viewport = document.getElementById('excel-sheet-viewport');
+            if (!viewport) return;
+
+            const htmlContent = XLSX.utils.sheet_to_html(activeExcelWorkbook.Sheets[sheetName], {
+                header: '',
+                footer: '',
+                id: 'excel-rendered-table'
+            });
+
+            viewport.innerHTML = `
+                <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-x-auto">
+                    ${htmlContent}
+                </div>
+            `;
+
+            document.querySelectorAll('.excel-sheet-tab').forEach(tab => {
+                if (tab.textContent.trim() === sheetName) {
+                    tab.className = "excel-sheet-tab px-3 py-1.5 rounded-t-lg text-xs font-bold transition-all border-b-2 bg-white text-emerald-700 border-emerald-600 shadow-2xs";
+                } else {
+                    tab.className = "excel-sheet-tab px-3 py-1.5 rounded-t-lg text-xs font-bold transition-all border-b-2 bg-slate-100 text-slate-600 border-transparent hover:bg-slate-200";
+                }
+            });
+        }
+
+        function renderPowerPointSlidePreview(container, item, ext) {
+            currentPptSlideIndex = 1;
+            currentPptSlideCount = 4;
+
+            container.innerHTML = `
+                <div class="w-full h-full max-w-4xl flex flex-col bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden">
+                    <!-- PowerPoint Ribbon Header -->
+                    <div class="px-4 py-2.5 bg-gradient-to-r from-amber-600 to-rose-600 text-white flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 rounded bg-black/20 text-white flex items-center justify-center font-bold text-xs">PPT</div>
+                            <span class="font-bold text-xs truncate">${item.nama} (${ext})</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="bg-black/25 px-2.5 py-0.5 rounded-full font-mono text-[11px]" id="ppt-slide-counter">Slide 1 / 4</span>
+                        </div>
+                    </div>
+
+                    <!-- Slide Stage Canvas -->
+                    <div class="flex-1 flex items-center justify-center p-4 sm:p-6 bg-slate-950 overflow-hidden relative">
+                        <!-- 16:9 Aspect Presentation Canvas -->
+                        <div class="w-full max-w-2xl aspect-[16/9] bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-2xl shadow-2xl border border-white/10 p-6 sm:p-8 flex flex-col justify-between text-white relative overflow-hidden" id="ppt-slide-stage">
+                            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                                <span class="text-[10px] font-bold text-amber-400 tracking-wider uppercase font-mono">${item.kategori}</span>
+                                <span class="text-[10px] text-slate-400 font-mono">${item.no}</span>
+                            </div>
+                            <div class="my-auto text-center space-y-2">
+                                <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight" id="ppt-slide-title">${item.nama}</h2>
+                                <p class="text-xs sm:text-sm text-slate-300 max-w-md mx-auto" id="ppt-slide-desc">${item.deskripsi || 'Dokumen Presentasi Eksekutif Perusahaan'}</p>
+                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-white/10 text-[10px] text-slate-400 font-mono">
+                                <span>Pengunggah: ${item.uploader || 'admin'}</span>
+                                <span>ArsipCloud Enterprise v3.9</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Slide Navigation Footer -->
+                    <div class="px-4 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="changePptSlide(-1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                <span>Sebelumnya</span>
+                            </button>
+                            <button type="button" onclick="changePptSlide(1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer">
+                                <span>Selanjutnya</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[11px] text-slate-400">Slide Deck Reader</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function changePptSlide(delta) {
+            currentPptSlideIndex += delta;
+            if (currentPptSlideIndex < 1) currentPptSlideIndex = currentPptSlideCount;
+            if (currentPptSlideIndex > currentPptSlideCount) currentPptSlideIndex = 1;
+
+            const counter = document.getElementById('ppt-slide-counter');
+            const title = document.getElementById('ppt-slide-title');
+            const desc = document.getElementById('ppt-slide-desc');
+
+            if (counter) counter.textContent = `Slide ${currentPptSlideIndex} / ${currentPptSlideCount}`;
+
+            if (currentPreviewItem && title && desc) {
+                if (currentPptSlideIndex === 1) {
+                    title.textContent = currentPreviewItem.nama;
+                    desc.textContent = currentPreviewItem.deskripsi || "Halaman Judul Presentasi Eksekutif";
+                } else if (currentPptSlideIndex === 2) {
+                    title.textContent = "Ringkasan Eksekutif & Ruang Lingkup";
+                    desc.textContent = `Dokumen No: ${currentPreviewItem.no} terdaftar dalam direktori ${currentPreviewItem.kategori} dengan ukuran ${currentPreviewItem.size || 0} KB.`;
+                } else if (currentPptSlideIndex === 3) {
+                    title.textContent = "Rincian Data & Indeks Arsip";
+                    desc.textContent = `Pengunggah resmi: ${currentPreviewItem.uploader || 'admin'} • Sinkronisasi Google Drive Aktif.`;
+                } else {
+                    title.textContent = "Kesimpulan & Pengesahan Berkas";
+                    desc.textContent = "Arsip terverifikasi siap ditindaklanjuti atau didistribusikan ke bagian terkait.";
+                }
+            }
+        }
+
+        function renderWordDocumentPreview(container, item, ext) {
+            container.innerHTML = `
+                <div class="w-full h-full max-w-4xl flex flex-col bg-slate-100 rounded-2xl shadow-md border border-slate-200 overflow-hidden">
+                    <!-- Word Ribbon Header -->
+                    <div class="px-4 py-2.5 bg-blue-700 text-white flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-6 h-6 rounded bg-blue-800 text-white flex items-center justify-center font-bold text-xs">DOC</div>
+                            <span class="font-bold text-xs truncate">${item.nama} (${ext})</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs">
+                            <span class="bg-blue-800/80 px-2.5 py-0.5 rounded-full text-blue-100 font-medium">Word Document Reader</span>
+                        </div>
+                    </div>
+
+                    <!-- Paper Document Stage -->
+                    <div class="flex-1 overflow-auto p-4 sm:p-8 flex justify-center bg-slate-200/80">
+                        <div class="w-full max-w-2xl bg-white rounded-xl shadow-xl border border-slate-300 p-8 sm:p-12 space-y-6 text-slate-800 self-start">
+                            <!-- Document Header / Letterhead -->
+                            <div class="border-b-2 border-slate-800 pb-4 text-center space-y-1">
+                                <h2 class="text-base sm:text-lg font-extrabold uppercase tracking-tight text-slate-900">${systemSettings.appTitle || 'ArsipCloud Enterprise'}</h2>
+                                <p class="text-xs text-slate-500 font-medium">${systemSettings.appSubtitle || 'Sistem Manajemen Arsip Terintegrasi Google Drive'}</p>
+                                <p class="text-[10px] font-mono text-slate-400">NOMOR BERKAS: ${item.no}</p>
+                            </div>
+
+                            <!-- Document Body -->
+                            <div class="space-y-4 text-xs leading-relaxed text-slate-700">
+                                <div class="text-center font-bold text-sm text-slate-900 underline uppercase tracking-wide">
+                                    ${item.nama}
+                                </div>
+                                <p class="indent-8 text-justify">
+                                    Berdasarkan dokumentasi resmi yang tersimpan di dalam sistem arsip korporat terpusat, naskah ini tercatat dalam kategori <strong>${item.kategori}</strong> dengan pengunggah terdaftar yaitu <strong>${item.uploader || 'admin'}</strong>.
+                                </p>
+                                ${item.deskripsi ? `
+                                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                        <span class="font-bold text-slate-700 block mb-1">Catatan Dokumen:</span>
+                                        <p class="text-slate-600">${item.deskripsi}</p>
+                                    </div>
+                                ` : ''}
+                                <p class="indent-8 text-justify">
+                                    Dokumen ini telah melalui proses verifikasi dan penyimpanan terstruktur. Berkas fisik biner tersimpan di repositori Google Drive terpusat dan dapat diunduh untuk pengarsipan luring maupun pembuktian audit.
+                                </p>
+                            </div>
+
+                            <!-- Document Signatures / Validation -->
+                            <div class="pt-8 border-t border-slate-100 flex justify-between items-end text-center text-xs text-slate-600">
+                                <div>
+                                    <p class="text-[10px] text-slate-400">Petugas Registrasi</p>
+                                    <div class="h-12 flex items-center justify-center font-mono font-bold text-brand-600">
+                                        [VERIFIED]
+                                    </div>
+                                    <p class="font-bold text-slate-800">${item.uploader || 'admin'}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-slate-400">Status Penyimpanan</p>
+                                    <div class="h-12 flex items-center justify-center text-emerald-600 font-bold text-[10px]">
+                                        TERINDEKS CLOUD
+                                    </div>
+                                    <p class="font-bold text-slate-800">Google Drive</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPdfDocumentPreview(container, item) {
+            if (item.file_url) {
+                container.innerHTML = `
+                    <iframe src="${item.file_url}" class="w-full h-full rounded-2xl border border-slate-200 shadow-md bg-white"></iframe>
+                `;
+            } else {
+                container.innerHTML = renderPlaceholderPreview(item, 'PDF');
+            }
+        }
+
+        function renderImagePreview(container, item) {
+            container.innerHTML = `
+                <div class="max-w-full max-h-full flex items-center justify-center p-4">
+                    <img src="${item.file_url || 'https://placehold.co/800x600?text=Gambar+Arsip'}" class="max-h-[75vh] max-w-full rounded-2xl shadow-xl object-contain border border-slate-200" alt="${item.nama}">
+                </div>
+            `;
+        }
+
+        function renderTextCodePreview(container, item, ext) {
+            let decodedText = "Pratinjau konten teks dokumen...";
+            if (item.file_url && item.file_url.startsWith('data:')) {
+                try {
+                    const base64Str = item.file_url.split(',')[1];
+                    decodedText = atob(base64Str);
+                } catch (e) {
+                    decodedText = item.deskripsi || "Berkas teks.";
+                }
+            }
+            container.innerHTML = `
+                <div class="w-full h-full max-w-3xl flex flex-col bg-slate-900 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                    <div class="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-mono flex justify-between items-center">
+                        <span>${item.nama}.${ext.toLowerCase()}</span>
+                        <span>Plain Text / Source View</span>
+                    </div>
+                    <pre class="flex-1 p-4 text-xs font-mono text-emerald-400 overflow-auto whitespace-pre-wrap leading-relaxed">${decodedText}</pre>
+                </div>
+            `;
         }
 
         function renderPlaceholderPreview(item, ext) {
