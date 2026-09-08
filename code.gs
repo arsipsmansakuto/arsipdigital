@@ -1,12 +1,14 @@
 /**
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
- * ArsipCloud Enterprise v3.9 - Centralized Drive Folder ID & Synchronized Trash
+ * ArsipCloud Enterprise v4.1 - Production Cloud Storage & Sheets Database
  * ============================================================================
  */
 
-const ROOT_DRIVE_FOLDER_ID = "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r";
+// Default Root Google Drive ID jika belum dikonfigurasi pada sheet Pengaturan
+const DEFAULT_ROOT_DRIVE_FOLDER_ID = "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r";
 
+// Definisi Nama Lembar Kerja Database Spreadsheet
 const SHEET_NAMES = {
   ARCHIVE: 'Data_Arsip',
   CATEGORY: 'Kategori_Drive',
@@ -15,9 +17,14 @@ const SHEET_NAMES = {
   SETTINGS: 'Pengaturan'
 };
 
+/**
+ * Handler HTTP POST utama untuk seluruh operasi CRUD & Sinkronisasi
+ * Menggunakan LockService untuk menjamin integritas transaksi data multi-pengguna
+ */
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
+    // Tunggu antrean eksekusi maksimal 15 detik
     lock.waitLock(15000);
     setupDatabase();
 
@@ -101,31 +108,55 @@ function doPost(e) {
   }
 }
 
+/**
+ * Handler HTTP GET untuk pengujian status Web App dan pemuatan konfigurasi awal
+ */
 function doGet(e) {
   setupDatabase();
   const settingsObj = getSettingsData().settings || {};
+  const currentRootId = settingsObj.rootDriveId || DEFAULT_ROOT_DRIVE_FOLDER_ID;
+
   return createJsonResponse({ 
     status: 'ACTIVE', 
-    version: 'ArsipCloud Enterprise v3.9 Production Engine',
-    root_folder_id: ROOT_DRIVE_FOLDER_ID,
+    version: 'ArsipCloud Enterprise v4.1 Production Engine',
+    root_folder_id: currentRootId,
     settings: settingsObj
   });
 }
 
+/**
+ * Memformat objek output menjadi MIME Type JSON murni
+ */
 function createJsonResponse(data) {
   return ContentService.createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/**
+ * Mengambil direktori folder induk Google Drive berdasarkan konfigurasi Pengaturan
+ */
 function getRootDriveFolder() {
+  let targetFolderId = DEFAULT_ROOT_DRIVE_FOLDER_ID;
   try {
-    return DriveApp.getFolderById(ROOT_DRIVE_FOLDER_ID);
+    const settings = getSettingsData().settings;
+    if (settings && settings.rootDriveId && String(settings.rootDriveId).trim() !== "") {
+      targetFolderId = String(settings.rootDriveId).trim();
+    }
   } catch (e) {
-    Logger.log("Gagal mengakses ROOT_DRIVE_FOLDER_ID (" + ROOT_DRIVE_FOLDER_ID + "): " + e.toString());
+    Logger.log("Gagal membaca rootDriveId dari pengaturan: " + e.toString());
+  }
+
+  try {
+    return DriveApp.getFolderById(targetFolderId);
+  } catch (e) {
+    Logger.log("Folder Google Drive (" + targetFolderId + ") tidak ditemukan, mengalihkan ke folder lokal: " + e.toString());
     return getOrCreateDriveFolder("ArsipCloud_Enterprise_Drive");
   }
 }
 
+/**
+ * Mencari atau membuat folder Google Drive di bawah folder induk
+ */
 function getOrCreateDriveFolder(folderName, parentFolder = null) {
   const targetParent = parentFolder || getRootDriveFolder();
   const folders = targetParent.getFoldersByName(folderName);
@@ -137,6 +168,9 @@ function getOrCreateDriveFolder(folderName, parentFolder = null) {
   return newFld;
 }
 
+/**
+ * Zero-Config Database Setup: Memeriksa dan membuat 5 sheet lengkap dengan header kolom
+ */
 function setupDatabase() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -155,27 +189,39 @@ function setupDatabase() {
   let sheetCategory = ss.getSheetByName(SHEET_NAMES.CATEGORY);
   if (!sheetCategory) {
     sheetCategory = ss.insertSheet(SHEET_NAMES.CATEGORY);
-    sheetCategory.appendRow(['ID Kategori', 'Nama Kategori', 'Folder ID Google Drive', 'Status']);
-    sheetCategory.getRange(1, 1, 1, 4).setFontWeight('bold').setBackground('#f1f5f9');
+    sheetCategory.appendRow(['ID Kategori', 'Nama Kategori', 'Folder ID Google Drive', 'Keterangan', 'Status']);
+    sheetCategory.getRange(1, 1, 1, 5).setFontWeight('bold').setBackground('#f1f5f9');
     
-    const suratFolder = getOrCreateDriveFolder("Surat Masuk & Keluar");
-    const invoiceFolder = getOrCreateDriveFolder("Invoice & Perpajakan");
-    const hrdFolder = getOrCreateDriveFolder("Dokumen Kepegawaian");
-
-    sheetCategory.appendRow(['CAT-101', 'Surat Masuk & Keluar', suratFolder.getId(), 'ACTIVE']);
-    sheetCategory.appendRow(['CAT-102', 'Invoice & Perpajakan', invoiceFolder.getId(), 'ACTIVE']);
-    sheetCategory.appendRow(['CAT-103', 'Dokumen Kepegawaian', hrdFolder.getId(), 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-01', 'Keuangan & Perpajakan', 'FLD_KEU_8372', 'Laporan neraca, pajak, dan audit tahunan', 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-02', 'SDM & Kepegawaian', 'FLD_HRD_1928', 'SK pegawai, kontrak kerja, dan absensi', 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-03', 'Legalitas & Notaris', 'FLD_LGL_4412', 'Akta pendirian, NIB, dan perjanjian MOU', 'ACTIVE']);
+    sheetCategory.appendRow(['CAT-04', 'Operasional Proyek', 'FLD_OPS_9921', 'RAB, dokumen tender, dan berita acara', 'ACTIVE']);
   }
 
-  // 3. Tab Sheet: Users
+  // 3. Tab Sheet: Users (dengan kolom Password & Hak Akses)
   let sheetUsers = ss.getSheetByName(SHEET_NAMES.USERS);
   if (!sheetUsers) {
     sheetUsers = ss.insertSheet(SHEET_NAMES.USERS);
     sheetUsers.appendRow(['Username', 'Password', 'Nama Lengkap', 'Role Hak Akses', 'Status Akun']);
     sheetUsers.getRange(1, 1, 1, 5).setFontWeight('bold').setBackground('#f1f5f9');
-    sheetUsers.appendRow(['admin', 'admin123', 'Administrator System', 'ADMINISTRATOR', 'ACTIVE']);
-    sheetUsers.appendRow(['operator', 'operator123', 'Staf Operator Arsip', 'OPERATOR', 'ACTIVE']);
-    sheetUsers.appendRow(['viewer', 'viewer123', 'Auditor External', 'VIEWER', 'ACTIVE']);
+    sheetUsers.appendRow(['admin', 'admin123', 'Administrator Utama', 'Admin', 'Aktif']);
+    sheetUsers.appendRow(['operator', 'operator123', 'Budi Perkasa', 'Operator', 'Aktif']);
+    sheetUsers.appendRow(['viewer', 'viewer123', 'Tamu Peninjau', 'Viewer', 'Aktif']);
+  } else {
+    // Migrasi cerdas jika sheet Users versi lama belum memiliki kolom Password
+    const headerRow = sheetUsers.getRange(1, 1, 1, sheetUsers.getLastColumn()).getValues()[0];
+    const headerStr = headerRow.map(h => String(h).toLowerCase()).join(' ');
+    if (!headerStr.includes('password')) {
+      sheetUsers.insertColumnAfter(1);
+      sheetUsers.getRange(1, 2).setValue('Password').setFontWeight('bold').setBackground('#f1f5f9');
+      const numRows = sheetUsers.getLastRow();
+      if (numRows > 1) {
+        for (let r = 2; r <= numRows; r++) {
+          const uVal = String(sheetUsers.getRange(r, 1).getValue()).toLowerCase();
+          sheetUsers.getRange(r, 2).setValue(uVal ? uVal + '123' : 'admin123');
+        }
+      }
+    }
   }
 
   // 4. Tab Sheet: Audit_Log
@@ -195,10 +241,27 @@ function setupDatabase() {
   }
 }
 
+/**
+ * Membaca seluruh pasangan kunci & nilai dari sheet Pengaturan
+ */
 function getSettingsData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const settingsSheet = ss.getSheetByName(SHEET_NAMES.SETTINGS);
-  let settingsObj = {};
+  let settingsObj = {
+    appName: "ArsipCloud Enterprise",
+    appDesc: "Sistem Manajemen Arsip Digital Terintegrasi Google Drive",
+    appLogo: "https://lh3.googleusercontent.com/d/1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r",
+    bgUrl: "",
+    bgOpacity: 100,
+    bgBlur: 0,
+    sidebarBg: "#0f172a",
+    sidebarText: "#f8fafc",
+    sidebarActive: "#38bdf8",
+    rootDriveId: DEFAULT_ROOT_DRIVE_FOLDER_ID,
+    maxUploadSizeMB: 20,
+    allowedExtensions: "jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,rtf,odt,ods,odp,zip,rar"
+  };
+
   if (settingsSheet && settingsSheet.getLastRow() > 1) {
     const sRows = settingsSheet.getRange(2, 1, settingsSheet.getLastRow() - 1, 2).getValues();
     for (let i = 0; i < sRows.length; i++) {
@@ -215,51 +278,75 @@ function getSettingsData() {
   };
 }
 
+/**
+ * Mengambil seluruh data dari 5 sheet untuk inisialisasi frontend
+ */
 function getAllData() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
+  // 1. Data Arsip
   const archiveSheet = ss.getSheetByName(SHEET_NAMES.ARCHIVE);
   const archives = archiveSheet && archiveSheet.getLastRow() > 1 
     ? archiveSheet.getDataRange().getValues().slice(1).map(r => ({
         id: String(r[0]),
         no: String(r[1]),
-        nama: String(r[2]),
-        deskripsi: String(r[3]),
-        kategori: String(r[4]),
-        tanggal: String(r[5]),
+        title: String(r[2]),
+        desc: String(r[3] || ''),
+        category: String(r[4]),
+        uploadedAt: String(r[5]),
         size: parseInt(r[6], 10) || 0,
-        file_name: String(r[7] || ''),
-        file_url: String(r[8] || ''),
+        filename: String(r[7] || ''),
+        driveUrl: String(r[8] || ''),
         uploader: String(r[9] || 'admin'),
-        drive_file_id: String(r[10] || '')
+        driveFileId: String(r[10] || '')
       })) 
     : [];
 
+  // 2. Data Kategori
   const categorySheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
   const categories = categorySheet && categorySheet.getLastRow() > 1 
     ? categorySheet.getDataRange().getValues().slice(1).map(r => ({
         id: String(r[0]),
-        nama: String(r[1]),
-        folder_id: String(r[2]),
-        status: String(r[3])
+        name: String(r[1]),
+        driveId: String(r[2]),
+        desc: String(r[3] || ''),
+        status: String(r[4] || 'ACTIVE')
       })) 
     : [];
 
+  // 3. Data Pengguna
   const usersSheet = ss.getSheetByName(SHEET_NAMES.USERS);
-  const users = usersSheet && usersSheet.getLastRow() > 1 
-    ? usersSheet.getDataRange().getValues().slice(1).map(r => ({
-        username: String(r[0]),
-        password: String(r[1] || 'admin123'),
-        name: String(r[2]),
-        role: String(r[3]),
-        status: String(r[4])
-      })) 
-    : [];
+  let users = [];
+  if (usersSheet && usersSheet.getLastRow() > 1) {
+    const data = usersSheet.getDataRange().getValues();
+    const headers = data[0].map(h => String(h).toLowerCase().trim());
+    const uIdx = headers.indexOf('username');
+    const pIdx = headers.indexOf('password');
+    const nIdx = headers.findIndex(h => h.includes('nama'));
+    const rIdx = headers.findIndex(h => h.includes('role'));
+    const sIdx = headers.findIndex(h => h.includes('status'));
 
+    users = data.slice(1).map(r => {
+      const uname = String(uIdx !== -1 ? r[uIdx] : r[0]).trim();
+      let pwd = uname ? uname.toLowerCase() + '123' : 'admin123';
+      if (pIdx !== -1 && r[pIdx] && String(r[pIdx]).trim() !== '') {
+        pwd = String(r[pIdx]).trim();
+      }
+      return {
+        username: uname,
+        password: pwd,
+        name: String(nIdx !== -1 ? r[nIdx] : (r[2] || uname)),
+        role: String(rIdx !== -1 ? r[rIdx] : (r[3] || 'Operator')),
+        status: String(sIdx !== -1 ? r[sIdx] : (r[4] || 'Aktif'))
+      };
+    });
+  }
+
+  // 4. Data Log Aktivitas
   const logsSheet = ss.getSheetByName(SHEET_NAMES.LOGS);
   const logs = logsSheet && logsSheet.getLastRow() > 1 
     ? logsSheet.getDataRange().getValues().slice(1).map(r => ({
-        time: String(r[0]),
+        timestamp: String(r[0]),
         user: String(r[1]),
         action: String(r[2]),
         detail: String(r[3])
@@ -278,17 +365,26 @@ function getAllData() {
   };
 }
 
+/**
+ * Menyimpan atau memperbarui data dokumen arsip beserta pengunggahan fisik ke Google Drive
+ */
 function saveArchive(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.ARCHIVE);
-  let fileDirectUrl = data.file_url || "";
-  let driveFileId = data.drive_file_id || "";
+  let fileDirectUrl = data.driveUrl || data.file_url || "";
+  let driveFileId = data.driveFileId || data.drive_file_id || "";
 
-  let targetFolderId = getCategoryFolderId(data.kategori);
-  const rawBase64 = data.file_data || (data.file_url && String(data.file_url).startsWith("data:") ? data.file_url : "");
+  let targetFolderId = getCategoryFolderId(data.category || data.kategori);
+  const rawBase64 = data.contentData || data.file_data || (fileDirectUrl.startsWith("data:") ? fileDirectUrl : "");
 
+  // Jika payload berisi file Base64 murni, konversi dan simpan ke folder Google Drive
   if (rawBase64 && String(rawBase64).startsWith("data:")) {
-    const uploadObj = uploadBase64ToDrive(rawBase64, data.file_name || (data.no + "." + (data.file_type || "pdf").toLowerCase()), data.kategori, targetFolderId);
+    const uploadObj = uploadBase64ToDrive(
+      rawBase64, 
+      data.filename || data.file_name || (data.no + "." + (data.ext || "pdf").toLowerCase()), 
+      data.category || data.kategori, 
+      targetFolderId
+    );
     if (uploadObj.url) fileDirectUrl = uploadObj.url;
     if (uploadObj.file_id) driveFileId = uploadObj.file_id;
   }
@@ -305,12 +401,12 @@ function saveArchive(data) {
   const rowData = [
     data.id,
     data.no,
-    data.nama,
-    data.deskripsi || "",
-    data.kategori,
-    data.tanggal,
+    data.title || data.nama,
+    data.desc || data.deskripsi || "",
+    data.category || data.kategori,
+    data.uploadedAt || data.tanggal,
     data.size || 0,
-    data.file_name || "",
+    data.filename || data.file_name || "",
     fileDirectUrl,
     data.uploader || "admin",
     driveFileId
@@ -322,19 +418,22 @@ function saveArchive(data) {
     sheet.appendRow(rowData);
   }
 
-  logAction(data.uploader, foundIndex > 0 ? 'EDIT_ARCHIVE' : 'ADD_ARCHIVE', `Dokumen ${data.no} - ${data.nama} disimpan`);
+  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_ARCHIVE' : 'ADD_ARCHIVE', `Dokumen ${data.no} - ${data.title || data.nama} disimpan`);
   return { file_url: fileDirectUrl, drive_file_id: driveFileId };
 }
 
+/**
+ * Mengunggah data Base64 ke dalam direktori Google Drive dan memulangkan URL pratinjau langsung
+ */
 function uploadBase64ToDrive(base64Data, fileName, categoryName, targetFolderId) {
   try {
     let parentFolder;
     
-    if (targetFolderId && String(targetFolderId).trim() !== "") {
+    if (targetFolderId && String(targetFolderId).trim() !== "" && !String(targetFolderId).startsWith("FLD_")) {
       try {
         parentFolder = DriveApp.getFolderById(String(targetFolderId).trim());
       } catch (fErr) {
-        Logger.log("Folder ID Kategori tidak ditemukan, mengalihkan ke root parent: " + fErr.toString());
+        Logger.log("Folder ID kategori kustom tidak ditemukan: " + fErr.toString());
       }
     }
 
@@ -363,6 +462,9 @@ function uploadBase64ToDrive(base64Data, fileName, categoryName, targetFolderId)
   }
 }
 
+/**
+ * Mengambil Folder ID Google Drive yang terikat pada nama kategori
+ */
 function getCategoryFolderId(categoryName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
@@ -376,6 +478,9 @@ function getCategoryFolderId(categoryName) {
   return "";
 }
 
+/**
+ * Menyimpan atau memperbarui folder kategori pada Google Drive
+ */
 function saveCategory(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
@@ -389,52 +494,52 @@ function saveCategory(data) {
     }
   }
 
-  let folderId = data.folder_id ? String(data.folder_id).trim() : "";
+  let folderId = data.driveId || data.folder_id ? String(data.driveId || data.folder_id).trim() : "";
 
-  // Buat folder baru di dalam folder Google Drive root utama jika ID kosong atau otomatis
-  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO" || folderId.startsWith("AUTO_")) {
+  // Otomatis buat folder Google Drive baru di bawah Root Drive jika belum ditentukan
+  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO") {
     try {
       const rootFolder = getRootDriveFolder();
-      const newFolder = rootFolder.createFolder(data.nama);
+      const newFolder = rootFolder.createFolder(data.name || data.nama);
       newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       folderId = newFolder.getId();
-      Logger.log("Folder Google Drive baru berhasil dibuat di root folder (" + ROOT_DRIVE_FOLDER_ID + "): " + data.nama + " (ID: " + folderId + ")");
     } catch (e) {
       Logger.log("Gagal membuat folder di root Google Drive: " + e.toString());
-      folderId = getOrCreateDriveFolder(data.nama).getId();
-    }
-  } else {
-    try {
-      const existingFolder = DriveApp.getFolderById(folderId);
-    } catch (err) {
-      Logger.log("Folder ID kustom tidak ditemukan, membuat folder baru di root: " + err.toString());
-      const rootFolder = getRootDriveFolder();
-      const fallbackFolder = rootFolder.createFolder(data.nama);
-      fallbackFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      folderId = fallbackFolder.getId();
+      folderId = `FLD_${Date.now().toString().slice(-6)}`;
     }
   }
 
-  const rowData = [data.id, data.nama, folderId, data.status || "ACTIVE"];
+  const rowData = [
+    data.id, 
+    data.name || data.nama, 
+    folderId, 
+    data.desc || data.keterangan || "", 
+    data.status || "ACTIVE"
+  ];
+
   if (foundIndex > 0) {
     sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
   } else {
     sheet.appendRow(rowData);
   }
 
-  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_CATEGORY' : 'ADD_CATEGORY', `Kategori "${data.nama}" tersambung ke Google Drive Folder ID: ${folderId}`);
+  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_CATEGORY' : 'ADD_CATEGORY', `Kategori "${data.name || data.nama}" terhubung ke Drive Folder ID: ${folderId}`);
   return { 
     status: 'SUCCESS', 
-    message: `Folder Google Drive "${data.nama}" berhasil dihubungkan!`,
+    message: `Kategori "${data.name || data.nama}" berhasil disimpan!`,
     category: {
       id: data.id,
-      nama: data.nama,
-      folder_id: folderId,
+      name: data.name || data.nama,
+      driveId: folderId,
+      desc: data.desc || data.keterangan || "",
       status: data.status || 'ACTIVE'
     }
   };
 }
 
+/**
+ * Menghapus kategori dan memindahkan folder Google Drive ke tempat sampah
+ */
 function deleteCategory(id, folderId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORY);
@@ -452,20 +557,24 @@ function deleteCategory(id, folderId) {
     }
   }
 
-  if (targetFolderId && String(targetFolderId).trim() !== "" && !targetFolderId.startsWith("FLD_") && !targetFolderId.startsWith("AUTO_")) {
+  // Pindahkan folder fisik di Google Drive ke tempat sampah (Trash)
+  if (targetFolderId && String(targetFolderId).trim() !== "" && !targetFolderId.startsWith("FLD_")) {
     try {
       const folder = DriveApp.getFolderById(String(targetFolderId).trim());
       folder.setTrashed(true);
-      Logger.log("Folder Google Drive kategori berhasil dipindahkan ke sampah: " + targetFolderId);
+      Logger.log("Folder Google Drive berhasil dipindahkan ke sampah: " + targetFolderId);
     } catch (fErr) {
-      Logger.log("Gagal memindahkan folder Google Drive ke sampah: " + fErr.toString());
+      Logger.log("Gagal memindahkan folder ke sampah: " + fErr.toString());
     }
   }
 
-  logAction('admin', 'DELETE_CATEGORY', `Kategori ID ${id} dan folder Google Drive (${targetFolderId}) berhasil dihapus`);
+  logAction('admin', 'DELETE_CATEGORY', `Kategori ID ${id} (${targetFolderId}) dihapus`);
   return { status: 'SUCCESS', message: 'Kategori dan folder Drive berhasil dihapus' };
 }
 
+/**
+ * Menghapus data arsip dari lembar kerja dan memindahkan berkas fisiknya ke Trash Google Drive
+ */
 function deleteArchive(id, driveFileId) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.ARCHIVE);
@@ -490,11 +599,14 @@ function deleteArchive(id, driveFileId) {
       file.setTrashed(true);
       Logger.log("Berkas Google Drive berhasil dipindahkan ke sampah: " + targetDriveId);
     } catch (err) {
-      Logger.log("Gagal menghapus berkas di Google Drive: " + err.toString());
+      Logger.log("Gagal memindahkan berkas Google Drive ke sampah: " + err.toString());
     }
   }
 }
 
+/**
+ * Menyimpan atau memperbarui data akun pengguna dan kata sandi
+ */
 function saveUser(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.USERS);
@@ -508,14 +620,25 @@ function saveUser(data) {
     }
   }
 
-  const rowData = [data.username, data.password || 'admin123', data.name, data.role, data.status];
+  const rowData = [
+    data.username, 
+    data.password || 'admin123', 
+    data.name, 
+    data.role, 
+    data.status
+  ];
+
   if (foundIndex > 0) {
     sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
   } else {
     sheet.appendRow(rowData);
   }
+  logAction('admin', foundIndex > 0 ? 'EDIT_USER' : 'ADD_USER', `Pengguna @${data.username} (${data.role}) disimpan`);
 }
 
+/**
+ * Menghapus akun pengguna dari lembar kerja
+ */
 function deleteUser(username) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.USERS);
@@ -527,8 +650,12 @@ function deleteUser(username) {
       break;
     }
   }
+  logAction('admin', 'DELETE_USER', `Pengguna @${username} dihapus dari sistem`);
 }
 
+/**
+ * Menyimpan konfigurasi sistem, wallpaper, dan batas upload ke sheet Pengaturan
+ */
 function saveSettings(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName(SHEET_NAMES.SETTINGS);
@@ -547,6 +674,7 @@ function saveSettings(data) {
     Object.keys(data).forEach(k => {
       let val = data[k];
 
+      // Jika wallpaper diunggah dalam format Base64 besar, simpan ke Drive agar spreadsheet tetap ringan
       if (typeof val === 'string' && val.startsWith('data:image')) {
         try {
           const splitData = val.split(',');
@@ -562,7 +690,7 @@ function saveSettings(data) {
             val = "https://lh3.googleusercontent.com/d/" + file.getId();
           }
         } catch (assetErr) {
-          Logger.log("Gagal mengonversi asset gambar ke Drive: " + assetErr.toString());
+          Logger.log("Gagal mengonversi aset gambar ke Drive: " + assetErr.toString());
         }
       }
 
@@ -571,14 +699,17 @@ function saveSettings(data) {
     });
   }
 
-  logAction('system', 'SAVE_SETTINGS', 'Konfigurasi sistem & tema visual diperbarui');
+  logAction('system', 'SAVE_SETTINGS', 'Konfigurasi sistem, batas unggah, dan tema visual diperbarui');
   return { status: 'SUCCESS', settings: sanitizedSettings };
 }
 
+/**
+ * Mencatat rekam jejak aktivitas audit sistem ke sheet Audit_Log
+ */
 function logAction(user, action, detail) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName(SHEET_NAMES.LOGS);
   if (!sheet) return;
-  const timeStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm");
+  const timeStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
   sheet.appendRow([timeStr, user || 'system', action, detail]);
 }
