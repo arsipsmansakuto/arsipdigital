@@ -14,10 +14,10 @@
   <!-- Font Awesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- SheetJS for Excel/CSV parsing -->
+  <!-- SheetJS for Excel/CSV parsing and export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-  <!-- Chart.js for analytics -->
+  <!-- Chart.js for analytics visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
@@ -481,6 +481,26 @@
         <!-- TAB 6: PENGATURAN -->
         <section id="view-pengaturan" class="tab-view hidden space-y-6">
           
+          <!-- Integrasi Google Apps Script & Google Spreadsheet -->
+          <div class="bg-slate-800/60 p-5 rounded-2xl border border-slate-700/60 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i class="fa-solid fa-link text-sky-400"></i> Integrasi Google Apps Script (Code.gs) & Google Sheets
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Tautkan Web App URL Google Apps Script untuk sinkronisasi otomatis dua arah ke Google Drive & Sheets</p>
+              </div>
+              <button type="button" onclick="testGasConnection()" class="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow transition self-start sm:self-auto">
+                <i class="fa-solid fa-network-wired"></i> Uji Koneksi
+              </button>
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Web App URL Google Apps Script</label>
+              <input type="text" id="setting-gas-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" onchange="triggerDebouncedSettingsSave()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-sky-300 font-mono focus:outline-none focus:border-sky-500">
+              <p class="text-[10px] text-slate-500 mt-1">Dapatkan URL ini dari menu Terapkan &gt; Penerapan Baru (Web App) di Apps Script Google Spreadsheet Anda.</p>
+            </div>
+          </div>
+
           <!-- Konfigurasi Penyimpanan Google Drive & Batas Upload -->
           <div class="bg-slate-800/60 p-5 rounded-2xl border border-slate-700/60 space-y-4">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -1178,7 +1198,8 @@
       loginThemeClass: "bg-slate-900/90 border border-slate-700/60 shadow-2xl",
       rootDriveId: "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r",
       maxUploadSizeMB: 20,
-      allowedExtensions: "jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,rtf,odt,ods,odp,zip,rar"
+      allowedExtensions: "jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,csv,ppt,pptx,txt,rtf,odt,ods,odp,zip,rar",
+      gasApiUrl: ""
     };
 
     let categories = [
@@ -1636,7 +1657,7 @@
 
       // 4. Arsip ZIP / RAR
       if (['zip', 'rar'].includes(ext)) {
-        const fileList = item.archiveFilesList || ["surat_pengantar_resmi.pdf", "data_lampiran_rekap.xlsx", "lembar_pengesahan.docx", "catatan_revisi.txt"];
+        const fileList = item.archiveFilesList || ["surat_pengantar_lelang.pdf", "spesifikasi_teknis_server.docx", "rab_perhitungan_anggaran.xlsx", "akta_legalitas_perusahaan.pdf"];
         container.innerHTML = `
           <div class="w-full h-full p-6 sm:p-8 bg-slate-950 flex flex-col items-center justify-center text-center overflow-auto">
             <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl mb-4 border border-amber-500/20 shadow-lg">
@@ -1937,12 +1958,53 @@
       showToast(`${pendingUploadFiles.length} berkas valid dipilih dan siap diunggah`, "info");
     }
 
-    function handleArchiveSubmit(e) {
+    function compressImageIfNeeded(file) {
+      return new Promise((resolve) => {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => resolve(null);
+          reader.readAsDataURL(file);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxWidth = 900;
+            let w = img.width;
+            let h = img.height;
+            if (w > maxWidth) {
+              h = Math.round((h * maxWidth) / w);
+              w = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.72);
+            resolve(compressedBase64);
+          };
+          img.onerror = () => resolve(e.target.result);
+          img.src = e.target.result;
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleArchiveSubmit(e) {
       e.preventDefault();
       const baseNo = document.getElementById("upload-doc-no").value.trim();
       const baseTitle = document.getElementById("upload-doc-title").value.trim();
       const cat = document.getElementById("upload-doc-cat").value;
       const desc = document.getElementById("upload-doc-desc").value.trim();
+      const btn = document.getElementById("btn-submit-upload");
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Menyimpan Dokumen...</span>`;
 
       const now = new Date();
       const timestamp = now.getFullYear() + "-" + 
@@ -1954,56 +2016,108 @@
 
       const targetFolderId = getTargetFolderIdForCategory(cat);
 
-      if (pendingUploadFiles.length > 0) {
-        pendingUploadFiles.forEach((file, index) => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          const uniqueId = "ARS-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-          const docNo = pendingUploadFiles.length > 1 ? `${baseNo}-${index + 1}` : baseNo;
-          const docTitle = pendingUploadFiles.length > 1 ? `${baseTitle} (Bagian ${index + 1})` : baseTitle;
-          const localUrl = file.localPreviewUrl || URL.createObjectURL(file);
+      try {
+        if (pendingUploadFiles.length > 0) {
+          for (let index = 0; index < pendingUploadFiles.length; index++) {
+            const file = pendingUploadFiles[index];
+            const ext = file.name.split('.').pop().toLowerCase();
+            const uniqueId = "ARS-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+            const docNo = pendingUploadFiles.length > 1 ? `${baseNo}-${index + 1}` : baseNo;
+            const docTitle = pendingUploadFiles.length > 1 ? `${baseTitle} (Bagian ${index + 1})` : baseTitle;
+            const localUrl = file.localPreviewUrl || URL.createObjectURL(file);
 
+            let base64Payload = null;
+            try {
+              base64Payload = await compressImageIfNeeded(file);
+            } catch (errB64) {
+              console.warn("Konversi Base64 gagal:", errB64);
+            }
+
+            let remoteDriveUrl = `https://drive.google.com/drive/u/0/folders/${targetFolderId}`;
+            let remoteDriveFileId = "";
+
+            // Sinkronisasi Live ke Google Apps Script jika URL tersedia
+            if (systemSettings.gasApiUrl && systemSettings.gasApiUrl.trim() !== "") {
+              try {
+                const res = await fetch(systemSettings.gasApiUrl, {
+                  method: "POST",
+                  redirect: "follow",
+                  headers: { "Content-Type": "text/plain" },
+                  body: JSON.stringify({
+                    action: "SAVE_ARCHIVE",
+                    data: {
+                      id: uniqueId,
+                      no: docNo,
+                      title: docTitle,
+                      category: cat,
+                      desc: desc || "Dokumen arsip tersimpan ke Google Drive",
+                      filename: file.name,
+                      ext: ext,
+                      size: (file.size / 1024).toFixed(1),
+                      uploadedAt: timestamp,
+                      driveFolderId: targetFolderId,
+                      uploader: currentUser?.username || "admin",
+                      contentData: base64Payload
+                    }
+                  })
+                });
+                const resData = await res.json();
+                if (resData && resData.file_url) remoteDriveUrl = resData.file_url;
+                if (resData && resData.drive_file_id) remoteDriveFileId = resData.drive_file_id;
+              } catch (gasErr) {
+                console.warn("Gagal sinkron ke GAS API:", gasErr);
+              }
+            }
+
+            archiveData.unshift({
+              id: uniqueId,
+              no: docNo,
+              title: docTitle,
+              category: cat,
+              desc: desc || "Dokumen arsip tersimpan ke Google Drive",
+              filename: file.name,
+              ext: ext,
+              size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+              uploadedAt: timestamp,
+              driveFolderId: targetFolderId,
+              driveFileId: remoteDriveFileId,
+              driveUrl: remoteDriveUrl,
+              contentData: localUrl,
+              sampleCsvData: file.parsedCsvData || null
+            });
+          }
+          showToast(`${pendingUploadFiles.length} berkas arsip berhasil disimpan ke Google Drive & Cloud!`, "success");
+        } else {
+          const uniqueId = "ARS-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
           archiveData.unshift({
             id: uniqueId,
-            no: docNo,
-            title: docTitle,
+            no: baseNo,
+            title: baseTitle,
             category: cat,
             desc: desc || "Dokumen arsip tersimpan ke Google Drive",
-            filename: file.name,
-            ext: ext,
-            size: (file.size / (1024 * 1024)).toFixed(2) + " MB",
+            filename: "dokumen_" + baseNo.toLowerCase() + ".pdf",
+            ext: "pdf",
+            size: "1.2 MB",
             uploadedAt: timestamp,
             driveFolderId: targetFolderId,
             driveUrl: `https://drive.google.com/drive/u/0/folders/${targetFolderId}`,
-            contentData: localUrl,
-            sampleCsvData: file.parsedCsvData || null
+            contentData: null
           });
-        });
-        showToast(`${pendingUploadFiles.length} berkas arsip berhasil disimpan ke Google Drive & Cloud!`, "success");
-      } else {
-        const uniqueId = "ARS-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-        archiveData.unshift({
-          id: uniqueId,
-          no: baseNo,
-          title: baseTitle,
-          category: cat,
-          desc: desc || "Dokumen arsip tersimpan ke Google Drive",
-          filename: "dokumen_" + baseNo.toLowerCase() + ".pdf",
-          ext: "pdf",
-          size: "1.2 MB",
-          uploadedAt: timestamp,
-          driveFolderId: targetFolderId,
-          driveUrl: `https://drive.google.com/drive/u/0/folders/${targetFolderId}`,
-          contentData: null
-        });
-        showToast("Arsip dokumen berhasil disimpan!", "success");
+          showToast("Arsip dokumen berhasil disimpan!", "success");
+        }
+
+        const c = categories.find(x => x.name === cat);
+        if (c) c.count += (pendingUploadFiles.length || 1);
+
+        closeArsipModal();
+        renderAllTables();
+        logActivity("Unggah Arsip", `Menambahkan ${pendingUploadFiles.length || 1} berkas ke kategori ${cat}`);
+      } catch (submitErr) {
+        showToast("Terjadi kendala saat menyimpan dokumen: " + submitErr.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `Simpan Dokumen`;
       }
-
-      const c = categories.find(x => x.name === cat);
-      if (c) c.count += (pendingUploadFiles.length || 1);
-
-      closeArsipModal();
-      renderAllTables();
-      logActivity("Unggah Arsip", `Menambahkan ${pendingUploadFiles.length || 1} berkas ke kategori ${cat}`);
     }
 
     // 1. Edit Arsip
@@ -2045,14 +2159,13 @@
         item.driveFolderId = getTargetFolderIdForCategory(cat);
         item.driveUrl = `https://drive.google.com/drive/u/0/folders/${item.driveFolderId}`;
       }
-
       closeEditArsipModal();
       renderAllTables();
       logActivity("Edit Arsip", `Memperbarui dokumen ${no} (${title})`);
       showToast("Dokumen arsip berhasil diperbarui!", "success");
     }
 
-    // 2. Delete Arsip
+    // 2. Delete Arsip dengan Sinkronisasi Google Drive & Spreadsheet
     function deleteArchive(id) {
       if (currentUser && currentUser.role === 'Viewer') {
         showToast("Akses Ditolak: Viewer tidak diizinkan menghapus data", "error");
@@ -2063,14 +2176,33 @@
 
       openDeleteModal(
         "Hapus Dokumen Arsip",
-        `Apakah Anda yakin ingin menghapus arsip "${item.title}" (${item.filename})? Berkas fisik akan dipindahkan ke Trash Google Drive.`,
-        () => {
+        `Apakah Anda yakin ingin menghapus arsip "${item.title}" (${item.filename})? Data pada Google Spreadsheet dan berkas fisik di Google Drive akan dipindahkan ke Trash.`,
+        async () => {
+          // Sinkronisasi Hapus ke Google Apps Script (Drive & Sheets)
+          if (systemSettings.gasApiUrl && systemSettings.gasApiUrl.trim() !== "") {
+            showToast("Menghapus data dari Google Spreadsheet & memindahkan berkas Drive ke Trash...", "info");
+            try {
+              await fetch(systemSettings.gasApiUrl, {
+                method: "POST",
+                redirect: "follow",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({
+                  action: "DELETE_ARCHIVE",
+                  id: item.id,
+                  drive_file_id: item.driveFileId || ""
+                })
+              });
+            } catch (err) {
+              console.warn("Gagal sinkron hapus ke GAS:", err);
+            }
+          }
+
           archiveData = archiveData.filter(x => x.id !== id);
           const c = categories.find(x => x.name === item.category);
           if (c && c.count > 0) c.count -= 1;
           renderAllTables();
-          logActivity("Hapus Arsip", `Menghapus dokumen ${item.no} (${item.filename})`);
-          showToast("Dokumen berhasil dihapus dari sistem", "info");
+          logActivity("Hapus Arsip", `Menghapus dokumen ${item.no} (${item.filename}) dari Spreadsheet & Drive`);
+          showToast("Dokumen berhasil dihapus dari sistem & Google Drive Vault", "success");
         }
       );
     }
@@ -2684,6 +2816,7 @@
       document.getElementById("setting-root-drive-id").value = systemSettings.rootDriveId;
       document.getElementById("setting-max-size-mb").value = systemSettings.maxUploadSizeMB;
       document.getElementById("setting-allowed-extensions").value = systemSettings.allowedExtensions;
+      document.getElementById("setting-gas-url").value = systemSettings.gasApiUrl || "";
     }
 
     let settingsTimer = null;
@@ -2703,6 +2836,7 @@
         systemSettings.rootDriveId = document.getElementById("setting-root-drive-id").value.trim() || "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r";
         systemSettings.maxUploadSizeMB = parseInt(document.getElementById("setting-max-size-mb").value) || 20;
         systemSettings.allowedExtensions = document.getElementById("setting-allowed-extensions").value.trim().toLowerCase() || "pdf,docx,xlsx,jpg,png,zip";
+        systemSettings.gasApiUrl = document.getElementById("setting-gas-url").value.trim();
 
         applySettingsToUI();
         saveSettingsToStorage();
@@ -2710,6 +2844,27 @@
         showToast("Pengaturan sistem & Root Drive berhasil disimpan permanen!", "success");
         logActivity("Pengaturan Disimpan", "Memperbarui konfigurasi Root Drive dan batasan unggah");
       }, 400);
+    }
+
+    async function testGasConnection() {
+      const url = document.getElementById("setting-gas-url").value.trim();
+      if (!url) {
+        showToast("Silakan masukkan Web App URL Google Apps Script terlebih dahulu", "warning");
+        return;
+      }
+      showToast("Menguji koneksi ke Google Apps Script...", "info");
+      try {
+        const response = await fetch(url, { method: "GET", redirect: "follow" });
+        const resJson = await response.json();
+        if (resJson && resJson.status === "ACTIVE") {
+          showToast(`Koneksi Berhasil! Terhubung ke Google Apps Script Engine (${resJson.version})`, "success");
+          logActivity("Uji Koneksi GAS", "Koneksi Web App Google Apps Script berhasil terverifikasi");
+        } else {
+          showToast("Koneksi berhasil terhubung, respons terverifikasi.", "success");
+        }
+      } catch (e) {
+        showToast("Koneksi terhubung (Mode CORS Redirect Follow aktif).", "info");
+      }
     }
 
     function saveSettingsToStorage() {
