@@ -2,10 +2,11 @@
  * ============================================================================
  * BACKEND PRODUCTION ENGINE: Google Apps Script (Code.gs)
  * ArsipCloud Enterprise v4.1 - Production Cloud Storage & Sheets Database
+ * Terintegrasi Google Drive & Manajemen Kategori Otomatis / Kustom Terkunci
  * ============================================================================
  */
 
-// Default Root Google Drive ID jika belum dikonfigurasi pada sheet Pengaturan
+// Default Root Google Drive ID jika belum diubah pada tab Pengaturan
 const DEFAULT_ROOT_DRIVE_FOLDER_ID = "1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r";
 
 // Definisi Nama Lembar Kerja Database Spreadsheet
@@ -480,6 +481,7 @@ function getCategoryFolderId(categoryName) {
 
 /**
  * Menyimpan atau memperbarui folder kategori pada Google Drive
+ * Mendukung mode OTOMATIS (anak di bawah Root Drive) dan KUSTOM (ID spesifik terkunci ke Google Spreadsheet)
  */
 function saveCategory(data) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -494,44 +496,53 @@ function saveCategory(data) {
     }
   }
 
+  const mode = data.mode || (data.driveId && String(data.driveId).startsWith("AUTO") ? "AUTO" : "CUSTOM");
   let folderId = data.driveId || data.folder_id ? String(data.driveId || data.folder_id).trim() : "";
 
-  // Otomatis buat folder Google Drive baru di bawah Root Drive jika belum ditentukan
-  if (!folderId || folderId === "" || folderId.startsWith("FLD_") || folderId.toUpperCase() === "AUTO") {
+  // 1. Jika mode OTOMATIS: ikuti Root Google Drive ID & buat subfolder resmi di bawahnya
+  if (mode === 'AUTO' || !folderId || folderId === "" || folderId.toUpperCase().startsWith("AUTO") || folderId.startsWith("FLD_")) {
     try {
       const rootFolder = getRootDriveFolder();
       const newFolder = rootFolder.createFolder(data.name || data.nama);
       newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       folderId = newFolder.getId();
     } catch (e) {
-      Logger.log("Gagal membuat folder di root Google Drive: " + e.toString());
-      folderId = `FLD_${Date.now().toString().slice(-6)}`;
+      Logger.log("Gagal membuat folder di root Google Drive, menggunakan Root ID: " + e.toString());
+      try {
+        folderId = getRootDriveFolder().getId();
+      } catch (rootErr) {
+        folderId = DEFAULT_ROOT_DRIVE_FOLDER_ID;
+      }
     }
+  } else {
+    // 2. Mode KUSTOM: Gunakan ID spesifik yang dimasukkan pengguna dan kunci ke spreadsheet
+    folderId = folderId.trim();
   }
 
   const rowData = [
     data.id, 
     data.name || data.nama, 
     folderId, 
-    data.desc || data.keterangan || "", 
+    data.desc || data.keterangan || (mode === 'AUTO' ? 'Subfolder otomatis di bawah Root Drive' : 'Folder Google Drive Kustom'), 
     data.status || "ACTIVE"
   ];
 
+  // Kunci data secara permanen ke lembar kerja Spreadsheet 'Kategori_Drive'
   if (foundIndex > 0) {
     sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
   } else {
     sheet.appendRow(rowData);
   }
 
-  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_CATEGORY' : 'ADD_CATEGORY', `Kategori "${data.name || data.nama}" terhubung ke Drive Folder ID: ${folderId}`);
+  logAction(data.uploader || 'admin', foundIndex > 0 ? 'EDIT_CATEGORY' : 'ADD_CATEGORY', `Kategori "${data.name || data.nama}" [${mode === 'AUTO' ? 'Otomatis di bawah Root Drive' : 'Kustom ID'}] terkunci ke Sheet dengan Drive ID: ${folderId}`);
   return { 
     status: 'SUCCESS', 
-    message: `Kategori "${data.name || data.nama}" berhasil disimpan!`,
+    message: `Kategori "${data.name || data.nama}" berhasil dikunci ke Google Spreadsheet!`,
     category: {
       id: data.id,
       name: data.name || data.nama,
       driveId: folderId,
-      desc: data.desc || data.keterangan || "",
+      desc: rowData[3],
       status: data.status || 'ACTIVE'
     }
   };
