@@ -1436,7 +1436,6 @@
       const sidebar = document.getElementById("sidebar-container");
       const backdrop = document.getElementById("sidebar-backdrop");
       if (!sidebar || !backdrop) return;
-
       if (open) {
         sidebar.classList.add("sidebar-open");
         backdrop.classList.remove("hidden");
@@ -1447,32 +1446,25 @@
     }
 
     function startLiveClock() {
-      const clockElem = document.getElementById("top-live-clock");
-      if (!clockElem) return;
-
-      function updateClock() {
+      const el = document.getElementById("top-live-clock");
+      if (!el) return;
+      setInterval(() => {
         const now = new Date();
-        const hrs = String(now.getHours()).padStart(2, '0');
-        const mins = String(now.getMinutes()).padStart(2, '0');
-        const secs = String(now.getSeconds()).padStart(2, '0');
-        clockElem.innerText = `${hrs}:${mins}:${secs} WIB`;
-      }
-      updateClock();
-      setInterval(updateClock, 1000);
+        el.innerText = now.toLocaleTimeString('id-ID') + ' WIB';
+      }, 1000);
     }
 
     const TAB_INFO = {
       dashboard: { title: "Dashboard Overview", desc: "Analitik ringkas dan statistik penyimpanan cloud", icon: "fa-chart-pie" },
-      arsip: { title: "Kelola Arsip", desc: "Pencarian, pengunggahan berkas + keterangan, edit, dan pratinjau dokumen", icon: "fa-folder-open" },
-      kategori: { title: "Kategori & Folder Drive", desc: "Pengaturan struktur direktori Google Drive ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", icon: "fa-google-drive" },
-      users: { title: "Kelola Pengguna", desc: "Manajemen hak otorisasi, peran, edit, dan kata sandi pengguna", icon: "fa-users-gear" },
-      laporan: { title: "Laporan Arsip", desc: "Rekapitulasi data, filter format, dan ekspor lembar kerja Excel", icon: "fa-file-invoice" },
-      pengaturan: { title: "Pengaturan Sistem", desc: "Kustomisasi browse wallpaper, transparansi 100%, 80 tema navigasi, dan identitas", icon: "fa-sliders" },
+      arsip: { title: "Kelola Arsip", desc: "Pencarian, pengunggahan multi-berkas, dan pratinjau dokumen", icon: "fa-box-archive" },
+      kategori: { title: "Kategori & Direktori Drive", desc: "Pengaturan folder Google Drive ID: 1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r", icon: "fa-brands fa-google-drive" },
+      users: { title: "Kelola Pengguna", desc: "Manajemen hak otorisasi dan kata sandi pengguna", icon: "fa-users-gear" },
+      laporan: { title: "Laporan Arsip", desc: "Rekapitulasi data, filter ekstensi, dan ekspor lembar kerja Excel", icon: "fa-file-lines" },
+      pengaturan: { title: "Pengaturan Sistem", desc: "Kustomisasi wallpaper 100% transparan, 80 tema navigasi samping, dan identitas", icon: "fa-sliders" },
       audit: { title: "Log Akses & Keamanan", desc: "Pencatatan real-time jejak audit dan riwayat operasional", icon: "fa-clock-rotate-left" }
     };
 
     function switchTab(tabId) {
-      toggleMobileSidebar(false);
       document.querySelectorAll(".tab-view").forEach(el => el.classList.add("hidden"));
       const targetView = document.getElementById("view-" + tabId);
       if (targetView) targetView.classList.remove("hidden");
@@ -1486,25 +1478,40 @@
       if (iconElem) iconElem.innerHTML = `<i class="fa-solid ${meta.icon} text-sm"></i>`;
 
       document.querySelectorAll("aside nav button").forEach(btn => {
-        btn.style.backgroundColor = "transparent";
-        btn.style.color = systemSettings.sidebarText;
+        btn.classList.remove("bg-white/15", "text-sky-400");
       });
       const activeBtn = document.getElementById("nav-btn-" + tabId);
       if (activeBtn) {
-        activeBtn.style.backgroundColor = "rgba(255,255,255,0.15)";
-        activeBtn.style.color = systemSettings.sidebarActive;
+        activeBtn.classList.add("bg-white/15");
       }
+
+      if (tabId === 'dashboard') {
+        setTimeout(() => initChart(), 120);
+      }
+      toggleMobileSidebar(false);
     }
+
+    function getTargetFolderIdForCategory(categoryName) {
+      const c = categories.find(x => x.name === categoryName);
+      if (c && c.driveId && !c.driveId.startsWith("FLD_")) {
+        return c.driveId;
+      }
+      return systemSettings.rootDriveId || ROOT_DRIVE_FOLDER_ID;
+    }
+
+    let currentPreviewChannel = 'primary';
 
     function openPreview(archiveId) {
       const item = archiveData.find(x => x.id === archiveId);
       if (!item) return;
 
       currentPreviewItem = item;
+      currentPreviewChannel = 'primary';
+
       const modal = document.getElementById("preview-modal");
-      const container = document.getElementById("preview-body-container");
       const ext = (item.ext || (item.filename || "").split('.').pop()).toLowerCase();
 
+      // Set Metadata Header
       document.getElementById("preview-doc-title").innerText = item.title;
       document.getElementById("preview-file-meta").innerText = `${item.no} • ${item.filename} • ${item.size} • ${item.uploadedAt}`;
       
@@ -1515,24 +1522,58 @@
       const iconElem = document.getElementById("preview-file-icon");
       iconElem.innerHTML = `<i class="${getExtIconClass(ext)}"></i>`;
 
-      const driveBtn = document.getElementById("preview-btn-drive");
-      if (item.driveUrl) {
-        driveBtn.href = item.driveUrl;
-        driveBtn.classList.remove("hidden");
-        driveBtn.classList.add("flex");
-      } else {
-        driveBtn.classList.add("hidden");
-        driveBtn.classList.remove("flex");
-      }
+      // Badge Folder
+      const folderBadge = document.getElementById("preview-folder-name");
+      if (folderBadge) folderBadge.innerText = item.category || "Drive";
 
+      // Resolusi URL Google Drive & Tautan Akses Bebas Hambatan
+      const targetFolderId = item.driveFolderId || getTargetFolderIdForCategory(item.category);
+      const effectiveDriveUrl = item.driveUrl || `https://drive.google.com/drive/u/0/folders/${targetFolderId}`;
+      
+      const driveBtn = document.getElementById("preview-btn-drive");
+      if (driveBtn) driveBtn.href = effectiveDriveUrl;
+
+      const openNewTabBtn = document.getElementById("preview-btn-open-newtab");
+      if (openNewTabBtn) openNewTabBtn.href = item.contentData || effectiveDriveUrl;
+
+      // Render Isi Pratinjau Sesuai Kanal Aktif
+      renderPreviewContentByChannel();
+
+      modal.classList.remove("hidden");
+      logActivity("Pratinjau Arsip", `Membuka pratinjau dokumen ${item.filename} [${ext.toUpperCase()}]`);
+    }
+
+    function switchPreviewViewerChannel(channel) {
+      currentPreviewChannel = channel;
+      const btnPrimary = document.getElementById("btn-mode-primary");
+      const btnGdocs = document.getElementById("btn-mode-gdocs");
+
+      if (btnPrimary && btnGdocs) {
+        if (channel === 'primary') {
+          btnPrimary.className = "px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold transition";
+          btnGdocs.className = "px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition";
+        } else {
+          btnGdocs.className = "px-2.5 py-1 rounded-lg bg-sky-600 text-white font-semibold transition";
+          btnPrimary.className = "px-2.5 py-1 rounded-lg text-slate-300 hover:text-white transition";
+        }
+      }
+      renderPreviewContentByChannel();
+    }
+
+    function renderPreviewContentByChannel() {
+      if (!currentPreviewItem) return;
+      const item = currentPreviewItem;
+      const container = document.getElementById("preview-body-container");
+      if (!container) return;
+      const ext = (item.ext || (item.filename || "").split('.').pop()).toLowerCase();
       container.innerHTML = "";
 
-      // 1. Gambar
+      // 1. GAMBAR (JPG, PNG, GIF, WEBP, SVG)
       if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
         const imgSrc = item.contentData || item.driveUrl || "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80";
         container.innerHTML = `
           <div class="relative w-full h-full flex flex-col items-center justify-center p-4 checkerboard-pattern overflow-hidden">
-            <img id="preview-active-image" src="${imgSrc}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-slate-700 transition-transform duration-200">
+            <img id="preview-active-image" src="${imgSrc}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-slate-700 transition-transform duration-200" onerror="this.onerror=null; renderDirectDriveLockFallback(this.parentElement, '${item.filename}', '${item.driveUrl}');">
             <div class="absolute bottom-4 bg-slate-900/90 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-4 text-xs shadow-lg">
               <button onclick="zoomImage(-0.2)" class="text-slate-300 hover:text-white"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
               <span id="zoom-level-text" class="text-[11px] font-mono text-sky-400">100%</span>
@@ -1541,30 +1582,31 @@
             </div>
           </div>
         `;
+        return;
       }
-      // 2. PDF
-      else if (ext === 'pdf') {
-        const pdfSrc = item.driveUrl || item.contentData;
-        if (pdfSrc) {
-          container.innerHTML = `<iframe src="${pdfSrc}" class="w-full h-full border-0" allow="autoplay"></iframe>`;
-        } else {
-          renderFallbackViewer(container, item, ext, "PDF Viewer Terintegrasi", "Pratinjau dokumen PDF siap diunduh atau dibuka langsung melalui Google Drive.");
+
+      // 2. KONTEN DATA LOKAL (Blob URL dari berkas yang diunggah)
+      if (item.contentData && (item.contentData.startsWith('blob:') || item.contentData.startsWith('data:'))) {
+        if (ext === 'pdf') {
+          container.innerHTML = `<iframe src="${item.contentData}" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"></iframe>`;
+          return;
         }
       }
-      // 3. Spreadsheets
-      else if (['xls', 'xlsx', 'csv', 'ods'].includes(ext)) {
-        if (item.sampleCsvData) {
+
+      // 3. SPREADSHEETS (XLS, XLSX, CSV, ODS)
+      if (['xls', 'xlsx', 'csv', 'ods'].includes(ext)) {
+        if (item.sampleCsvData && currentPreviewChannel === 'primary') {
           const rows = item.sampleCsvData.trim().split("\n").map(r => r.split(","));
-          const headers = rows[0];
+          const headers = rows[0] || ["Kolom 1", "Kolom 2", "Kolom 3"];
           const dataRows = rows.slice(1);
 
           container.innerHTML = `
             <div class="w-full h-full p-4 overflow-auto bg-slate-950 flex flex-col">
               <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-800">
                 <span class="text-xs font-semibold text-emerald-400 flex items-center gap-2">
-                  <i class="fa-solid fa-table-cells"></i> Pratinjau Lembar Kerja SheetJS
+                  <i class="fa-solid fa-table-cells"></i> Pratinjau Tabel Data Interaktif
                 </span>
-                <span class="text-[11px] text-slate-400 font-mono">${dataRows.length} Baris Data Ditemukan</span>
+                <span class="text-[11px] text-slate-400 font-mono">${dataRows.length} Baris Data Terdeteksi</span>
               </div>
               <div class="flex-1 overflow-auto rounded-xl border border-slate-800">
                 <table class="w-full text-left text-xs border-collapse font-mono">
@@ -1578,35 +1620,17 @@
               </div>
             </div>
           `;
-        } else if (item.driveUrl) {
-          container.innerHTML = `<iframe src="${item.driveUrl}" class="w-full h-full border-0"></iframe>`;
-        } else {
-          renderFallbackViewer(container, item, ext, "Lembar Kerja Terbuka", "Berkas tabel spreadsheet siap dibuka di Google Drive atau diekspor ke Microsoft Excel.");
+          return;
         }
       }
-      // 4. Dokumen Teks: DOC, DOCX, ODT, RTF
-      else if (['doc', 'docx', 'odt', 'rtf'].includes(ext)) {
-        if (item.driveUrl && item.driveUrl.includes('drive.google.com')) {
-          container.innerHTML = `<iframe src="${item.driveUrl}" class="w-full h-full border-0"></iframe>`;
-        } else {
-          renderFallbackViewer(container, item, ext, "Dokumen Teks & Surat", "Dokumen format teks ini dapat dibaca menggunakan Google Docs Viewer atau diunduh ke perangkat Anda.");
-        }
-      }
-      // 5. Slides Presentasi
-      else if (['ppt', 'pptx', 'odp'].includes(ext)) {
-        if (item.driveUrl && item.driveUrl.includes('drive.google.com')) {
-          container.innerHTML = `<iframe src="${item.driveUrl}" class="w-full h-full border-0"></iframe>`;
-        } else {
-          renderFallbackViewer(container, item, ext, "Slide Presentasi", "Berkas presentasi dapat dibuka menggunakan Google Slides atau didownload untuk dijalankan di perangkat lokal.");
-        }
-      }
-      // 6. Teks Murni
-      else if (ext === 'txt') {
-        const textContent = item.sampleCsvData || item.contentData || `Nomor: ${item.no}\nJudul: ${item.title}\nKategori: ${item.category}\nKeterangan: ${item.desc || "-"}\nWaktu Unggah: ${item.uploadedAt}\n\nDokumen terarsip dalam kondisi aman pada sistem ArsipCloud Enterprise v4.1.`;
+
+      // 4. TEKS MURNI (TXT, RTF)
+      if (['txt', 'rtf'].includes(ext)) {
+        const textContent = item.sampleCsvData || item.contentData || `Nomor Berkas : ${item.no}\nJudul Dokumen: ${item.title}\nKategori     : ${item.category}\nWaktu Unggah : ${item.uploadedAt}\nKeterangan   : ${item.desc || '-'}\n\nDokumen terarsip dalam kondisi aman pada sistem Cloud.`;
         container.innerHTML = `
           <div class="w-full h-full p-6 bg-slate-950 overflow-auto font-mono text-xs text-slate-300 flex flex-col">
             <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-              <span class="text-sky-400 font-bold flex items-center gap-2"><i class="fa-solid fa-code"></i> Pembaca Teks Monospace</span>
+              <span class="text-sky-400 font-bold flex items-center gap-2"><i class="fa-solid fa-code"></i> Pembaca Teks Terbuka</span>
               <button onclick="copyToClipboard('${btoa(textContent)}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300">
                 <i class="fa-solid fa-copy"></i> Salin Teks
               </button>
@@ -1614,17 +1638,19 @@
             <pre class="whitespace-pre-wrap leading-relaxed">${textContent}</pre>
           </div>
         `;
+        return;
       }
-      // 7. Arsip Kompresi: ZIP, RAR
-      else if (['zip', 'rar'].includes(ext)) {
-        const fileList = item.archiveFilesList || ["dokumen_1.pdf", "data_lampiran.xlsx", "lembar_pengesahan.jpg", "catatan.txt"];
+
+      // 5. ARSIP KOMPRESI (ZIP, RAR)
+      if (['zip', 'rar'].includes(ext)) {
+        const fileList = item.archiveFilesList || ["dokumen_utama.pdf", "lampiran_rekap.xlsx", "berita_acara.docx", "catatan_revisi.txt"];
         container.innerHTML = `
           <div class="w-full h-full p-8 bg-slate-950 flex flex-col items-center justify-center text-center overflow-auto">
             <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl mb-4 border border-amber-500/20 shadow-lg">
               <i class="fa-solid fa-file-zipper"></i>
             </div>
             <h4 class="text-base font-bold text-white mb-1">Struktur Berkas Arsip ${ext.toUpperCase()}</h4>
-            <p class="text-xs text-slate-400 max-w-md mb-5">Arsip ini berisi paket berkas terkompresi. Anda dapat mengunduh seluruh arsip atau memeriksa daftar komponen dokumen di bawah ini:</p>
+            <p class="text-xs text-slate-400 max-w-md mb-5">Arsip ini berisi paket berkas terkompresi. Anda dapat mengunduh seluruh arsip atau membuka langsung melalui tautan Google Drive di bawah:</p>
             
             <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl overflow-hidden text-left mb-5">
               <div class="px-4 py-2 bg-slate-800/80 border-b border-slate-800 text-[11px] font-semibold text-slate-300 flex justify-between">
@@ -1641,37 +1667,77 @@
               </ul>
             </div>
 
-            <button onclick="downloadCurrentPreviewFile()" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-amber-600/30">
-              <i class="fa-solid fa-download"></i> Unduh Paket ${ext.toUpperCase()} Lengkap (${item.size})
-            </button>
+            <div class="flex items-center gap-3">
+              <a href="${item.driveUrl}" target="_blank" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+                <i class="fa-brands fa-google-drive"></i> Buka Direktori di Google Drive
+              </a>
+              <button onclick="downloadCurrentPreviewFile()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700">
+                <i class="fa-solid fa-download"></i> Unduh Paket (${item.size})
+              </button>
+            </div>
           </div>
         `;
-      } else {
-        renderFallbackViewer(container, item, ext, "Pratinjau Dokumen Berkas", "Berkas ini dapat diakses secara langsung melalui penyimpanan Google Drive atau disimpan ke perangkat Anda.");
+        return;
       }
 
-      modal.classList.remove("hidden");
-      logActivity("Pratinjau Arsip", `Membuka pratinjau ${item.filename} [${ext.toUpperCase()}]`);
+      // 6. DOKUMEN PDF, WORD, SPREADSHEET, PRESENTASI DARI GOOGLE DRIVE
+      let iframeSrc = "";
+      const driveFileId = extractGoogleDriveFileId(item.driveUrl || item.contentData);
+
+      if (currentPreviewChannel === 'primary') {
+        iframeSrc = driveFileId 
+          ? `https://drive.google.com/file/d/${driveFileId}/preview` 
+          : (item.driveUrl && item.driveUrl.includes('/preview') ? item.driveUrl : `https://drive.google.com/file/d/1rxWfplF9QTj4-j0TMPrYTfvRB0_5by7r/preview`);
+      } else {
+        iframeSrc = driveFileId 
+          ? `https://docs.google.com/viewer?srcid=${driveFileId}&pid=explorer&efh=false&a=v&chrome=false&embedded=true`
+          : `https://docs.google.com/viewer?url=${encodeURIComponent(item.driveUrl || 'https://example.com')}&embedded=true`;
+      }
+
+      container.innerHTML = `
+        <div class="relative w-full h-full flex flex-col items-center justify-center">
+          <iframe 
+            src="${iframeSrc}" 
+            class="w-full h-full border-0" 
+            allow="autoplay; encrypted-media; fullscreen"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads">
+          </iframe>
+          
+          <div class="absolute bottom-3 right-4 z-20 flex items-center gap-2 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700 shadow-xl">
+            <span class="text-[11px] text-slate-300">Tampilan terkunci?</span>
+            <a href="${item.driveUrl || iframeSrc}" target="_blank" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-[11px] flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Layar Penuh
+            </a>
+          </div>
+        </div>
+      `;
     }
 
-    function renderFallbackViewer(container, item, ext, label, desc) {
+    function extractGoogleDriveFileId(url) {
+      if (!url) return null;
+      if (url.includes('/file/d/')) {
+        const parts = url.split('/file/d/');
+        return parts[1] ? parts[1].split('/')[0].split('?')[0] : null;
+      }
+      if (url.includes('id=')) {
+        const match = url.match(/id=([a-zA-Z0-9_-]+)/);
+        return match ? match[1] : null;
+      }
+      return null;
+    }
+
+    function renderDirectDriveLockFallback(container, filename, driveUrl) {
+      if (!container) return;
       container.innerHTML = `
-        <div class="w-full h-full p-8 flex flex-col items-center justify-center text-center">
-          <div class="w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-3xl mb-4 border border-sky-500/20 shadow-lg">
-            <i class="${getExtIconClass(ext)}"></i>
+        <div class="p-8 text-center max-w-md">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl mx-auto mb-3 border border-amber-500/20">
+            <i class="fa-solid fa-lock"></i>
           </div>
-          <h4 class="text-base font-bold text-white mb-1">${label} (${ext.toUpperCase()})</h4>
-          <p class="text-xs text-slate-400 max-w-md mb-6">${desc}</p>
-          <div class="flex items-center gap-3">
-            ${item.driveUrl ? `
-              <a href="${item.driveUrl}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20">
-                <i class="fa-brands fa-google-drive"></i> Buka di Google Drive
-              </a>
-            ` : ''}
-            <button onclick="downloadCurrentPreviewFile()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold border border-slate-700 flex items-center gap-2">
-              <i class="fa-solid fa-download"></i> Unduh Berkas
-            </button>
-          </div>
+          <h4 class="text-sm font-bold text-white mb-1">Dokumen Google Drive Terproteksi</h4>
+          <p class="text-xs text-slate-400 mb-4">Izin berkas Google Drive disetel ke privat atau browser membatasi cookie pihak ketiga.</p>
+          <a href="${driveUrl}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold inline-flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+            <i class="fa-brands fa-google-drive"></i> Buka Bebas Hambatan di Tab Baru
+          </a>
         </div>
       `;
     }
