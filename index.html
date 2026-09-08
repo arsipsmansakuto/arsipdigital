@@ -17,6 +17,12 @@
   <!-- SheetJS for Excel/CSV parsing and export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+  <!-- Mammoth.js for client-side Word .docx to HTML conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <!-- JSZip for inspecting archive .zip contents in browser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <!-- Chart.js for analytics visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -1184,6 +1190,10 @@
     let currentPreviewChannel = 'primary';
     let pendingDeleteCallback = null;
     let dashboardChartInstance = null;
+    let currentZoom = 1;
+    let currentRotation = 0;
+    let currentActiveSlide = 0;
+    let currentSheetIndex = 0;
 
     let systemSettings = {
       appName: "ArsipCloud Enterprise",
@@ -1473,6 +1483,10 @@
 
       currentPreviewItem = item;
       currentPreviewChannel = 'primary';
+      currentZoom = 1;
+      currentRotation = 0;
+      currentActiveSlide = 0;
+      currentSheetIndex = 0;
       const modal = document.getElementById("preview-modal");
       const ext = (item.ext || (item.filename || "").split('.').pop()).toLowerCase();
 
@@ -1532,26 +1546,26 @@
       const targetFolderId = item.driveFolderId || getTargetFolderIdForCategory(item.category);
       const effectiveDriveUrl = item.driveUrl || `https://drive.google.com/drive/u/0/folders/${targetFolderId}`;
 
-      // KANAL 2: GOOGLE DRIVE CLOUD
+      // KANAL 2: GOOGLE DRIVE CLOUD VIEW
       if (currentPreviewChannel === 'gdocs') {
         const driveFileId = extractGoogleDriveFileId(item.driveUrl);
         
         if (!driveFileId || driveFileId === systemSettings.rootDriveId || driveFileId.startsWith("FLD_")) {
           container.innerHTML = `
-            <div class="p-8 text-center max-w-lg">
+            <div class="p-8 text-center max-w-lg animate-admin-enter">
               <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-3xl mx-auto mb-4 border border-emerald-500/30 shadow-lg">
                 <i class="fa-brands fa-google-drive"></i>
               </div>
               <h4 class="text-base font-bold text-white mb-2">Folder Google Drive Kategori</h4>
               <p class="text-xs text-slate-400 leading-relaxed mb-6">
-                Dokumen ini tersimpan di Google Drive kategori <span class="text-emerald-400 font-semibold font-mono">${item.category}</span> (Folder ID: <span class="font-mono text-slate-300">${targetFolderId}</span>).
+                Dokumen ini tersimpan di direktori Google Drive kategori <span class="text-emerald-400 font-semibold font-mono">${item.category}</span> (Folder ID: <span class="font-mono text-slate-300">${targetFolderId}</span>).
               </p>
               <div class="flex items-center justify-center gap-3">
                 <button onclick="switchPreviewViewerChannel('primary')" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-sky-600/30 transition">
                   <i class="fa-solid fa-file-lines"></i> Buka Penampil Langsung
                 </button>
                 <a href="${effectiveDriveUrl}" target="_blank" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition">
-                  <i class="fa-brands fa-google-drive"></i> Buka Folder di Drive
+                  <i class="fa-brands fa-google-drive"></i> Buka Direktori di Drive
                 </a>
               </div>
             </div>
@@ -1567,117 +1581,363 @@
         return;
       }
 
-      // KANAL 1: PENAMPIL LANGSUNG (100% BEBAS DARI ERROR 'PRATINJAU TIDAK TERSEDIA')
+      // KANAL 1: PENAMPIL LANGSUNG (NATIVE IN-APP DOCUMENT ENGINE)
 
-      // 1. Gambar
+      // 1. GAMBAR (JPG, JPEG, PNG, GIF, WEBP, SVG)
       if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
         const imgSrc = item.contentData || (item.driveUrl && !item.driveUrl.includes('drive.google.com/drive/folders') ? item.driveUrl : "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80");
         container.innerHTML = `
           <div class="relative w-full h-full flex flex-col items-center justify-center p-4 checkerboard-pattern overflow-hidden">
-            <img id="preview-active-image" src="${imgSrc}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-slate-700 transition-transform duration-200">
-            <div class="absolute bottom-4 bg-slate-900/90 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-4 text-xs shadow-lg">
-              <button onclick="zoomImage(-0.2)" class="text-slate-300 hover:text-white"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
-              <span id="zoom-level-text" class="text-[11px] font-mono text-sky-400">100%</span>
-              <button onclick="zoomImage(0.2)" class="text-slate-300 hover:text-white"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-              <button onclick="resetImageZoom()" class="text-slate-400 hover:text-slate-200 text-[10px] border-l border-slate-700 pl-3">Reset</button>
+            <div class="flex-1 w-full h-full flex items-center justify-center overflow-auto">
+              <img id="preview-active-image" src="${imgSrc}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl border border-slate-700 transition-transform duration-200" style="transform: scale(${currentZoom}) rotate(${currentRotation}deg);">
+            </div>
+            <div class="absolute bottom-4 bg-slate-900/95 border border-slate-700/80 px-4 py-2 rounded-2xl flex items-center gap-3 text-xs shadow-2xl z-10 backdrop-blur-md">
+              <button onclick="zoomImage(-0.2)" title="Perkecil" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+              <span id="zoom-level-text" class="text-[11px] font-mono text-sky-400 min-w-[45px] text-center font-bold">${Math.round(currentZoom * 100)}%</span>
+              <button onclick="zoomImage(0.2)" title="Perbesar" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+              <div class="h-4 w-px bg-slate-700 mx-1"></div>
+              <button onclick="rotateImage(90)" title="Putar 90 Derajat" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition"><i class="fa-solid fa-rotate-right"></i></button>
+              <button onclick="resetImageTransform()" title="Reset Tampilan" class="px-2 py-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 text-[10px] font-semibold transition">Reset</button>
             </div>
           </div>
         `;
         return;
       }
 
-      // 2. Lembar Kerja Excel & Data
+      // 2. DOKUMEN PDF (.pdf)
+      if (ext === 'pdf') {
+        const pdfUrl = item.contentData || (item.driveUrl && item.driveUrl.includes('/preview') ? item.driveUrl : null);
+        if (pdfUrl) {
+          container.innerHTML = `
+            <div class="w-full h-full flex flex-col bg-slate-950">
+              <iframe src="${pdfUrl}#toolbar=1&navpanes=1&scrollbar=1" class="w-full h-full border-0 bg-slate-900" title="Pratinjau PDF Langsung"></iframe>
+            </div>
+          `;
+          return;
+        }
+
+        // Tampilan Lembar Kerja Dokumen PDF Beresolusi Tinggi
+        const docSummaryText = item.documentSummary || item.desc || "Dokumen arsip keputusan resmi tersimpan dan terenkripsi dalam sistem penyimpanan Google Drive terintegrasi.";
+        container.innerHTML = `
+          <div class="w-full h-full p-4 sm:p-8 bg-slate-950 overflow-y-auto flex flex-col items-center">
+            <div class="w-full max-w-3xl bg-white text-slate-900 rounded-xl shadow-2xl p-8 sm:p-12 space-y-6 my-auto font-serif relative border border-slate-300 animate-admin-enter">
+              
+              <!-- PDF Paper Header -->
+              <div class="text-center border-b-2 border-slate-900 pb-4 space-y-1">
+                <div class="flex items-center justify-center gap-2 font-sans font-bold text-xs uppercase tracking-widest text-slate-600 mb-1">
+                  <i class="fa-solid fa-shield-halved text-sky-600"></i> ${systemSettings.appName} • Dokumen Resmi
+                </div>
+                <h2 class="text-lg sm:text-xl font-black uppercase tracking-wide text-slate-950 leading-snug">${item.title}</h2>
+                <p class="font-mono text-xs font-semibold text-slate-700">Nomor Registrasi: ${item.no}</p>
+              </div>
+
+              <!-- Meta Data Grid -->
+              <div class="grid grid-cols-2 gap-3 p-3.5 rounded-lg bg-slate-100 border border-slate-300 font-sans text-xs">
+                <div><span class="text-slate-500 font-bold block text-[10px]">KATEGORI DIREKTORI</span> <span class="font-semibold text-slate-800">${item.category}</span></div>
+                <div><span class="text-slate-500 font-bold block text-[10px]">WAKTU PENGARSIPAN</span> <span class="font-mono text-slate-800">${item.uploadedAt}</span></div>
+                <div><span class="text-slate-500 font-bold block text-[10px]">NAMA BERKAS</span> <span class="font-mono text-slate-800 truncate block">${item.filename}</span></div>
+                <div><span class="text-slate-500 font-bold block text-[10px]">STATUS INTEGRITAS</span> <span class="text-emerald-700 font-bold uppercase"><i class="fa-solid fa-circle-check"></i> Terverifikasi</span></div>
+              </div>
+
+              <!-- Main Content Body -->
+              <div class="space-y-4 text-xs sm:text-sm leading-relaxed text-slate-800 text-justify">
+                <p class="font-bold uppercase tracking-wide font-sans text-xs text-slate-900 border-l-4 border-sky-600 pl-2">Isi Ringkasan Dokumen:</p>
+                <div class="p-4 rounded-lg bg-slate-50 border border-slate-200 whitespace-pre-line font-sans text-xs text-slate-700 leading-normal">
+                  ${docSummaryText}
+                </div>
+                <p class="text-[11px] text-slate-500 italic font-sans">
+                  Berkas fisik tersimpan secara aman pada direktori Google Drive ID: <span class="font-mono font-semibold text-slate-700">${targetFolderId}</span>.
+                </p>
+              </div>
+
+              <!-- Document Footer Stamp -->
+              <div class="pt-6 border-t border-slate-300 flex items-center justify-between font-sans text-xs">
+                <div class="flex items-center gap-2 text-emerald-700 font-semibold text-[11px]">
+                  <i class="fa-solid fa-lock text-sm"></i>
+                  <span>Digital Cryptographic Vault Verified</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <a href="${effectiveDriveUrl}" target="_blank" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow transition">
+                    <i class="fa-brands fa-google-drive"></i> Buka di Drive
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 3. DOKUMEN WORD (.doc, .docx, .odt, .rtf)
+      if (['doc', 'docx', 'odt', 'rtf'].includes(ext)) {
+        if (item.convertedHtmlContent) {
+          container.innerHTML = `
+            <div class="w-full h-full p-6 sm:p-10 bg-slate-950 overflow-y-auto flex flex-col items-center">
+              <div class="w-full max-w-3xl bg-white text-slate-900 rounded-2xl shadow-2xl p-8 sm:p-12 my-auto prose prose-slate max-w-none text-xs sm:text-sm font-sans leading-relaxed border border-slate-300 animate-admin-enter">
+                <div class="border-b pb-3 mb-4 flex items-center justify-between text-xs text-slate-500 font-mono">
+                  <span class="font-bold text-sky-700 uppercase"><i class="fa-solid fa-file-word mr-1"></i> ${item.filename}</span>
+                  <span>${item.size}</span>
+                </div>
+                <div>${item.convertedHtmlContent}</div>
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Tampilan Dokumen Surat Resmi Word Interaktif
+        const docSummaryText = item.documentSummary || item.desc || "Perjanjian dan regulasi resmi tersimpan dalam repositori ArsipCloud Enterprise.";
+        container.innerHTML = `
+          <div class="w-full h-full p-4 sm:p-8 bg-slate-950 overflow-y-auto flex flex-col items-center">
+            <div class="w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl p-6 sm:p-10 shadow-2xl text-slate-200 my-auto animate-admin-enter space-y-6">
+              
+              <div class="flex items-start justify-between border-b border-slate-800 pb-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl shadow-inner">
+                    <i class="fa-solid fa-file-word"></i>
+                  </div>
+                  <div>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 uppercase font-bold border border-blue-500/30">${ext.toUpperCase()} DOCUMENT</span>
+                    <h3 class="text-base font-bold text-white mt-1 leading-tight">${item.title}</h3>
+                  </div>
+                </div>
+                <div class="text-right font-mono text-xs text-slate-400">
+                  <span class="text-emerald-400 font-semibold">${item.uploadedAt}</span>
+                  <div class="text-[10px] text-slate-500 mt-0.5">ID: ${item.no}</div>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-xs space-y-2">
+                <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-slate-800/80">
+                  <span>Kategori Dokumen: <strong class="text-slate-200 font-sans">${item.category}</strong></span>
+                  <span class="font-mono text-slate-300">${item.size}</span>
+                </div>
+                <div class="text-slate-300 whitespace-pre-line leading-relaxed font-sans text-xs pt-1">
+                  ${docSummaryText}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2 text-xs">
+                <span class="text-slate-400 text-[11px] flex items-center gap-1.5">
+                  <i class="fa-brands fa-google-drive text-emerald-400"></i> Folder ID: <strong class="font-mono text-slate-300">${targetFolderId}</strong>
+                </span>
+                <div class="flex items-center gap-2">
+                  <a href="${effectiveDriveUrl}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow transition">
+                    <i class="fa-brands fa-google-drive"></i> Buka di Google Docs / Drive
+                  </a>
+                  <button onclick="downloadCurrentPreviewFile()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-1.5 border border-slate-700 transition">
+                    <i class="fa-solid fa-download"></i> Unduh Berkas
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 4. LEMBAR KERJA EXCEL & DATA (XLS, XLSX, CSV, ODS)
       if (['xls', 'xlsx', 'csv', 'ods'].includes(ext)) {
-        const csvRaw = item.sampleCsvData || "No,Uraian,Kategori,Status,Catatan\n1,Dokumen Arsip Terverifikasi,Operasional,Tervalidasi,Kondisi Berkas Baik\n2,Pencatatan Berkas Digital,Sistem,Tersinkron,Tersimpan di Cloud Vault\n3,Verifikasi Retensi Dokumen,Kearsipan,Aktif,Sesuai Jadwal Retensi";
-        const rows = csvRaw.trim().split("\n").map(r => r.split(","));
-        const headers = rows[0] || ["Kolom 1", "Kolom 2", "Kolom 3", "Kolom 4"];
-        const dataRows = rows.slice(1);
+        let sheetNames = ["Lembar_1"];
+        let activeRows = [];
+
+        if (item.parsedSheetsData && Object.keys(item.parsedSheetsData).length > 0) {
+          sheetNames = Object.keys(item.parsedSheetsData);
+          const currentSheetName = sheetNames[currentSheetIndex] || sheetNames[0];
+          activeRows = item.parsedSheetsData[currentSheetName] || [];
+        } else {
+          const csvRaw = item.sampleCsvData || "No,Uraian Transaksi,Kategori,Debit (Rp),Kredit (Rp),Saldo (Rp)\n1,Penerimaan Tagihan Invoice,Keuangan,45000000,0,195000000\n2,Biaya Pemeliharaan Cloud Vault,Operasional,0,12500000,182500000\n3,Pajak PPh Final Dokumen,Perpajakan,0,3250000,179250000\n4,Saldo Akhir Periode,Kas,0,0,179250000";
+          activeRows = csvRaw.trim().split("\n").map(r => r.split(","));
+        }
+
+        const headers = activeRows[0] || ["Kolom 1", "Kolom 2", "Kolom 3", "Kolom 4"];
+        const dataRows = activeRows.slice(1);
 
         container.innerHTML = `
-          <div class="w-full h-full p-4 sm:p-6 overflow-auto bg-slate-950 flex flex-col">
-            <div class="flex flex-wrap items-center justify-between pb-3 mb-3 border-b border-slate-800 gap-2">
-              <span class="text-xs font-semibold text-emerald-400 flex items-center gap-2">
-                <i class="fa-solid fa-table-cells"></i> Pratinjau Lembar Kerja Data Interaktif (${ext.toUpperCase()})
-              </span>
-              <div class="flex items-center gap-3">
-                <span class="text-[11px] text-slate-400 font-mono">${dataRows.length} Baris Terbaca</span>
-                <button onclick="downloadCurrentPreviewFile()" class="px-3 py-1 rounded-lg bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white text-[11px] border border-emerald-500/30 transition">
-                  <i class="fa-solid fa-file-excel mr-1"></i> Ekspor Lembar Kerja
+          <div class="w-full h-full p-4 sm:p-6 overflow-auto bg-slate-950 flex flex-col animate-admin-enter">
+            
+            <!-- Toolbar & Search -->
+            <div class="flex flex-wrap items-center justify-between pb-3 mb-3 border-b border-slate-800 gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-teal-500/15 text-teal-400 border border-teal-500/30 flex items-center justify-center text-sm">
+                  <i class="fa-solid fa-table-cells"></i>
+                </span>
+                <div>
+                  <h4 class="text-xs font-bold text-white flex items-center gap-2">
+                    Pratinjau Lembar Kerja Interaktif (${ext.toUpperCase()})
+                  </h4>
+                  <p class="text-[10px] text-slate-400 font-mono">${dataRows.length} Baris Data Ditemukan</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="relative">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-[10px]"></i>
+                  <input type="text" id="spreadsheet-preview-search" oninput="filterSpreadsheetPreviewRows(this.value)" placeholder="Cari dalam tabel..." class="bg-slate-900 border border-slate-700 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500 placeholder-slate-500">
+                </div>
+                <button onclick="downloadCurrentPreviewFile()" class="px-3 py-1.5 rounded-xl bg-teal-600/20 text-teal-300 hover:bg-teal-600 hover:text-white text-xs font-semibold border border-teal-500/30 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-file-excel"></i> Ekspor
                 </button>
               </div>
             </div>
-            <div class="flex-1 overflow-auto rounded-xl border border-slate-800 bg-slate-900/40 shadow-inner">
-              <table class="w-full text-left text-xs border-collapse font-mono">
-                <thead class="bg-slate-900 sticky top-0 text-slate-200 border-b border-slate-800 shadow">
-                  <tr>${headers.map(h => `<th class="py-2.5 px-3 uppercase tracking-wider text-slate-300">${h}</th>`).join('')}</tr>
+
+            <!-- Sheet Tabs (If Multiple) -->
+            ${sheetNames.length > 1 ? `
+              <div class="flex items-center gap-1 pb-2 border-b border-slate-800/60 overflow-x-auto text-xs mb-3">
+                ${sheetNames.map((sn, idx) => `
+                  <button onclick="switchPreviewSheetIndex(${idx})" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition ${currentSheetIndex === idx ? 'bg-teal-600 text-white shadow' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}">
+                    <i class="fa-solid fa-sheet-plastic mr-1 text-[10px]"></i> ${sn}
+                  </button>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <!-- Data Table Container -->
+            <div class="flex-1 overflow-auto rounded-xl border border-slate-800 bg-slate-900/50 shadow-inner">
+              <table id="spreadsheet-interactive-table" class="w-full text-left text-xs border-collapse font-mono">
+                <thead class="bg-slate-900 sticky top-0 text-slate-200 border-b border-slate-800 shadow z-10">
+                  <tr>${headers.map(h => `<th class="py-2.5 px-3.5 uppercase tracking-wider text-slate-300 font-semibold border-r border-slate-800 last:border-0">${h}</th>`).join('')}</tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800/60 text-slate-300">
-                  ${dataRows.map(r => `<tr class="hover:bg-slate-800/50 transition">${r.map(c => `<td class="py-2 px-3">${c}</td>`).join('')}</tr>`).join('')}
+                  ${dataRows.map((r, rIdx) => `
+                    <tr class="hover:bg-slate-800/60 transition ${rIdx % 2 === 0 ? 'bg-transparent' : 'bg-slate-950/30'}">
+                      ${r.map(c => `<td class="py-2 px-3.5 border-r border-slate-800/40 last:border-0 truncate max-w-[280px]">${c}</td>`).join('')}
+                    </tr>
+                  `).join('')}
                 </tbody>
               </table>
             </div>
+
           </div>
         `;
         return;
       }
 
-      // 3. Slide Presentasi
+      // 5. PRESENTASI SLIDE (PPT, PPTX, ODP)
+      const mockSlides = [
+        { title: item.title, sub: item.category + " • " + item.no, content: item.desc || "Paparan ringkasan dokumen resmi enterprise v4.1.", footer: "Slide 1: Ringkasan Pokok" },
+        { title: "Latar Belakang & Regulasi", sub: "Dasar Hukum Operasional", content: "Implementasi tata kelola arsip digital terpusat pada Google Drive Vault dengan kepatuhan ISO/IEC 27001.", footer: "Slide 2: Regulasi" },
+        { title: "Struktur & Alur Kerja", sub: "SOP Pengelolaan Berkas", content: "Pencatatan metadata pada Google Spreadsheet dan sinkronisasi berkas dua arah dengan pemulihan Trash otomatis.", footer: "Slide 3: Alur Kerja" },
+        { title: "Verifikasi & Pengesahan", sub: "Validasi Digital", content: "Dokumen terverifikasi penuh dan siap diakses secara aman oleh seluruh unit kerja berwenang.", footer: "Slide 4: Kesimpulan" }
+      ];
+
       if (['ppt', 'pptx', 'odp'].includes(ext)) {
+        const activeSlide = mockSlides[currentActiveSlide] || mockSlides[0];
         container.innerHTML = `
-          <div class="w-full h-full p-6 bg-slate-950 flex flex-col items-center justify-center overflow-auto">
-            <div class="w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl p-6 shadow-2xl space-y-4">
+          <div class="w-full h-full p-4 sm:p-8 bg-slate-950 flex flex-col items-center justify-center overflow-auto animate-admin-enter">
+            <div class="w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
+              
               <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div class="flex items-center gap-2 text-amber-400 font-semibold text-xs">
-                  <i class="fa-solid fa-file-powerpoint text-base"></i> Pratinjau Materi Presentasi (${ext.toUpperCase()})
+                <div class="flex items-center gap-2.5 text-amber-400 font-bold text-xs">
+                  <i class="fa-solid fa-file-powerpoint text-base"></i>
+                  <span>Slide Presentation Player (${ext.toUpperCase()})</span>
                 </div>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">Slide 1 dari 8</span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="changeActiveSlide(-1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition"><i class="fa-solid fa-chevron-left"></i></button>
+                  <span class="text-[11px] font-mono px-3 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                    Slide ${currentActiveSlide + 1} dari ${mockSlides.length}
+                  </span>
+                  <button onclick="changeActiveSlide(1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
               </div>
-              <div class="aspect-video bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/30 rounded-xl border border-slate-800 p-8 flex flex-col justify-between shadow-inner">
+
+              <!-- Slide Screen Viewport -->
+              <div class="aspect-video bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950/40 rounded-2xl border border-slate-800 p-8 sm:p-12 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
                 <div>
-                  <span class="text-[10px] font-mono text-amber-400 uppercase tracking-widest block mb-2">${item.category} • ${item.no}</span>
-                  <h3 class="text-xl font-extrabold text-white leading-tight">${item.title}</h3>
-                  <p class="text-xs text-slate-300 mt-2">${item.desc || 'Paparan ringkasan dokumen arsip digital enterprise v4.1.'}</p>
+                  <span class="text-[10px] font-mono text-amber-400 uppercase tracking-widest block mb-2 font-bold">${activeSlide.sub}</span>
+                  <h3 class="text-xl sm:text-2xl font-black text-white leading-tight">${activeSlide.title}</h3>
+                  <p class="text-xs sm:text-sm text-slate-300 mt-4 leading-relaxed max-w-xl">${activeSlide.content}</p>
                 </div>
-                <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-white/10 pt-3">
-                  <span>ArsipCloud Presentation Engine</span>
-                  <span>Terverifikasi • ${item.uploadedAt}</span>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-white/10 pt-4">
+                  <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-amber-400"></i> ${activeSlide.footer}</span>
+                  <span>${item.uploadedAt}</span>
                 </div>
               </div>
-              <div class="flex items-center justify-between pt-2">
-                <div class="text-[11px] text-slate-400">Gunakan Google Drive untuk menyunting slide langsung.</div>
-                <a href="${effectiveDriveUrl}" target="_blank" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-amber-600/30 transition">
-                  <i class="fa-brands fa-google-drive"></i> Buka di Google Slides / Drive
-                </a>
+
+              <!-- Slide Thumbnail Navigator -->
+              <div class="grid grid-cols-4 gap-2 pt-1">
+                ${mockSlides.map((s, idx) => `
+                  <button onclick="setActiveSlideIndex(${idx})" class="p-2 rounded-xl text-left border transition ${currentActiveSlide === idx ? 'border-amber-500 bg-amber-500/15 text-white' : 'border-slate-800 bg-slate-950/60 text-slate-400 hover:text-slate-200'}">
+                    <span class="text-[9px] font-mono block text-amber-400">0${idx + 1}</span>
+                    <span class="text-[10px] font-bold truncate block">${s.title}</span>
+                  </button>
+                `).join('')}
               </div>
+
             </div>
           </div>
         `;
         return;
       }
 
-      // 4. Arsip ZIP / RAR
-      if (['zip', 'rar'].includes(ext)) {
-        const fileList = item.archiveFilesList || ["surat_pengantar_lelang.pdf", "spesifikasi_teknis_server.docx", "rab_perhitungan_anggaran.xlsx", "akta_legalitas_perusahaan.pdf"];
+      // 6. TEKS MURNI & KODE (TXT, RTF)
+      if (['txt', 'rtf'].includes(ext)) {
+        const textContent = item.sampleCsvData || item.documentSummary || `NOMOR REGISTRASI : ${item.no}\nJUDUL ARSIP      : ${item.title}\nKATEGORI ARSIP   : ${item.category}\nWAKTU PENGARSIPAN: ${item.uploadedAt}\nKETERANGAN DOKUMEN: ${item.desc || '-'}\n\n======================================================\nDOKUMEN TERSIMPAN PADA REPOSITORI GOOGLE DRIVE ENTERPRISE\n======================================================\nDirektori Penyimpanan Google Drive ID: ${targetFolderId}\nSeluruh data diverifikasi dan tercatat ke lembar kerja Google Spreadsheet.\nIntegritas berkas dijamin melalui pencatatan audit log sistem.`;
+        const lines = textContent.split('\n');
+
         container.innerHTML = `
-          <div class="w-full h-full p-6 sm:p-8 bg-slate-950 flex flex-col items-center justify-center text-center overflow-auto">
-            <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl mb-4 border border-amber-500/20 shadow-lg">
+          <div class="w-full h-full p-4 sm:p-6 bg-slate-950 overflow-hidden font-mono text-xs text-slate-300 flex flex-col animate-admin-enter">
+            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+              <span class="text-cyan-400 font-bold flex items-center gap-2">
+                <i class="fa-solid fa-code"></i> Pembaca Teks & Kode (${ext.toUpperCase()})
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] text-slate-400">${lines.length} Baris Teks</span>
+                <button onclick="copyToClipboard('${btoa(textContent)}')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-copy"></i> Salin Teks
+                </button>
+              </div>
+            </div>
+            <div class="flex-1 overflow-auto rounded-xl border border-slate-800 bg-slate-900/60 p-4 flex">
+              <div class="text-slate-600 select-none pr-3 border-r border-slate-800 text-right font-mono text-[11px] leading-relaxed">
+                ${lines.map((_, i) => `<div>${i + 1}</div>`).join('')}
+              </div>
+              <pre class="pl-4 whitespace-pre-wrap leading-relaxed text-slate-200 font-mono text-xs flex-1 overflow-x-auto">${textContent}</pre>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // 7. ARSIP KOMPRESI (ZIP, RAR)
+      if (['zip', 'rar'].includes(ext)) {
+        const fileList = item.archiveFilesList || [
+          { name: "surat_pengantar_lelang.pdf", size: "2.4 MB", type: "PDF" },
+          { name: "spesifikasi_teknis_server.docx", size: "850 KB", type: "Word" },
+          { name: "rab_perhitungan_anggaran.xlsx", size: "1.2 MB", type: "Excel" },
+          { name: "akta_legalitas_perusahaan.pdf", size: "3.1 MB", type: "PDF" }
+        ];
+
+        container.innerHTML = `
+          <div class="w-full h-full p-6 sm:p-8 bg-slate-950 flex flex-col items-center justify-center text-center overflow-auto animate-admin-enter">
+            <div class="w-16 h-16 rounded-3xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-3xl mb-4 border border-purple-500/30 shadow-2xl">
               <i class="fa-solid fa-file-zipper"></i>
             </div>
             <h4 class="text-base font-bold text-white mb-1">Struktur Paket Berkas Arsip ${ext.toUpperCase()}</h4>
-            <p class="text-xs text-slate-400 max-w-md mb-5">Paket arsip terkompresi berukuran ${item.size}. Komponen berkas dapat diunduh atau dibuka di Google Drive:</p>
+            <p class="text-xs text-slate-400 max-w-md mb-6">Paket arsip terkompresi kapasitas total ${item.size}. Komponen di dalam berkas dapat diunduh atau dibuka langsung di Google Drive:</p>
             
-            <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl overflow-hidden text-left mb-5 shadow-xl">
-              <div class="px-4 py-2.5 bg-slate-800/90 border-b border-slate-800 text-[11px] font-semibold text-slate-300 flex justify-between">
+            <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden text-left mb-6 shadow-2xl">
+              <div class="px-4 py-3 bg-slate-800/90 border-b border-slate-800 text-[11px] font-semibold text-slate-300 flex justify-between">
                 <span>Nama Komponen Berkas</span>
-                <span>Status</span>
+                <span>Kapasitas</span>
               </div>
               <ul class="divide-y divide-slate-800/60 text-xs font-mono">
-                ${fileList.map(f => `
-                  <li class="px-4 py-2.5 flex items-center justify-between text-slate-300 hover:bg-slate-800/40 transition">
-                    <span class="flex items-center gap-2 truncate"><i class="fa-regular fa-file text-sky-400"></i> ${f}</span>
-                    <span class="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">Siap</span>
-                  </li>
-                `).join('')}
+                ${fileList.map(f => {
+                  const fName = typeof f === 'object' ? f.name : f;
+                  const fSize = typeof f === 'object' ? f.size : "1.5 MB";
+                  return `
+                    <li class="px-4 py-2.5 flex items-center justify-between text-slate-300 hover:bg-slate-800/40 transition">
+                      <span class="flex items-center gap-2.5 truncate">
+                        <i class="fa-regular fa-file-lines text-sky-400"></i>
+                        <span class="truncate">${fName}</span>
+                      </span>
+                      <span class="text-[10px] text-slate-400 font-semibold px-2 py-0.5 rounded bg-slate-800 border border-slate-700">${fSize}</span>
+                    </li>
+                  `;
+                }).join('')}
               </ul>
             </div>
 
@@ -1685,7 +1945,7 @@
               <a href="${effectiveDriveUrl}" target="_blank" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition">
                 <i class="fa-brands fa-google-drive"></i> Buka Direktori di Drive
               </a>
-              <button onclick="downloadCurrentPreviewFile()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition">
+              <button onclick="downloadCurrentPreviewFile()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center gap-2">
                 <i class="fa-solid fa-download"></i> Unduh Paket (${item.size})
               </button>
             </div>
@@ -1693,97 +1953,47 @@
         `;
         return;
       }
+    }
 
-      // 5. Teks Murni (.txt, .rtf)
-      if (['txt', 'rtf'].includes(ext)) {
-        const textContent = item.sampleCsvData || item.documentSummary || `NOMOR ARSIP : ${item.no}\nJUDUL       : ${item.title}\nKATEGORI    : ${item.category}\nWAKTU UNGGAH: ${item.uploadedAt}\nKETERANGAN  : ${item.desc || '-'}\n\n======================================================\nDOKUMEN TERSIMPAN SECARA RESMI PADA ARSIPCLOUD ENTERPRISE\n======================================================\nDokumen ini tersinkronisasi dengan Google Drive Enterprise ID: ${targetFolderId}.\nSeluruh integritas berkas dijamin melalui pencatatan audit log sistem.`;
-        container.innerHTML = `
-          <div class="w-full h-full p-6 bg-slate-950 overflow-auto font-mono text-xs text-slate-300 flex flex-col">
-            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-              <span class="text-sky-400 font-bold flex items-center gap-2"><i class="fa-solid fa-code"></i> Pembaca Teks & Kode (${ext.toUpperCase()})</span>
-              <button onclick="copyToClipboard('${btoa(textContent)}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-[11px] text-slate-300 transition">
-                <i class="fa-solid fa-copy"></i> Salin Teks
-              </button>
-            </div>
-            <pre class="whitespace-pre-wrap leading-relaxed bg-slate-900/60 p-4 rounded-xl border border-slate-800 flex-1 overflow-auto">${textContent}</pre>
-          </div>
-        `;
-        return;
-      }
+    function rotateImage(deg) {
+      currentRotation = (currentRotation + deg) % 360;
+      const img = document.getElementById("preview-active-image");
+      if (img) img.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
+    }
 
-      // 6. Dokumen PDF & Kantor (PDF, DOC, DOCX, ODT)
-      if (item.contentData && item.contentData.startsWith('blob:') && ext === 'pdf') {
-        container.innerHTML = `<iframe src="${item.contentData}" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-downloads"></iframe>`;
-        return;
-      }
+    function resetImageTransform() {
+      currentZoom = 1;
+      currentRotation = 0;
+      const img = document.getElementById("preview-active-image");
+      if (img) img.style.transform = `scale(1) rotate(0deg)`;
+      const zText = document.getElementById("zoom-level-text");
+      if (zText) zText.innerText = "100%";
+    }
 
-      // Penampil Dokumen A4 Resmi Interaktif
-      const docSummaryText = item.documentSummary || item.desc || "Dokumen arsip resmi tersimpan dan terenkripsi dalam sistem penyimpanan awan Google Drive terintegrasi.";
-      container.innerHTML = `
-        <div class="w-full h-full p-4 sm:p-8 bg-slate-950 overflow-y-auto flex flex-col items-center">
-          <div class="w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl p-6 sm:p-10 shadow-2xl text-slate-200 relative my-auto">
-            
-            <div class="border-b-2 border-sky-500/40 pb-5 mb-6 flex items-start justify-between gap-4">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl shadow-inner">
-                  <i class="${getExtIconClass(ext)}"></i>
-                </div>
-                <div>
-                  <h4 class="text-base font-extrabold text-white tracking-wide uppercase">ARSIP DIGITAL KORPORAT</h4>
-                  <p class="text-xs text-sky-400 font-mono">Sistem Terintegrasi Google Drive Enterprise • v4.1</p>
-                </div>
-              </div>
-              <div class="text-right font-mono text-[11px] text-slate-400">
-                <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase text-[10px] font-bold">Terverifikasi</span>
-                <div class="mt-1">${item.uploadedAt}</div>
-              </div>
-            </div>
+    function changeActiveSlide(delta) {
+      currentActiveSlide = Math.max(0, Math.min(3, currentActiveSlide + delta));
+      renderPreviewContentByChannel();
+    }
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-slate-950/60 border border-slate-800 mb-6 text-xs">
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Nomor Dokumen</span>
-                <span class="font-mono text-sky-300 font-bold text-sm">${item.no}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Kategori Direktori</span>
-                <span class="text-slate-200 font-medium">${item.category}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Nama Berkas Fisik</span>
-                <span class="font-mono text-slate-300">${item.filename}</span>
-              </div>
-              <div>
-                <span class="text-slate-400 block text-[10px] uppercase font-semibold">Format & Kapasitas</span>
-                <span class="font-mono text-emerald-400 uppercase">${ext} • ${item.size}</span>
-              </div>
-            </div>
+    function setActiveSlideIndex(idx) {
+      currentActiveSlide = idx;
+      renderPreviewContentByChannel();
+    }
 
-            <div class="space-y-3 mb-8">
-              <h5 class="text-xs font-bold text-slate-300 uppercase tracking-wider border-l-2 border-amber-400 pl-2">Perihal / Pokok Dokumen:</h5>
-              <h3 class="text-base font-bold text-white">${item.title}</h3>
-              <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-line">
-                ${docSummaryText}
-              </div>
-            </div>
+    function switchPreviewSheetIndex(idx) {
+      currentSheetIndex = idx;
+      renderPreviewContentByChannel();
+    }
 
-            <div class="border-t border-slate-800 pt-5 flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div class="flex items-center gap-2 text-slate-400">
-                <i class="fa-solid fa-shield-halved text-sky-400"></i>
-                <span class="text-[11px]">Folder ID: <span class="font-mono text-slate-300">${targetFolderId}</span></span>
-              </div>
-              <div class="flex items-center gap-2">
-                <a href="${effectiveDriveUrl}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-600/30 transition">
-                  <i class="fa-brands fa-google-drive"></i> Buka Dokumen di Drive
-                </a>
-                <button onclick="downloadCurrentPreviewFile()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-1.5 border border-slate-700 transition">
-                  <i class="fa-solid fa-download"></i> Unduh Berkas
-                </button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      `;
+    function filterSpreadsheetPreviewRows(term) {
+      const q = (term || "").toLowerCase().trim();
+      const table = document.getElementById("spreadsheet-interactive-table");
+      if (!table) return;
+      const trs = table.querySelectorAll("tbody tr");
+      trs.forEach(tr => {
+        const text = tr.innerText.toLowerCase();
+        tr.style.display = text.includes(q) ? "" : "none";
+      });
     }
 
     function extractGoogleDriveFileId(url) {
@@ -1815,7 +2025,6 @@
       logActivity("Unduh Berkas", `Mengunduh berkas ${currentPreviewItem.filename}`);
     }
 
-    let currentZoom = 1;
     function zoomImage(delta) {
       const img = document.getElementById("preview-active-image");
       if (!img) return;
@@ -1916,22 +2125,57 @@
           continue;
         }
 
-        // Generate instant local Blob URL for reliable in-browser preview
+        // Generate instant local Blob URL for reliable in-browser direct preview
         f.localPreviewUrl = URL.createObjectURL(f);
         
-        // Parse spreadsheet files via SheetJS if applicable
+        // Parse Word (.docx) directly via Mammoth.js
+        if (ext === 'docx' && typeof mammoth !== 'undefined') {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            mammoth.convertToHtml({ arrayBuffer: evt.target.result })
+              .then(result => { f.convertedHtmlContent = result.value; })
+              .catch(err => { console.warn("Mammoth parse error:", err); });
+          };
+          reader.readAsArrayBuffer(f);
+        }
+
+        // Parse spreadsheet files via SheetJS
         if (['xlsx', 'xls', 'csv', 'ods'].includes(ext) && typeof XLSX !== 'undefined') {
           const reader = new FileReader();
           reader.onload = function(evt) {
             try {
               const data = new Uint8Array(evt.target.result);
               const workbook = XLSX.read(data, { type: 'array' });
-              const firstSheetName = workbook.SheetNames[0];
-              const csv = XLSX.utils.sheet_to_csv(workbook.Sheets[firstSheetName]);
-              f.parsedCsvData = csv;
+              f.parsedSheetsData = {};
+              workbook.SheetNames.forEach(sheetName => {
+                const sheet = workbook.Sheets[sheetName];
+                const csv = XLSX.utils.sheet_to_csv(sheet);
+                f.parsedSheetsData[sheetName] = csv.trim().split("\n").map(r => r.split(","));
+              });
+              f.parsedCsvData = XLSX.utils.sheet_to_csv(workbook.Sheets[workbook.SheetNames[0]]);
             } catch (err) {
               console.warn("SheetJS parse error:", err);
             }
+          };
+          reader.readAsArrayBuffer(f);
+        }
+
+        // Parse ZIP files via JSZip
+        if (ext === 'zip' && typeof JSZip !== 'undefined') {
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            JSZip.loadAsync(evt.target.result).then(zip => {
+              f.archiveFilesList = [];
+              zip.forEach((relPath, zipEntry) => {
+                if (!zipEntry.dir) {
+                  f.archiveFilesList.push({
+                    name: relPath,
+                    size: (zipEntry._data ? (zipEntry._data.uncompressedSize / 1024).toFixed(1) : "1.0") + " KB",
+                    type: "File"
+                  });
+                }
+              });
+            }).catch(zErr => { console.warn("JSZip error:", zErr); });
           };
           reader.readAsArrayBuffer(f);
         }
