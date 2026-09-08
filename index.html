@@ -2252,22 +2252,38 @@
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Belum ada kategori terdaftar</td></tr>`;
         return;
       }
-      tbody.innerHTML = categories.map((cat, i) => `
+      tbody.innerHTML = categories.map((cat, i) => {
+        const isAuto = !cat.driveId || cat.driveId.startsWith("FLD_") || cat.driveId.startsWith("AUTO_") || cat.mode === 'AUTO';
+        return `
         <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40">
           <td class="py-3 px-4 text-center font-mono text-slate-400">${i + 1}</td>
-          <td class="py-3 px-4 font-semibold text-white flex items-center gap-2">
-            <i class="fa-solid fa-folder text-amber-400"></i> ${cat.name}
+          <td class="py-3 px-4">
+            <div class="font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-folder text-amber-400"></i> ${cat.name}
+            </div>
+            <div class="text-[10px] text-slate-400 mt-0.5">${cat.id}</div>
           </td>
           <td class="py-3 px-4">
-            <span class="font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 px-2 py-0.5 rounded text-[11px]">
-              ${cat.driveId}
-            </span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded text-[11px]">
+                ${cat.driveId}
+              </span>
+              ${isAuto ? `
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <i class="fa-brands fa-google-drive text-[9px]"></i> Anak Root Drive
+                </span>
+              ` : `
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                  <i class="fa-solid fa-lock text-[9px]"></i> Kustom ID Terkunci
+                </span>
+              `}
+            </div>
           </td>
           <td class="py-3 px-4 font-mono text-slate-300">${cat.count} Berkas</td>
           <td class="py-3 px-4 text-slate-400 text-xs">${cat.desc || "-"}</td>
           <td class="py-3 px-4 text-center">
             <div class="flex items-center justify-center gap-1.5">
-              <a href="https://drive.google.com/drive/u/0/folders/${systemSettings.rootDriveId}" target="_blank" class="px-2.5 py-1 rounded bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 text-[11px] transition">
+              <a href="https://drive.google.com/drive/u/0/folders/${isAuto ? systemSettings.rootDriveId : cat.driveId}" target="_blank" title="Buka Direktori Google Drive" class="px-2.5 py-1 rounded bg-emerald-600/20 text-emerald-300 hover:bg-emerald-600 hover:text-white border border-emerald-500/30 text-[11px] transition flex items-center gap-1">
                 <i class="fa-brands fa-google-drive"></i> Buka Drive
               </a>
               <button onclick="openEditCategoryModal('${cat.id}')" title="Edit Kategori" class="p-1 rounded bg-amber-500/15 text-amber-300 hover:bg-amber-600 hover:text-white border border-amber-500/30 text-[11px] transition">
@@ -2279,7 +2295,8 @@
             </div>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function renderUserTable() {
