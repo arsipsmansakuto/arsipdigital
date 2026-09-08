@@ -2201,6 +2201,7 @@
 
       tbody.innerHTML = filtered.map((item, i) => {
         const e = (item.ext || "pdf").toLowerCase();
+        const itemFolderId = item.driveFolderId || getTargetFolderIdForCategory(item.category);
         return `
           <tr class="hover:bg-slate-800/50 transition border-b border-slate-800/40">
             <td class="py-3 px-4 text-center font-mono text-slate-400">${i + 1}</td>
@@ -2212,6 +2213,9 @@
               <span class="px-2.5 py-0.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700/60 text-[11px] block w-fit mb-1">
                 ${item.category}
               </span>
+              <a href="https://drive.google.com/drive/u/0/folders/${itemFolderId}" target="_blank" class="inline-flex items-center gap-1 font-mono text-[10px] text-emerald-400 hover:underline" title="Buka Folder Google Drive">
+                <i class="fa-brands fa-google-drive text-[10px]"></i> ${itemFolderId.slice(0, 10)}...
+              </a>
               <p class="text-[10px] text-slate-400 italic truncate max-w-[200px]" title="${item.desc || '-'}">${item.desc || '-'}</p>
             </td>
             <td class="py-3 px-4">
@@ -2230,7 +2234,7 @@
             <td class="py-3 px-4 font-mono text-slate-400">${item.size}</td>
             <td class="py-3 px-4 text-center">
               <div class="flex items-center justify-center gap-1.5">
-                <button onclick="openPreview('${item.id}')" title="Pratinjau Dokumen" class="px-2.5 py-1 rounded-lg bg-sky-600/20 hover:bg-sky-600 text-sky-300 hover:text-white border border-sky-500/30 transition flex items-center gap-1 text-[11px]">
+                <button onclick="openPreview('${item.id}')" title="Pratinjau Google Drive Langsung (${e.toUpperCase()})" class="px-2.5 py-1 rounded-lg bg-sky-600/20 hover:bg-sky-600 text-sky-300 hover:text-white border border-sky-500/30 transition flex items-center gap-1 text-[11px]">
                   <i class="fa-solid fa-eye"></i> Pratinjau
                 </button>
                 <button onclick="openEditArsipModal('${item.id}')" title="Edit Dokumen" class="p-1 rounded-lg bg-amber-500/15 hover:bg-amber-600 text-amber-300 hover:text-white border border-amber-500/30 transition text-[11px]">
